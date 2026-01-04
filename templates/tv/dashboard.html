@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Shop TV Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .card { border: 1px solid #ccc; padding: 12px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Shop Performance Dashboard</h1>
+  <div id="dashboard" class="grid"></div>
+
+  <script>
+    const token = "{{ token }}";
+    async function loadDashboard() {
+      const resp = await fetch(`/api/tv/dashboard?token=${token}&range=today`);
+      if (!resp.ok) {
+        document.getElementById('dashboard').innerText = 'Unable to load dashboard.';
+        return;
+      }
+      const data = await resp.json();
+      const container = document.getElementById('dashboard');
+      container.innerHTML = `
+        <div class="card"><h2>Clocked In</h2><pre>${JSON.stringify(data.clocked_in, null, 2)}</pre></div>
+        <div class="card"><h2>Active Service Orders</h2><pre>${JSON.stringify(data.active_orders, null, 2)}</pre></div>
+        <div class="card"><h2>Leaderboard</h2><pre>${JSON.stringify(data.leaderboard, null, 2)}</pre></div>
+        <div class="card"><h2>Throughput</h2><pre>${JSON.stringify(data.throughput, null, 2)}</pre></div>
+      `;
+    }
+    loadDashboard();
+    setInterval(loadDashboard, 30000);
+  </script>
+</body>
+</html>
