@@ -131,3 +131,147 @@ input, select, textarea {
 .login .submit-row input {
   width: 100%;
 }
+
+.bs-admin-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 24px;
+  padding: 24px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #ffffff 0%, #fff4e6 55%, #fde8d2 100%);
+  border: 1px solid var(--bs-line);
+  box-shadow: var(--bs-shadow);
+  margin-bottom: 28px;
+}
+
+.bs-admin-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: var(--bs-muted);
+  margin: 0 0 8px;
+}
+
+.bs-admin-title {
+  margin: 0 0 10px;
+  font-size: 2.2rem;
+}
+
+.bs-admin-subtitle {
+  margin: 0;
+  color: var(--bs-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.bs-admin-quick {
+  display: flex;
+  align-items: stretch;
+}
+
+.bs-quick-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid var(--bs-line);
+  padding: 18px;
+  width: 100%;
+}
+
+.bs-quick-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.bs-quick-card p {
+  margin: 0 0 12px;
+  color: var(--bs-muted);
+}
+
+.bs-quick-links {
+  display: grid;
+  gap: 8px;
+}
+
+.bs-quick-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fef9f4;
+  border: 1px solid var(--bs-line);
+  color: var(--bs-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.bs-admin-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.bs-admin-card {
+  background: var(--bs-card);
+  border: 1px solid var(--bs-line);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--bs-shadow);
+}
+
+.bs-admin-card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.bs-admin-card h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.bs-admin-app-link {
+  color: var(--bs-accent-dark);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.bs-admin-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.bs-admin-card li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #fef9f4;
+  border: 1px solid var(--bs-line);
+}
+
+.bs-admin-card li a {
+  color: var(--bs-ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.bs-admin-add {
+  background: #ffe2d1;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--bs-accent-dark);
+  text-decoration: none;
+}
+
+@media (max-width: 960px) {
+  .bs-admin-hero {
+    grid-template-columns: 1fr;
+  }
+}

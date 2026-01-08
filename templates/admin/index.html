@@ -1,0 +1,48 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="bs-admin-hero">
+  <div>
+    <p class="bs-admin-kicker">Operations control</p>
+    <h1 class="bs-admin-title">Site administration</h1>
+    <p class="bs-admin-subtitle">
+      Keep every tenant, service order, and technician in flow. Jump into the core modules below.
+    </p>
+  </div>
+  <div class="bs-admin-quick">
+    <div class="bs-quick-card">
+      <h3>Fast actions</h3>
+      <p>Common workflows for daily ops.</p>
+      <div class="bs-quick-links">
+        <a href="/admin/service_orders/serviceorder/">Service orders</a>
+        <a href="/admin/customers/customer/">Customers</a>
+        <a href="/admin/attendance/shiftpunch/">Attendance</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bs-admin-grid">
+  {% for app in app_list %}
+    <section class="bs-admin-card">
+      <header>
+        <h2>{{ app.name }}</h2>
+        {% if app.app_url %}
+          <a class="bs-admin-app-link" href="{{ app.app_url }}">View all</a>
+        {% endif %}
+      </header>
+      <ul>
+        {% for model in app.models %}
+          <li>
+            <a href="{{ model.admin_url }}">{{ model.name }}</a>
+            {% if model.add_url %}
+              <a class="bs-admin-add" href="{{ model.add_url }}">Add</a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endfor %}
+</div>
+{% endblock %}
