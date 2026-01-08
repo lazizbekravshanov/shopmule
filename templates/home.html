@@ -1,4 +1,5 @@
 <!doctype html>
+{% load static %}
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -137,6 +138,15 @@
       box-shadow: var(--shadow);
     }
 
+    .hero-image {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      margin-bottom: 16px;
+      display: block;
+      object-fit: cover;
+    }
+
     .hero-panel h3 {
       margin: 0 0 10px;
     }
@@ -238,6 +248,61 @@
       flex-wrap: wrap;
     }
 
+    .logos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .logos span {
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fafafa;
+    }
+
+    .pricing {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .pricing-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: #fff;
+    }
+
+    .pricing-card h3 {
+      margin: 0 0 8px;
+    }
+
+    .price {
+      font-size: 2rem;
+      margin: 10px 0;
+    }
+
+    .pricing-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .faq {
+      display: grid;
+      gap: 14px;
+    }
+
+    .faq-item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      background: #fff;
+    }
+
     .cta-band h2 {
       margin: 0;
       font-size: 1.6rem;
@@ -289,6 +354,7 @@
           </div>
         </div>
         <div class="hero-panel">
+          <img class="hero-image" src="{% static 'images/landing-hero.png' %}" alt="BodyShopper operations overview">
           <h3>Operations at a glance</h3>
           <p>Fast context, cleaner notes, and a TV dashboard that keeps the floor aligned.</p>
           <div class="hero-metrics">
@@ -296,6 +362,17 @@
             <div class="metric">Real-time visibility <span>for all technicians</span></div>
             <div class="metric">Multi-tenant ready <span>by default</span></div>
           </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Built for serious service teams</h2>
+        <p>Trusted by growing fleets and independent shops modernizing their workflow.</p>
+        <div class="logos">
+          <span>Fleet Service Group</span>
+          <span>Atlas Diesel</span>
+          <span>Northline Logistics</span>
+          <span>Ridgeway Repair</span>
         </div>
       </section>
 
@@ -318,6 +395,31 @@
         </div>
       </section>
 
+      <section class="section">
+        <h2>Simple pricing that scales</h2>
+        <p>Start lean, then add bays, locations, and teams as you grow.</p>
+        <div class="pricing">
+          <div class="pricing-card">
+            <h3>Starter</h3>
+            <div class="price">$249<span style="font-size: 1rem; color: var(--muted);">/month</span></div>
+            <ul>
+              <li>Single location</li>
+              <li>Core service orders</li>
+              <li>Customer portal</li>
+            </ul>
+          </div>
+          <div class="pricing-card">
+            <h3>Scale</h3>
+            <div class="price">$499<span style="font-size: 1rem; color: var(--muted);">/month</span></div>
+            <ul>
+              <li>Multi-tenant ready</li>
+              <li>AI cleanup workflows</li>
+              <li>TV dashboard</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
       <section class="section" id="proof">
         <h2>Trusted by modern repair teams</h2>
         <p>Designed for multi-location operations that need speed, structure, and clarity.</p>
@@ -333,6 +435,25 @@
           <div class="quote">
             <p>“Approvals are now same-day and customers see clean, professional notes.”</p>
             <span>Shop Owner</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>FAQ</h2>
+        <p>Quick answers for teams rolling out BodyShopper.</p>
+        <div class="faq">
+          <div class="faq-item">
+            <h3>Can we start with one location?</h3>
+            <p>Yes. Add locations and tenants later without rework.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Does this replace our spreadsheets?</h3>
+            <p>That is the goal. Track service orders, approvals, and time entries in one system.</p>
+          </div>
+          <div class="faq-item">
+            <h3>How do we enable AI features?</h3>
+            <p>Set `OPENAI_API_KEY` in `.env` to activate AI cleanup endpoints.</p>
           </div>
         </div>
       </section>
