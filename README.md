@@ -9,6 +9,7 @@
 
 ## Quick Start
 ```bash
+cd /path/to/bodyshopper
 cp .env.example .env
 # Optional: set OPENAI_API_KEY in .env
 
@@ -20,6 +21,10 @@ In another terminal:
 docker compose exec web python manage.py migrate
 docker compose exec web python manage.py seed_demo
 ```
+
+> Troubleshooting:
+> - If you see `cp: .env.example: No such file or directory`, make sure you're in the repo root first (`cd /path/to/bodyshopper`).
+> - If you see `no configuration file provided: not found`, run `docker compose -f docker-compose.yml up --build` from the repo root.
 
 Admin:
 - URL: http://localhost:8000/admin/
