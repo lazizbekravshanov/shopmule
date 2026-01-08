@@ -1,0 +1,133 @@
+:root {
+  --bs-bg: #f6f1ea;
+  --bs-bg-accent: #fde8d2;
+  --bs-card: #ffffff;
+  --bs-ink: #151515;
+  --bs-muted: #5b5b5b;
+  --bs-accent: #ff6b2c;
+  --bs-accent-dark: #d84f17;
+  --bs-line: rgba(21, 21, 21, 0.12);
+  --bs-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: "Space Grotesk", "IBM Plex Sans", "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top right, #fff4e6 0%, var(--bs-bg) 48%, #efe8dd 100%);
+  color: var(--bs-ink);
+}
+
+#header {
+  background: #fff;
+  border-bottom: 1px solid var(--bs-line);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+#branding h1 a {
+  color: var(--bs-ink);
+  letter-spacing: 0.02em;
+}
+
+.site-tagline {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--bs-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+#user-tools {
+  color: var(--bs-muted);
+}
+
+#user-tools a {
+  color: var(--bs-accent-dark);
+}
+
+#content {
+  padding-top: 24px;
+}
+
+.module {
+  background: var(--bs-card);
+  border: 1px solid var(--bs-line);
+  border-radius: 14px;
+  box-shadow: var(--bs-shadow);
+}
+
+.module h2, .module caption {
+  background: transparent;
+  color: var(--bs-ink);
+  font-weight: 600;
+  border-bottom: 1px solid var(--bs-line);
+}
+
+#changelist-filter {
+  background: #fff;
+  border: 1px solid var(--bs-line);
+  border-radius: 14px;
+  box-shadow: var(--bs-shadow);
+}
+
+.breadcrumbs {
+  background: #fff;
+  border-bottom: 1px solid var(--bs-line);
+}
+
+.dashboard #content {
+  background: transparent;
+}
+
+a:link, a:visited {
+  color: var(--bs-accent-dark);
+}
+
+.button, input[type="submit"], input[type="button"], .submit-row input, .object-tools a {
+  background: var(--bs-accent);
+  border: 1px solid var(--bs-accent-dark);
+  color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(255, 107, 44, 0.25);
+}
+
+.button.default, input[type="submit"].default {
+  background: var(--bs-accent-dark);
+}
+
+.button:hover, input[type="submit"]:hover, input[type="button"]:hover, .object-tools a:hover {
+  filter: brightness(0.96);
+}
+
+input, select, textarea {
+  border-radius: 8px;
+  border: 1px solid var(--bs-line);
+}
+
+#nav-sidebar {
+  background: rgba(255, 255, 255, 0.9);
+  border-right: 1px solid var(--bs-line);
+}
+
+#nav-sidebar .current-app > a,
+#nav-sidebar .current-model > a {
+  color: var(--bs-accent-dark);
+  font-weight: 600;
+}
+
+.login #container {
+  background: var(--bs-card);
+  border: 1px solid var(--bs-line);
+  border-radius: 18px;
+  box-shadow: var(--bs-shadow);
+}
+
+.login #content {
+  padding: 28px 30px 34px;
+}
+
+.login .submit-row input {
+  width: 100%;
+}

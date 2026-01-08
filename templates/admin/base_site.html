@@ -1,0 +1,16 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}BodyShopper Admin{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'admin/custom.css' %}">
+{% endblock %}
+
+{% block branding %}
+  <h1 id="site-name"><a href="{% url 'admin:index' %}">BodyShopper Admin</a></h1>
+  <p class="site-tagline">AI-wrapped shop ops</p>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
