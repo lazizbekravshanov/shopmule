@@ -7,15 +7,14 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #f6f1ea;
-      --bg-accent: #fde8d2;
-      --ink: #151515;
-      --muted: #5b5b5b;
+      --bg: #ffffff;
+      --ink: #101010;
+      --muted: #4a4a4a;
       --accent: #ff6b2c;
-      --accent-dark: #d84f17;
+      --accent-dark: #d94c16;
+      --line: rgba(16, 16, 16, 0.12);
       --card: #ffffff;
-      --line: rgba(21, 21, 21, 0.12);
-      --shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
     }
 
     * {
@@ -26,83 +25,78 @@
       margin: 0;
       font-family: "Space Grotesk", "IBM Plex Sans", "Segoe UI", sans-serif;
       color: var(--ink);
-      background: radial-gradient(circle at top right, #fff4e6 0%, var(--bg) 48%, #efe8dd 100%);
+      background: var(--bg);
       min-height: 100vh;
     }
 
     .page {
       position: relative;
-      overflow: hidden;
-      padding: 56px 20px 80px;
-    }
-
-    .glow {
-      position: absolute;
-      top: -180px;
-      right: -120px;
-      width: 420px;
-      height: 420px;
-      background: radial-gradient(circle, rgba(255, 107, 44, 0.35), rgba(255, 107, 44, 0));
-      filter: blur(10px);
-      pointer-events: none;
-    }
-
-    .grid {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-      background-size: 48px 48px;
-      opacity: 0.35;
-      pointer-events: none;
+      padding: 64px 20px 96px;
     }
 
     .wrap {
-      max-width: 980px;
+      max-width: 1080px;
       margin: 0 auto;
-      position: relative;
-      z-index: 1;
     }
 
-    .badge {
-      display: inline-flex;
+    .nav {
+      display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 6px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #fff;
-      font-size: 0.85rem;
-      color: var(--muted);
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
+      justify-content: space-between;
+      margin-bottom: 64px;
     }
 
-    .badge span {
-      color: var(--accent-dark);
+    .logo {
       font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 16px;
+      font-size: 0.95rem;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 500;
     }
 
     .hero {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-      gap: 32px;
-      margin-top: 28px;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 48px;
       align-items: center;
     }
 
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .eyebrow span {
+      color: var(--accent-dark);
+      font-weight: 600;
+    }
+
     .title {
-      font-size: clamp(2.4rem, 3vw + 1.8rem, 4rem);
-      line-height: 1.05;
-      margin: 16px 0 16px;
+      font-size: clamp(2.6rem, 3.4vw + 1.6rem, 4rem);
+      line-height: 1.04;
+      margin: 20px 0 18px;
     }
 
     .lead {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       color: var(--muted);
-      line-height: 1.6;
-      margin: 0 0 24px;
+      line-height: 1.7;
+      margin: 0 0 28px;
     }
 
     .cta {
@@ -121,13 +115,12 @@
       font-weight: 600;
       font-size: 0.95rem;
       text-decoration: none;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .btn.primary {
       background: var(--accent);
       color: #fff;
-      box-shadow: 0 12px 30px rgba(255, 107, 44, 0.35);
+      box-shadow: 0 12px 26px rgba(255, 107, 44, 0.2);
     }
 
     .btn.secondary {
@@ -136,145 +129,224 @@
       border-color: var(--line);
     }
 
-    .btn:hover {
-      transform: translateY(-2px);
-    }
-
-    .panel {
-      background: var(--card);
+    .hero-panel {
+      border-radius: 18px;
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 20px;
+      padding: 24px;
+      background: linear-gradient(135deg, #ffffff 0%, #fff6ef 50%, #fff 100%);
       box-shadow: var(--shadow);
     }
 
-    .panel h3 {
+    .hero-panel h3 {
       margin: 0 0 10px;
-      font-size: 1.1rem;
     }
 
-    .panel p {
+    .hero-panel p {
       margin: 0 0 16px;
       color: var(--muted);
     }
 
-    .links {
+    .hero-metrics {
       display: grid;
-      gap: 10px;
+      gap: 12px;
     }
 
-    .link {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .metric {
       padding: 12px 14px;
       border-radius: 12px;
       border: 1px solid var(--line);
-      background: #fef9f4;
-      text-decoration: none;
-      color: var(--ink);
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
       font-weight: 600;
     }
 
-    .link small {
+    .metric span {
       color: var(--muted);
       font-weight: 500;
     }
 
-    .pill {
-      display: inline-flex;
+    .section {
+      margin-top: 88px;
+    }
+
+    .section h2 {
+      margin: 0 0 16px;
+      font-size: 1.8rem;
+    }
+
+    .section p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      max-width: 680px;
+    }
+
+    .features {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .feature {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: var(--card);
+    }
+
+    .feature h3 {
+      margin: 0 0 8px;
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .proof {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .quote {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: #fff;
+    }
+
+    .quote p {
+      margin: 0 0 12px;
+    }
+
+    .quote span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .cta-band {
+      margin-top: 88px;
+      padding: 28px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, #fff6ef 0%, #ffffff 60%);
+      display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-      color: #1f1f1f;
-      background: #ffe2d1;
-      padding: 6px 10px;
-      border-radius: 999px;
-      margin-top: 18px;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
     }
 
-    .pulse {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent-dark);
-      box-shadow: 0 0 0 0 rgba(216, 79, 23, 0.6);
-      animation: pulse 2s infinite;
+    .cta-band h2 {
+      margin: 0;
+      font-size: 1.6rem;
     }
 
-    .fade-up {
-      animation: fadeUp 0.6s ease both;
+    .cta-band p {
+      margin: 6px 0 0;
+      color: var(--muted);
     }
 
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(16px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes pulse {
-      0% {
-        box-shadow: 0 0 0 0 rgba(216, 79, 23, 0.6);
-      }
-      70% {
-        box-shadow: 0 0 0 12px rgba(216, 79, 23, 0);
-      }
-      100% {
-        box-shadow: 0 0 0 0 rgba(216, 79, 23, 0);
-      }
-    }
-
-    @media (max-width: 860px) {
+    @media (max-width: 900px) {
       .hero {
         grid-template-columns: 1fr;
+      }
+
+      .nav {
+        flex-direction: column;
+        gap: 16px;
       }
     }
   </style>
 </head>
 <body>
   <div class="page">
-    <div class="glow"></div>
-    <div class="grid"></div>
     <div class="wrap">
-      <div class="badge fade-up">
-        AI-wrapped ops for heavy-duty repair
-        <span>Live</span>
-      </div>
-      <div class="hero">
-        <div class="fade-up" style="animation-delay: 0.1s;">
-          <h1 class="title">BodyShopper keeps every bay, tech, and ticket in sync.</h1>
+      <nav class="nav">
+        <div class="logo">BodyShopper</div>
+        <div class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#proof">Customers</a>
+          <a href="/admin/">Login</a>
+        </div>
+      </nav>
+
+      <section class="hero">
+        <div>
+          <div class="eyebrow">
+            AI-wrapped shop operations
+            <span>Live</span>
+          </div>
+          <h1 class="title">Run your repair shop with instant clarity.</h1>
           <p class="lead">
-            The multi-tenant repair shop OS built for speed: instant job context, AI-cleaned notes,
-            and real-time dashboards for the whole floor.
+            BodyShopper unifies service orders, labor tracking, and customer approvals in one
+            clean system. Every ticket stays current, every bay stays productive.
           </p>
           <div class="cta">
-            <a class="btn primary" href="/admin/">Open admin</a>
+            <a class="btn primary" href="/admin/">Launch admin</a>
             <a class="btn secondary" href="/portal/estimate/">Customer portal</a>
-            <a class="btn secondary" href="/tv/dashboard/">TV dashboard</a>
-          </div>
-          <div class="pill">
-            <span class="pulse"></span>
-            AI endpoints ready with `OPENAI_API_KEY`.
           </div>
         </div>
-        <div class="panel fade-up" style="animation-delay: 0.2s;">
-          <h3>Launch pads</h3>
-          <p>Jump straight into the workflows teams use daily.</p>
-          <div class="links">
-            <a class="link" href="/admin/">Admin console <small>Staff + settings</small></a>
-            <a class="link" href="/portal/estimate/">Estimate approval <small>Customer view</small></a>
-            <a class="link" href="/tv/dashboard/">Shop floor TV <small>Live status</small></a>
-          </div>
-          <div class="pill" style="margin-top: 14px;">
-            Token auth: `POST /api/token/`
+        <div class="hero-panel">
+          <h3>Operations at a glance</h3>
+          <p>Fast context, cleaner notes, and a TV dashboard that keeps the floor aligned.</p>
+          <div class="hero-metrics">
+            <div class="metric">2x faster estimates <span>with AI cleanup</span></div>
+            <div class="metric">Real-time visibility <span>for all technicians</span></div>
+            <div class="metric">Multi-tenant ready <span>by default</span></div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <section class="section" id="features">
+        <h2>Built for heavy-duty service teams</h2>
+        <p>Purpose-built workflows keep data consistent from estimate to invoice and beyond.</p>
+        <div class="features">
+          <div class="feature">
+            <h3>Service order command center</h3>
+            <p>Track status, parts, and labor in one place, with clean handoffs between roles.</p>
+          </div>
+          <div class="feature">
+            <h3>AI-cleaned customer notes</h3>
+            <p>Normalize tech notes instantly so approvals and invoices are always readable.</p>
+          </div>
+          <div class="feature">
+            <h3>Live floor dashboard</h3>
+            <p>Keep the shop aligned with a real-time view of jobs, bays, and priorities.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="proof">
+        <h2>Trusted by modern repair teams</h2>
+        <p>Designed for multi-location operations that need speed, structure, and clarity.</p>
+        <div class="proof">
+          <div class="quote">
+            <p>“We went from scattered spreadsheets to one clear pipeline in a week.”</p>
+            <span>Fleet Ops Manager</span>
+          </div>
+          <div class="quote">
+            <p>“Techs know what’s next before the morning huddle is over.”</p>
+            <span>Service Director</span>
+          </div>
+          <div class="quote">
+            <p>“Approvals are now same-day and customers see clean, professional notes.”</p>
+            <span>Shop Owner</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta-band">
+        <div>
+          <h2>Ready to run the shop from one screen?</h2>
+          <p>Spin up the admin console and explore the demo data.</p>
+        </div>
+        <div class="cta">
+          <a class="btn primary" href="/admin/">Open admin</a>
+          <a class="btn secondary" href="/tv/dashboard/">View TV dashboard</a>
+        </div>
+      </section>
     </div>
   </div>
 </body>
