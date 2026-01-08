@@ -9,13 +9,12 @@
     :root {
       color-scheme: light;
       --bg: #ffffff;
-      --ink: #101010;
-      --muted: #4a4a4a;
+      --ink: #111111;
+      --muted: #555555;
       --accent: #ff6b2c;
       --accent-dark: #d94c16;
-      --line: rgba(16, 16, 16, 0.12);
-      --card: #ffffff;
-      --shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+      --line: rgba(17, 17, 17, 0.12);
+      --soft: #f8f7f5;
     }
 
     * {
@@ -31,8 +30,7 @@
     }
 
     .page {
-      position: relative;
-      padding: 64px 20px 96px;
+      padding: 72px 20px 110px;
     }
 
     .wrap {
@@ -44,7 +42,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 64px;
+      margin-bottom: 72px;
     }
 
     .logo {
@@ -89,7 +87,7 @@
 
     .title {
       font-size: clamp(2.6rem, 3.4vw + 1.6rem, 4rem);
-      line-height: 1.04;
+      line-height: 1.05;
       margin: 20px 0 18px;
     }
 
@@ -130,12 +128,11 @@
       border-color: var(--line);
     }
 
-    .hero-panel {
+    .hero-card {
       border-radius: 18px;
       border: 1px solid var(--line);
-      padding: 24px;
-      background: linear-gradient(135deg, #ffffff 0%, #fff6ef 50%, #fff 100%);
-      box-shadow: var(--shadow);
+      padding: 22px;
+      background: var(--soft);
     }
 
     .hero-image {
@@ -147,22 +144,22 @@
       object-fit: cover;
     }
 
-    .hero-panel h3 {
+    .hero-card h3 {
       margin: 0 0 10px;
     }
 
-    .hero-panel p {
+    .hero-card p {
       margin: 0 0 16px;
       color: var(--muted);
     }
 
-    .hero-metrics {
+    .metrics {
       display: grid;
-      gap: 12px;
+      gap: 10px;
     }
 
     .metric {
-      padding: 12px 14px;
+      padding: 10px 12px;
       border-radius: 12px;
       border: 1px solid var(--line);
       background: #fff;
@@ -177,7 +174,7 @@
     }
 
     .section {
-      margin-top: 88px;
+      margin-top: 96px;
     }
 
     .section h2 {
@@ -191,6 +188,21 @@
       max-width: 680px;
     }
 
+    .logos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .logos span {
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fafafa;
+    }
+
     .features {
       display: grid;
       gap: 18px;
@@ -201,7 +213,7 @@
       border: 1px solid var(--line);
       border-radius: 16px;
       padding: 18px;
-      background: var(--card);
+      background: #fff;
     }
 
     .feature h3 {
@@ -236,71 +248,16 @@
     }
 
     .cta-band {
-      margin-top: 88px;
+      margin-top: 96px;
       padding: 28px;
       border-radius: 18px;
       border: 1px solid var(--line);
-      background: linear-gradient(135deg, #fff6ef 0%, #ffffff 60%);
+      background: var(--soft);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 24px;
       flex-wrap: wrap;
-    }
-
-    .logos {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 18px;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .logos span {
-      padding: 8px 12px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: #fafafa;
-    }
-
-    .pricing {
-      display: grid;
-      gap: 18px;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    }
-
-    .pricing-card {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 18px;
-      background: #fff;
-    }
-
-    .pricing-card h3 {
-      margin: 0 0 8px;
-    }
-
-    .price {
-      font-size: 2rem;
-      margin: 10px 0;
-    }
-
-    .pricing-card ul {
-      margin: 0;
-      padding-left: 18px;
-      color: var(--muted);
-    }
-
-    .faq {
-      display: grid;
-      gap: 14px;
-    }
-
-    .faq-item {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 16px;
-      background: #fff;
     }
 
     .cta-band h2 {
@@ -343,31 +300,31 @@
             AI-wrapped shop operations
             <span>Live</span>
           </div>
-          <h1 class="title">Run your repair shop with instant clarity.</h1>
+          <h1 class="title">Run every service bay with absolute clarity.</h1>
           <p class="lead">
-            BodyShopper unifies service orders, labor tracking, and customer approvals in one
-            clean system. Every ticket stays current, every bay stays productive.
+            BodyShopper is the operations OS for heavy-duty repair. It turns service orders,
+            labor, approvals, and inventory into one calm, real-time system.
           </p>
           <div class="cta">
             <a class="btn primary" href="/admin/">Launch admin</a>
             <a class="btn secondary" href="/portal/estimate/">Customer portal</a>
           </div>
         </div>
-        <div class="hero-panel">
+        <div class="hero-card">
           <img class="hero-image" src="{% static 'images/landing-hero.png' %}" alt="BodyShopper operations overview">
           <h3>Operations at a glance</h3>
-          <p>Fast context, cleaner notes, and a TV dashboard that keeps the floor aligned.</p>
-          <div class="hero-metrics">
-            <div class="metric">2x faster estimates <span>with AI cleanup</span></div>
-            <div class="metric">Real-time visibility <span>for all technicians</span></div>
+          <p>Instant context, clean notes, and a TV dashboard that keeps the floor aligned.</p>
+          <div class="metrics">
+            <div class="metric">Faster estimates <span>with AI cleanup</span></div>
+            <div class="metric">Live visibility <span>for every bay</span></div>
             <div class="metric">Multi-tenant ready <span>by default</span></div>
           </div>
         </div>
       </section>
 
       <section class="section">
-        <h2>Built for serious service teams</h2>
-        <p>Trusted by growing fleets and independent shops modernizing their workflow.</p>
+        <h2>Trusted by serious repair teams</h2>
+        <p>Built for fast-growing fleets and modern independent shops.</p>
         <div class="logos">
           <span>Fleet Service Group</span>
           <span>Atlas Diesel</span>
@@ -377,83 +334,39 @@
       </section>
 
       <section class="section" id="features">
-        <h2>Built for heavy-duty service teams</h2>
-        <p>Purpose-built workflows keep data consistent from estimate to invoice and beyond.</p>
+        <h2>Designed for high-throughput shops</h2>
+        <p>Every workflow is focused on speed, accountability, and accuracy.</p>
         <div class="features">
           <div class="feature">
             <h3>Service order command center</h3>
-            <p>Track status, parts, and labor in one place, with clean handoffs between roles.</p>
+            <p>Track status, parts, and labor in one place with clean handoffs.</p>
           </div>
           <div class="feature">
             <h3>AI-cleaned customer notes</h3>
-            <p>Normalize tech notes instantly so approvals and invoices are always readable.</p>
+            <p>Normalize tech notes instantly so approvals are always readable.</p>
           </div>
           <div class="feature">
-            <h3>Live floor dashboard</h3>
-            <p>Keep the shop aligned with a real-time view of jobs, bays, and priorities.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <h2>Simple pricing that scales</h2>
-        <p>Start lean, then add bays, locations, and teams as you grow.</p>
-        <div class="pricing">
-          <div class="pricing-card">
-            <h3>Starter</h3>
-            <div class="price">$249<span style="font-size: 1rem; color: var(--muted);">/month</span></div>
-            <ul>
-              <li>Single location</li>
-              <li>Core service orders</li>
-              <li>Customer portal</li>
-            </ul>
-          </div>
-          <div class="pricing-card">
-            <h3>Scale</h3>
-            <div class="price">$499<span style="font-size: 1rem; color: var(--muted);">/month</span></div>
-            <ul>
-              <li>Multi-tenant ready</li>
-              <li>AI cleanup workflows</li>
-              <li>TV dashboard</li>
-            </ul>
+            <h3>Live floor visibility</h3>
+            <p>Keep teams aligned with real-time status across bays and shifts.</p>
           </div>
         </div>
       </section>
 
       <section class="section" id="proof">
-        <h2>Trusted by modern repair teams</h2>
-        <p>Designed for multi-location operations that need speed, structure, and clarity.</p>
+        <h2>Operational lift teams feel fast</h2>
+        <p>Short feedback loops. Cleaner data. Happier customers.</p>
         <div class="proof">
           <div class="quote">
-            <p>“We went from scattered spreadsheets to one clear pipeline in a week.”</p>
+            <p>“We replaced three tools and finally got one reliable source of truth.”</p>
             <span>Fleet Ops Manager</span>
           </div>
           <div class="quote">
-            <p>“Techs know what’s next before the morning huddle is over.”</p>
+            <p>“Techs know what is next before the morning huddle is over.”</p>
             <span>Service Director</span>
           </div>
           <div class="quote">
-            <p>“Approvals are now same-day and customers see clean, professional notes.”</p>
+            <p>“Approvals are same-day and notes read like a professional report.”</p>
             <span>Shop Owner</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <h2>FAQ</h2>
-        <p>Quick answers for teams rolling out BodyShopper.</p>
-        <div class="faq">
-          <div class="faq-item">
-            <h3>Can we start with one location?</h3>
-            <p>Yes. Add locations and tenants later without rework.</p>
-          </div>
-          <div class="faq-item">
-            <h3>Does this replace our spreadsheets?</h3>
-            <p>That is the goal. Track service orders, approvals, and time entries in one system.</p>
-          </div>
-          <div class="faq-item">
-            <h3>How do we enable AI features?</h3>
-            <p>Set `OPENAI_API_KEY` in `.env` to activate AI cleanup endpoints.</p>
           </div>
         </div>
       </section>
@@ -461,7 +374,7 @@
       <section class="cta-band">
         <div>
           <h2>Ready to run the shop from one screen?</h2>
-          <p>Spin up the admin console and explore the demo data.</p>
+          <p>Launch the admin console and explore the demo data.</p>
         </div>
         <div class="cta">
           <a class="btn primary" href="/admin/">Open admin</a>

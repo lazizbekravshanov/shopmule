@@ -26,8 +26,12 @@ body {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
 
-#branding h1 a {
-  color: var(--bs-ink);
+#header,
+#header a,
+#header h1,
+#header #branding h1,
+#header #branding h1 a {
+  color: var(--bs-ink) !important;
   letter-spacing: 0.02em;
 }
 
@@ -39,12 +43,14 @@ body {
   letter-spacing: 0.1em;
 }
 
-#user-tools {
-  color: var(--bs-muted);
+#header #user-tools {
+  color: var(--bs-muted) !important;
 }
 
-#user-tools a {
-  color: var(--bs-accent-dark);
+#header #user-tools a,
+#header #user-tools a:visited,
+#header #user-tools a:hover {
+  color: var(--bs-accent-dark) !important;
 }
 
 #content {

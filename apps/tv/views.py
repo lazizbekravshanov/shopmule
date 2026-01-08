@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponseForbidden
 from django.views import View
 from django.core.cache import cache
+from django.conf import settings
 from .models import TenantDisplayToken
 
 
@@ -14,6 +15,16 @@ class TVDashboardView(View):
     def get(self, request):
         token = request.GET.get('token')
         if not token:
+            if settings.DEBUG:
+                display = TenantDisplayToken.objects.order_by('-id').first()
+                if not display:
+                    return render(
+                        request,
+                        self.template_name,
+                        {'token': '', 'error': 'No TV display token found. Create one in admin.'},
+                    )
+                token = display.generate_token()
+                return render(request, self.template_name, {'token': token, 'demo_mode': True})
             return HttpResponseForbidden('Token required.')
         ip = request.META.get('REMOTE_ADDR')
         cache_key = f'tv-rate:{ip}'

@@ -7,6 +7,14 @@ class EstimateAdmin(admin.ModelAdmin):
     list_display = ('service_order', 'status', 'total', 'portal_token_expires_at', 'tenant')
     list_filter = ('status', 'tenant')
     actions = ['send_estimate_link']
+    readonly_fields = (
+        'portal_token_hash',
+        'portal_token_expires_at',
+        'approved_at',
+        'approved_by_name',
+        'approved_ip',
+        'approved_user_agent',
+    )
 
     def send_estimate_link(self, request, queryset):
         for estimate in queryset:

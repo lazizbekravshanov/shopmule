@@ -1,34 +1,322 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Shop TV Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    .card { border: 1px solid #ccc; padding: 12px; border-radius: 8px; }
+    :root {
+      color-scheme: light;
+      --bg: #0f1216;
+      --panel: rgba(20, 22, 28, 0.9);
+      --card: #151922;
+      --ink: #f5f6f8;
+      --muted: #a6adba;
+      --accent: #ff6b2c;
+      --accent-soft: rgba(255, 107, 44, 0.14);
+      --line: rgba(245, 246, 248, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at top left, #1b1f2b 0%, #10131a 45%, #0b0d12 100%);
+      min-height: 100vh;
+    }
+
+    .page {
+      padding: 36px 36px 48px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 28px;
+    }
+
+    .title {
+      font-size: 2.4rem;
+      margin: 0;
+      letter-spacing: 0.02em;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat {
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .stat h3 {
+      margin: 0 0 8px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .stat strong {
+      font-size: 2rem;
+      color: var(--ink);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 1.4fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .card h2 {
+      margin: 0 0 14px;
+      font-size: 1.1rem;
+    }
+
+    .list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(255, 107, 44, 0.25);
+    }
+
+    .row span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .status {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <h1>Shop Performance Dashboard</h1>
-  <div id="dashboard" class="grid"></div>
+  <div class="page">
+    <div class="header">
+      <h1 class="title">Shop Floor Dashboard</h1>
+      <div class="meta">Last updated: <span id="updated">--</span></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><h3>Clocked In</h3><strong id="stat-clocked">0</strong></div>
+      <div class="stat"><h3>Active Orders</h3><strong id="stat-active">0</strong></div>
+      <div class="stat"><h3>Jobs Closed</h3><strong id="stat-closed">0</strong></div>
+      <div class="stat"><h3>Comebacks</h3><strong id="stat-comebacks">0</strong></div>
+      <div class="stat"><h3>Avg Cycle (min)</h3><strong id="stat-cycle">0</strong></div>
+    </div>
+
+    <div class="layout">
+      <div class="card">
+        <h2>Clocked In</h2>
+        <div id="clocked" class="list"></div>
+      </div>
+      <div class="card">
+        <h2>Active Service Orders</h2>
+        <div id="active" class="list"></div>
+      </div>
+      <div class="card">
+        <h2>Tech Leaderboard</h2>
+        <div class="status">
+          <span class="badge">Utilization</span>
+          <span class="badge">Efficiency</span>
+        </div>
+        <div style="margin-top: 12px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Tech</th>
+                <th>Clocked</th>
+                <th>Wrench</th>
+                <th>Billed</th>
+                <th>Util</th>
+                <th>Eff</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
     const token = "{{ token }}";
+    const errorMsg = "{{ error|default:'' }}";
+
+    const fmtMinutes = (mins) => {
+      if (!mins && mins !== 0) return "--";
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      if (h === 0) return `${m}m`;
+      return `${h}h ${m}m`;
+    };
+
+    const fmtHours = (hours) => `${hours.toFixed(1)}h`;
+
+    const fmtPct = (ratio) => `${Math.round(ratio * 100)}%`;
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
+
+    function renderClocked(list) {
+      const container = document.getElementById('clocked');
+      if (!list || list.length === 0) {
+        container.innerHTML = '<p class="empty">No one is clocked in.</p>';
+        return;
+      }
+      container.innerHTML = list
+        .map(item => `
+          <div class="row">
+            <div>${item.name}</div>
+            <span>${fmtMinutes(item.duration_minutes)}</span>
+          </div>
+        `)
+        .join('');
+    }
+
+    function renderActive(active) {
+      const container = document.getElementById('active');
+      const items = active?.top || [];
+      if (items.length === 0) {
+        container.innerHTML = '<p class="empty">No active service orders.</p>';
+        return;
+      }
+      container.innerHTML = items
+        .map(order => `
+          <div class="row">
+            <div>SO-${order.id} • ${order.customer__name || 'Customer'}</div>
+            <span>${order.unit__vin || 'VIN'}</span>
+          </div>
+        `)
+        .join('');
+    }
+
+    function renderLeaderboard(list) {
+      const body = document.getElementById('leaderboard');
+      if (!list || list.length === 0) {
+        body.innerHTML = '<tr><td colspan="6" class="empty">No tech data yet.</td></tr>';
+        return;
+      }
+      body.innerHTML = list
+        .map(tech => `
+          <tr>
+            <td>${tech.name}</td>
+            <td>${fmtHours(tech.clocked_hours)}</td>
+            <td>${fmtHours(tech.wrench_hours)}</td>
+            <td>${fmtHours(tech.billed_hours)}</td>
+            <td>${fmtPct(tech.utilization)}</td>
+            <td>${fmtPct(tech.efficiency)}</td>
+          </tr>
+        `)
+        .join('');
+    }
+
     async function loadDashboard() {
+      if (!token) {
+        setText('updated', 'missing token');
+        document.getElementById('clocked').innerHTML = errorMsg
+          ? `<p class="empty">${errorMsg}</p>`
+          : '<p class="empty">Token required. Create a TV display token in admin.</p>';
+        document.getElementById('active').innerHTML = '';
+        document.getElementById('leaderboard').innerHTML = '';
+        return;
+      }
       const resp = await fetch(`/api/tv/dashboard?token=${token}&range=today`);
       if (!resp.ok) {
-        document.getElementById('dashboard').innerText = 'Unable to load dashboard.';
+        setText('updated', 'error');
+        document.getElementById('clocked').innerHTML = '<p class="empty">Unable to load dashboard.</p>';
+        document.getElementById('active').innerHTML = '';
+        document.getElementById('leaderboard').innerHTML = '';
         return;
       }
       const data = await resp.json();
-      const container = document.getElementById('dashboard');
-      container.innerHTML = `
-        <div class="card"><h2>Clocked In</h2><pre>${JSON.stringify(data.clocked_in, null, 2)}</pre></div>
-        <div class="card"><h2>Active Service Orders</h2><pre>${JSON.stringify(data.active_orders, null, 2)}</pre></div>
-        <div class="card"><h2>Leaderboard</h2><pre>${JSON.stringify(data.leaderboard, null, 2)}</pre></div>
-        <div class="card"><h2>Throughput</h2><pre>${JSON.stringify(data.throughput, null, 2)}</pre></div>
-      `;
+      const now = new Date();
+      setText('updated', now.toLocaleTimeString());
+      setText('stat-clocked', (data.clocked_in || []).length);
+      setText('stat-active', data.active_orders?.count || 0);
+      setText('stat-closed', data.throughput?.jobs_closed || 0);
+      setText('stat-comebacks', data.throughput?.comebacks || 0);
+      setText('stat-cycle', data.throughput?.average_in_progress_to_closed_minutes || 0);
+      renderClocked(data.clocked_in);
+      renderActive(data.active_orders);
+      renderLeaderboard(data.leaderboard);
     }
+
     loadDashboard();
     setInterval(loadDashboard, 30000);
   </script>

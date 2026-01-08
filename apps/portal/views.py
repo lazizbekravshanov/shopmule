@@ -4,6 +4,7 @@ from django.http import HttpResponseForbidden
 from django.views import View
 from django.core.cache import cache
 from django.utils import timezone
+from django.conf import settings
 from apps.billing.models import Estimate, EstimateStatus
 from apps.service_orders.models import ServiceOrderStatus
 from apps.audit.utils import log_audit_event
@@ -17,6 +18,15 @@ class EstimatePortalView(View):
     def get(self, request):
         token = request.GET.get('token')
         if not token:
+            if settings.DEBUG:
+                estimate = Estimate.objects.order_by('-id').first()
+                if not estimate:
+                    return render(
+                        request,
+                        self.template_name,
+                        {'error': 'No estimate found. Create one in admin or seed demo data.'},
+                    )
+                return render(request, self.template_name, {'estimate': estimate, 'demo_mode': True})
             return HttpResponseForbidden('Invalid or expired token.')
         token_hash = hashlib.sha256(token.encode('utf-8')).hexdigest()
         estimate = get_object_or_404(Estimate, portal_token_hash=token_hash)
@@ -33,11 +43,21 @@ class EstimatePortalView(View):
     def post(self, request):
         token = request.GET.get('token')
         if not token:
-            return HttpResponseForbidden('Invalid or expired token.')
-        token_hash = hashlib.sha256(token.encode('utf-8')).hexdigest()
-        estimate = get_object_or_404(Estimate, portal_token_hash=token_hash)
-        if not estimate.verify_portal_token(token):
-            return HttpResponseForbidden('Invalid or expired token.')
+            if settings.DEBUG:
+                estimate = Estimate.objects.order_by('-id').first()
+                if not estimate:
+                    return render(
+                        request,
+                        self.template_name,
+                        {'error': 'No estimate found. Create one in admin or seed demo data.'},
+                    )
+            else:
+                return HttpResponseForbidden('Invalid or expired token.')
+        else:
+            token_hash = hashlib.sha256(token.encode('utf-8')).hexdigest()
+            estimate = get_object_or_404(Estimate, portal_token_hash=token_hash)
+            if not estimate.verify_portal_token(token):
+                return HttpResponseForbidden('Invalid or expired token.')
         ip = request.META.get('REMOTE_ADDR')
         cache_key = f'portal-rate:{ip}'
         count = cache.get(cache_key, 0)
