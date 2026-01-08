@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Estimate Approval</title>
+</head>
+<body>
+  <h1>Estimate for Service Order #{{ estimate.service_order.id }}</h1>
+  <p>Status: {{ estimate.get_status_display }}</p>
+  <p>Total: ${{ estimate.total }}</p>
+
+  {% if submitted %}
+    <p>Thank you! Your response has been recorded.</p>
+  {% else %}
+    <form method="post">
+      {% csrf_token %}
+      <label for="name">Your Name (e-signature)</label>
+      <input type="text" name="name" id="name" required />
+      <button type="submit" name="action" value="approve">Approve</button>
+      <button type="submit" name="action" value="decline">Decline</button>
+    </form>
+  {% endif %}
+</body>
+</html>
