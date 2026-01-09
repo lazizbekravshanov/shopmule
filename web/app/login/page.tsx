@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -24,24 +25,28 @@ export default function LoginPage() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false,
+        redirect: true,
+        callbackUrl: "/dashboard",
       })
 
       if (result?.error) {
         setError("Invalid email or password")
-      } else {
-        router.push("/dashboard")
-        router.refresh()
+        setLoading(false)
       }
+      // Success redirect is handled by NextAuth
     } catch (err) {
       setError("An error occurred. Please try again.")
-    } finally {
       setLoading(false)
     }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="absolute top-4 left-4">
+        <Link href="/" className="text-xl font-bold text-gray-900">
+          BodyShopper
+        </Link>
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>BodyShopper</CardTitle>
@@ -76,10 +81,15 @@ export default function LoginPage() {
               />
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex-col gap-4">
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Signing in..." : "Sign In"}
             </Button>
+            <div className="text-sm text-center text-gray-600">
+              <Link href="/" className="hover:text-gray-900 underline">
+                Back to home
+              </Link>
+            </div>
           </CardFooter>
         </form>
       </Card>
