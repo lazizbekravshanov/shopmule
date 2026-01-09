@@ -71,6 +71,9 @@ model Shop {
   auditLogs  AuditLog[]
   displayTokens DisplayToken[]
   inventoryAdjustments InventoryAdjustment[]
+  laborLines LaborLine[]
+  partLines PartLine[]
+  attachments Attachment[]
 
   @@index([slug])
 }
@@ -290,12 +293,14 @@ model ShiftPunch {
   shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([shopId, userId], name: "unique_open_shift_punch", filter: "clock_out_at IS NULL")
   @@index([shopId])
   @@index([userId])
   @@index([clockInAt])
   @@map("shift_punches")
 }
+
+// Note: Unique constraint on (shopId, userId) where clockOutAt IS NULL
+// is enforced via application logic in the API routes
 
 model TimeEntry {
   id           String    @id @default(cuid())
@@ -312,13 +317,15 @@ model TimeEntry {
   tech        User        @relation(fields: [techId], references: [id], onDelete: Cascade)
   repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: Cascade)
 
-  @@unique([shopId, techId], name: "unique_open_time_entry", filter: "clock_out IS NULL")
   @@index([shopId])
   @@index([techId])
   @@index([repairOrderId])
   @@index([clockIn])
   @@map("time_entries")
 }
+
+// Note: Unique constraint on (shopId, techId) where clockOut IS NULL
+// is enforced via application logic in the API routes
 
 model Estimate {
   id                    String        @id @default(cuid())
