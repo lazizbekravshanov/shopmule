@@ -22,6 +22,7 @@ class Command(BaseCommand):
             'Service Writer': Group.objects.get_or_create(name='Service Writer')[0],
             'Technician': Group.objects.get_or_create(name='Technician')[0],
             'Parts Manager': Group.objects.get_or_create(name='Parts Manager')[0],
+            'Accounting': Group.objects.get_or_create(name='Accounting')[0],
             'Customer': Group.objects.get_or_create(name='Customer')[0],
         }
 
@@ -53,10 +54,18 @@ class Command(BaseCommand):
         if not parts.has_usable_password():
             parts.set_password('parts123')
             parts.save(update_fields=['password'])
+        accounting, _ = User.objects.get_or_create(
+            username='accounting',
+            defaults={'email': 'accounting@example.com', 'tenant': tenant},
+        )
+        if not accounting.has_usable_password():
+            accounting.set_password('accounting123')
+            accounting.save(update_fields=['password'])
 
         writer.groups.add(groups['Service Writer'])
         tech.groups.add(groups['Technician'])
         parts.groups.add(groups['Parts Manager'])
+        accounting.groups.add(groups['Accounting'])
 
         customer = Customer.objects.create(tenant=tenant, name='Acme Logistics', phone='555-0100')
         unit = UnitVehicle.objects.create(tenant=tenant, customer=customer, vin='1HGBH41JXMN109186', make='Volvo', model='VNL', year=2020, plate='TRK-100')

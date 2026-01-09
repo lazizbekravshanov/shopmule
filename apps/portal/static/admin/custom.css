@@ -211,6 +211,127 @@ input, select, textarea {
   text-decoration: none;
 }
 
+.bs-admin-kpi-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 26px;
+}
+
+.bs-admin-range {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0 18px;
+  color: var(--bs-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.7rem;
+}
+
+.bs-admin-range-links {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.bs-admin-range-links a {
+  text-decoration: none;
+  color: var(--bs-ink);
+  background: #fff;
+  border: 1px solid var(--bs-line);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.bs-admin-range-links a.is-active {
+  background: var(--bs-accent);
+  border-color: var(--bs-accent-dark);
+  color: #fff;
+}
+
+.bs-admin-kpi {
+  background: #fff;
+  border: 1px solid var(--bs-line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: var(--bs-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--bs-shadow);
+}
+
+.bs-admin-kpi span {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--bs-muted);
+}
+
+.bs-admin-kpi strong {
+  font-size: 1.6rem;
+}
+
+.bs-admin-role-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-bottom: 28px;
+}
+
+.bs-admin-role {
+  background: var(--bs-card);
+  border: 1px solid var(--bs-line);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--bs-shadow);
+}
+
+.bs-admin-role header {
+  margin-bottom: 12px;
+}
+
+.bs-admin-role h2 {
+  margin: 0 0 4px;
+  font-size: 1.2rem;
+}
+
+.bs-admin-role p {
+  margin: 0;
+  color: var(--bs-muted);
+}
+
+.bs-admin-role ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.bs-admin-role li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #fef9f4;
+  border: 1px solid var(--bs-line);
+}
+
+.bs-admin-role li a {
+  color: var(--bs-ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.bs-admin-role li span {
+  font-weight: 700;
+  color: var(--bs-accent-dark);
+}
+
 .bs-admin-grid {
   display: grid;
   gap: 18px;

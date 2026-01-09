@@ -20,7 +20,7 @@ class AttachmentInline(admin.TabularInline):
 @admin.register(ServiceOrder)
 class ServiceOrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'customer', 'unit', 'status', 'tenant', 'opened_at')
-    list_filter = ('status', 'tenant')
+    list_filter = ('status', 'is_comeback', 'tenant')
     inlines = [ServiceOrderLaborLineInline, ServiceOrderPartLineInline, AttachmentInline]
 
 
