@@ -3,11 +3,11 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Providers } from "@/components/providers"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], display: "swap" })
 
 export const metadata: Metadata = {
-  title: "BodyShopper - Truck Repair Shop Management",
-  description: "Heavy-duty truck repair shop SaaS",
+  title: "BodyShopper - Run your shop like software",
+  description: "SaaS for trucking service centers. Manage repair orders, track technician time, handle parts inventory, and run your shop efficiently.",
 }
 
 export default function RootLayout({

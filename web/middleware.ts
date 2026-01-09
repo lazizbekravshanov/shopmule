@@ -23,6 +23,11 @@ export const config = {
     "/technicians/:path*",
     "/time-clock/:path*",
     "/invoices/:path*",
-    "/api/:path*",
+    "/api/customers/:path*",
+    "/api/vehicles/:path*",
+    "/api/repair-orders/:path*",
+    "/api/attendance/:path*",
+    "/api/time-entries/:path*",
+    "/api/invoices/:path*",
   ],
 }
