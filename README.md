@@ -1,18 +1,168 @@
-# BodyShopper - Heavy-Duty Truck Repair Shop SaaS (MVP)
+# BodyShopper - Heavy-Duty Truck Repair Shop SaaS
 
-## Stack
+## Overview
+
+BodyShopper is a multi-tenant SaaS application for managing heavy-duty truck repair shop operations, including repair orders, technician time tracking, parts inventory, billing, and performance dashboards.
+
+## ⚠️ Migration Status
+
+This repository contains:
+- **Legacy Django app** (root directory) - Original implementation
+- **New Next.js app** (`/web` directory) - Modernized implementation
+
+See [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) for detailed migration information.
+
+---
+
+## 🚀 New Next.js App (Recommended)
+
+### Stack
+- **Frontend/Backend**: Next.js 14+ (App Router) with TypeScript
+- **Database**: PostgreSQL with Prisma ORM
+- **Auth**: NextAuth.js with credentials (email/password)
+- **UI**: shadcn/ui + Tailwind CSS
+- **Validation**: Zod
+- **Forms**: React Hook Form
+
+### Quick Start
+
+1. **Navigate to web directory:**
+   ```bash
+   cd web
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment:**
+   ```bash
+   cp .env.example .env
+   # Edit .env if needed (DATABASE_URL, NEXTAUTH_SECRET)
+   ```
+
+4. **Start PostgreSQL with Docker:**
+   ```bash
+   docker compose up -d db
+   ```
+   Or use the full stack:
+   ```bash
+   docker compose up -d
+   ```
+
+5. **Run database migrations:**
+   ```bash
+   npm run db:migrate
+   ```
+
+6. **Seed the database:**
+   ```bash
+   npm run db:seed
+   ```
+
+7. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+8. **Access the application:**
+   - Web app: http://localhost:3000
+   - Login with: `admin@example.com` / `admin123`
+
+### Default Users (from seed)
+- **Admin**: `admin@example.com` / `admin123` (Role: ADMIN)
+- **Service Writer**: `writer@example.com` / `writer123` (Role: MANAGER)
+- **Technician**: `tech@example.com` / `tech123` (Role: TECH)
+
+### Available Routes
+
+- `/login` - Login page
+- `/dashboard` - Main dashboard with stats
+- `/repair-orders` - List all repair orders
+- `/repair-orders/new` - Create new repair order
+- `/repair-orders/[id]` - View repair order details
+- `/technicians` - View technicians and their status
+- `/time-clock` - Clock in/out and track time on repair orders
+- `/invoices` - View invoices and payment status
+- `/tv?token=<TOKEN>` - TV dashboard/leaderboard (full-screen mode)
+
+### Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run db:migrate` - Run Prisma migrations
+- `npm run db:seed` - Seed database with demo data
+- `npm run db:studio` - Open Prisma Studio (database GUI)
+- `npm run db:generate` - Generate Prisma client
+
+### Features
+
+✅ **Authentication & RBAC**
+- NextAuth with credentials provider
+- Roles: ADMIN, MANAGER, TECH, VIEWER
+- Protected routes with middleware
+
+✅ **Repair Orders**
+- Create, view, and manage repair orders
+- Status workflow: DRAFT → AWAITING_APPROVAL → APPROVED → IN_PROGRESS → READY_TO_INVOICE → INVOICED → CLOSED
+- Labor lines and parts lines
+- Time tracking per repair order
+
+✅ **Time Tracking**
+- Shift punches (clock in/out)
+- Time entries linked to repair orders
+- Real-time duration tracking
+- Today's summary view
+
+✅ **Technicians**
+- View all technicians
+- See who's clocked in
+- Track active time entries
+
+✅ **Invoices**
+- Invoice generation from repair orders
+- Payment tracking
+- Status: UNPAID, PARTIALLY_PAID, PAID
+
+✅ **TV Dashboard**
+- Full-screen leaderboard
+- Technician performance metrics
+- Active orders
+- Real-time auto-refresh
+
+### Database Schema
+
+The Prisma schema is located at `web/prisma/schema.prisma`. Key models:
+- `Shop` - Multi-tenant shop/tenant
+- `User` - Users with roles
+- `Customer` - Customers
+- `Vehicle` - Customer vehicles
+- `RepairOrder` - Repair/service orders
+- `LaborLine`, `PartLine` - Order line items
+- `TimeEntry`, `ShiftPunch` - Time tracking
+- `Invoice`, `Payment` - Billing
+- `Part` - Parts inventory
+
+---
+
+## 🐍 Legacy Django App (Deprecated)
+
+> **Note**: The Django app is preserved for reference but the Next.js app is the active development target.
+
+### Stack
 - Python 3.12, Django 5.x, DRF
 - PostgreSQL
 - Redis + Celery
 - JWT auth (SimpleJWT)
-- Django Admin + Django templates (Portal + TV Dashboard)
+- Django Admin + Django templates
 
-## Quick Start
+### Quick Start (Legacy)
+
 ```bash
-cd /path/to/bodyshopper
 cp .env.example .env
-# Optional: set OPENAI_API_KEY in .env
-
 docker compose up --build
 ```
 
@@ -22,59 +172,108 @@ docker compose exec web python manage.py migrate
 docker compose exec web python manage.py seed_demo
 ```
 
-> Troubleshooting:
-> - If you see `cp: .env.example: No such file or directory`, make sure you're in the repo root first (`cd /path/to/bodyshopper`).
-> - If you see `no configuration file provided: not found`, run `docker compose -f docker-compose.yml up --build` from the repo root.
+Admin: http://localhost:8000/admin/ (admin/admin123)
 
-Admin:
-- URL: http://localhost:8000/admin/
-- Username: admin
-- Password: admin123
+---
 
-## API Auth
+## 📋 Migration Guide
+
+See [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) for:
+- Model mappings (Django → Prisma)
+- Route mappings
+- Data migration strategy
+- Testing plan
+
+---
+
+## 🛠️ Development
+
+### Prisma Commands
+
 ```bash
-curl -X POST http://localhost:8000/api/token/ \
-  -H "Content-Type: application/json" \
-  -d '{"username":"service_writer","password":"writer123"}'
+# Generate Prisma client
+npm run db:generate
+
+# Create a new migration
+npm run db:migrate
+
+# Reset database (⚠️ deletes all data)
+npx prisma migrate reset
+
+# View database in browser
+npm run db:studio
 ```
 
-## Sample API Calls
+### Environment Variables
+
+Required in `.env`:
+- `DATABASE_URL` - PostgreSQL connection string
+- `NEXTAUTH_URL` - App URL (http://localhost:3000 for dev)
+- `NEXTAUTH_SECRET` - Random secret for NextAuth (generate with: `openssl rand -base64 32`)
+
+---
+
+## 📁 Project Structure
+
+```
+web/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes (Route Handlers)
+│   ├── dashboard/         # Dashboard pages
+│   ├── repair-orders/     # Repair order pages
+│   ├── technicians/       # Technician pages
+│   ├── time-clock/        # Time clock page
+│   ├── invoices/          # Invoice pages
+│   └── tv/                # TV dashboard
+├── components/            # React components
+│   └── ui/               # shadcn/ui components
+├── lib/                   # Utilities
+│   ├── auth.ts           # NextAuth configuration
+│   ├── db.ts             # Prisma client
+│   └── rbac.ts           # RBAC helpers
+├── prisma/                # Prisma schema and migrations
+│   ├── schema.prisma     # Database schema
+│   └── seed.ts           # Seed script
+└── types/                 # TypeScript types
+```
+
+---
+
+## 🐳 Docker
+
+### Development
 ```bash
-# List customers
-curl -H "Authorization: Bearer <ACCESS>" http://localhost:8000/api/customers/
-
-# Clock in
-curl -X POST -H "Authorization: Bearer <ACCESS>" http://localhost:8000/api/attendance/clock-in
-
-# Start time entry
-curl -X POST -H "Authorization: Bearer <ACCESS>" \
-  -H "Content-Type: application/json" \
-  -d '{"service_order": 1, "notes":"Diagnosing"}' \
-  http://localhost:8000/api/time-entries/start
-
-# AI cleanup notes
-curl -X POST -H "Authorization: Bearer <ACCESS>" \
-  -H "Content-Type: application/json" \
-  -d '{"text":"Customer says truck pulls right. Loud grinding."}' \
-  http://localhost:8000/api/ai/artifacts/service-orders/1/cleanup-notes/
-
-# TV dashboard
-curl "http://localhost:8000/api/tv/dashboard?token=<TOKEN>&range=today"
+cd web
+docker compose up
 ```
 
-## Customer Portal
-Estimate approval link is printed to the console when you use the Django Admin action "Send estimate link" on an Estimate.
-
-## TV Dashboard
-Create a `TenantDisplayToken` in Django Admin and run the "Rotate tokens" action to generate a token.
-Visit:
-```
-http://localhost:8000/tv/dashboard/?token=<TOKEN>
+### Production
+Update `docker-compose.yml` with production environment variables and use:
+```bash
+docker compose -f docker-compose.yml up --build
 ```
 
-## Multi-tenancy
-All tenant-scoped models include `tenant` and are filtered via `TenantScopedViewSet`.
+---
 
-## Dev Notes
-- OpenAI API key is required for AI endpoints.
-- Media uploads stored in `MEDIA_ROOT` (local filesystem).
+## 📝 Notes
+
+- All tenant-scoped models include `shopId` and are filtered by the user's shop
+- Role-based access control (RBAC) is enforced via middleware and server-side helpers
+- The TV dashboard uses token-based authentication (no login required)
+- File attachments are stored locally (can be migrated to S3 later)
+
+---
+
+## 🤝 Contributing
+
+1. Follow the coding style in existing files
+2. Use TypeScript strict mode
+3. Validate all inputs with Zod
+4. Test your changes locally before committing
+5. Update this README if adding new features
+
+---
+
+## 📄 License
+
+[Your License Here]
