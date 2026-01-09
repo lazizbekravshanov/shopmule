@@ -63,44 +63,48 @@ export function PricingSection() {
 
   return (
     <>
-      <section id="pricing" className="py-32 border-t border-gray-200">
+      <section id="pricing" className="py-32 border-t border-gray-100">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="text-center mb-20"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-4 tracking-tight">
             Simple, transparent pricing
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-xl mx-auto font-light">
             Choose the plan that fits your shop.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {tiers.map((tier, index) => (
             <motion.div
               key={tier.name}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              transition={{ duration: 0.5, delay: index * 0.05, ease: "easeOut" }}
             >
-              <Card className={`border-gray-200 h-full relative ${tier.popular ? 'border-2 border-gray-900 shadow-lg' : ''}`}>
+              <Card className={`border-gray-200 h-full relative bg-white ${
+                tier.popular 
+                  ? 'border-gray-300 shadow-sm' 
+                  : 'hover:border-gray-300 hover:shadow-sm transition-all duration-200'
+              }`}>
                 {tier.popular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gray-900 text-white">
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gray-900 text-white border-0 text-xs font-medium">
                     Most popular
                   </Badge>
                 )}
                 <CardHeader>
-                  <CardTitle className="text-2xl">{tier.name}</CardTitle>
-                  <CardDescription className="mt-2">{tier.description}</CardDescription>
+                  <CardTitle className="text-xl font-semibold">{tier.name}</CardTitle>
+                  <CardDescription className="mt-2 font-light">{tier.description}</CardDescription>
                   <div className="mt-6">
-                    <span className="text-4xl font-bold text-gray-900">{tier.price}</span>
+                    <span className="text-4xl font-semibold text-gray-900">{tier.price}</span>
                     {tier.period && (
-                      <span className="text-gray-600 ml-1">{tier.period}</span>
+                      <span className="text-gray-600 ml-1 text-base font-light">{tier.period}</span>
                     )}
                   </div>
                 </CardHeader>
@@ -108,13 +112,17 @@ export function PricingSection() {
                   <ul className="space-y-4 mb-8">
                     {tier.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-gray-900 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700">{feature}</span>
+                        <Check className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700 leading-relaxed font-light">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   <Button
-                    className="w-full"
+                    className={`w-full h-12 font-medium ${
+                      tier.popular 
+                        ? 'bg-gray-900 hover:bg-gray-800 text-white' 
+                        : ''
+                    }`}
                     variant={tier.popular ? "default" : "outline"}
                     size="lg"
                     onClick={() => {

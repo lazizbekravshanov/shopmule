@@ -8,32 +8,32 @@ const features = [
   {
     icon: FileText,
     title: "Repair orders",
-    description: "Streamlined workflow from draft to completion with detailed notes and history tracking.",
+    description: "Complete workflow from draft to completion with full history.",
   },
   {
     icon: Clock,
     title: "Time clock",
-    description: "Accurate shift tracking and per-job time entries for technicians.",
+    description: "Accurate shift and per-job time tracking for all technicians.",
   },
   {
     icon: Grid3x3,
     title: "Bay scheduling",
-    description: "Assign repair orders to bays and technicians with real-time visibility.",
+    description: "Assign work to bays and technicians with real-time visibility.",
   },
   {
     icon: Package,
     title: "Parts & inventory",
-    description: "Track inventory levels, manage parts, and link them to repair orders automatically.",
+    description: "Track inventory levels and link parts to repair orders automatically.",
   },
   {
     icon: Receipt,
     title: "Invoices",
-    description: "Generate invoices from repair orders and track payments seamlessly.",
+    description: "Generate invoices from repair orders and track all payments.",
   },
   {
     icon: Tv,
     title: "Performance TV",
-    description: "Shop floor leaderboard showing real-time technician performance and metrics.",
+    description: "Real-time shop floor leaderboard showing technician metrics.",
   },
 ]
 
@@ -44,14 +44,14 @@ export function FeatureGrid() {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="text-center mb-16"
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="text-center mb-20"
       >
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-4 tracking-tight">
           Everything your shop needs
         </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Built specifically for trucking service centers.
+        <p className="text-lg text-gray-600 max-w-xl mx-auto font-light">
+          Purpose-built for trucking service centers.
         </p>
       </motion.div>
 
@@ -64,15 +64,15 @@ export function FeatureGrid() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              transition={{ duration: 0.5, delay: index * 0.05, ease: "easeOut" }}
             >
-              <Card className="border-gray-200 h-full hover:shadow-md transition-shadow">
+              <Card className="border-gray-200 h-full hover:border-gray-300 hover:shadow-sm transition-all duration-200 bg-white">
                 <CardHeader>
-                  <div className="w-10 h-10 rounded-lg border border-gray-200 flex items-center justify-center mb-4 bg-gray-50">
-                    <Icon className="w-5 h-5 text-gray-900" />
+                  <div className="w-10 h-10 rounded-lg border border-gray-200 flex items-center justify-center mb-4 bg-gray-50/50">
+                    <Icon className="w-5 h-5 text-gray-700" />
                   </div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
-                  <CardDescription className="text-gray-600">
+                  <CardTitle className="text-lg font-semibold text-gray-900">{feature.title}</CardTitle>
+                  <CardDescription className="text-gray-600 leading-relaxed font-light">
                     {feature.description}
                   </CardDescription>
                 </CardHeader>
