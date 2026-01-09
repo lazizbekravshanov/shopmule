@@ -32,18 +32,18 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section id="faq" className="py-32 border-t border-gray-200">
+    <section id="faq" className="py-32 border-t border-gray-100">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="text-center mb-16"
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="text-center mb-20"
       >
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-4 tracking-tight">
           Frequently asked questions
         </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-600 max-w-xl mx-auto font-light">
           Everything you need to know about BodyShopper.
         </p>
       </motion.div>
@@ -52,16 +52,16 @@ export function FAQSection() {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.6, delay: 0.2 }}
+        transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
         className="max-w-3xl mx-auto"
       >
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, index) => (
             <AccordionItem key={index} value={`item-${index}`} className="border-gray-200">
-              <AccordionTrigger className="text-left text-gray-900 hover:no-underline">
+              <AccordionTrigger className="text-left text-gray-900 hover:no-underline font-medium">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-gray-600 leading-relaxed">
+              <AccordionContent className="text-gray-600 leading-relaxed font-light">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>
