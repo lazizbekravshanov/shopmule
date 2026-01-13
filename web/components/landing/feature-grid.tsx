@@ -1,7 +1,6 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, Clock, Grid3x3, Package, Receipt, Tv } from "lucide-react"
 
 const features = [
@@ -44,18 +43,15 @@ export function FeatureGrid() {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="text-center mb-20"
       >
-        <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-4 tracking-tight">
-          Everything your shop needs
+        <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-5 tracking-tight">
+          Features
         </h2>
-        <p className="text-lg text-gray-600 max-w-xl mx-auto font-light">
-          Purpose-built for trucking service centers.
-        </p>
       </motion.div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {features.map((feature, index) => {
           const Icon = feature.icon
           return (
@@ -64,19 +60,18 @@ export function FeatureGrid() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.05, ease: "easeOut" }}
+              transition={{ duration: 0.5, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+              className="flex gap-4"
             >
-              <Card className="border-gray-200 h-full hover:border-gray-300 hover:shadow-sm transition-all duration-200 bg-white">
-                <CardHeader>
-                  <div className="w-10 h-10 rounded-lg border border-gray-200 flex items-center justify-center mb-4 bg-gray-50/50">
-                    <Icon className="w-5 h-5 text-gray-700" />
-                  </div>
-                  <CardTitle className="text-lg font-semibold text-gray-900">{feature.title}</CardTitle>
-                  <CardDescription className="text-gray-600 leading-relaxed font-light">
-                    {feature.description}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+              <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
+                <Icon className="w-5 h-5 text-gray-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed font-light text-sm">
+                  {feature.description}
+                </p>
+              </div>
             </motion.div>
           )
         })}
