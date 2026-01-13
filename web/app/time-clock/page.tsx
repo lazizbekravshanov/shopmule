@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { BackButton } from "@/components/dashboard/back-button"
 
 interface ShiftPunch {
   id: string
@@ -149,9 +150,12 @@ export default function TimeClockPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Time Clock</h1>
-        <p className="text-gray-600 mt-1">Clock in/out and track time on repair orders</p>
+      <div className="flex items-center space-x-4">
+        <BackButton href="/dashboard" />
+        <div>
+          <h1 className="text-3xl font-bold">Time Clock</h1>
+          <p className="text-gray-600 mt-1">Clock in/out and track time on repair orders</p>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

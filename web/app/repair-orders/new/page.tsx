@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { BackButton } from "@/components/dashboard/back-button"
 
 export default function NewRepairOrderPage() {
   const router = useRouter()
@@ -57,9 +58,12 @@ export default function NewRepairOrderPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">New Repair Order</h1>
-        <p className="text-gray-600 mt-1">Create a new repair order</p>
+      <div className="flex items-center space-x-4">
+        <BackButton href="/repair-orders" />
+        <div>
+          <h1 className="text-3xl font-bold">New Repair Order</h1>
+          <p className="text-gray-600 mt-1">Create a new repair order</p>
+        </div>
       </div>
 
       <Card>

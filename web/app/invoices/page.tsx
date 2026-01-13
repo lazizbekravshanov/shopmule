@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { BackButton } from "@/components/dashboard/back-button"
 
 export default async function InvoicesPage() {
   const session = await requireAuth()
@@ -25,9 +26,12 @@ export default async function InvoicesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Invoices</h1>
-        <p className="text-gray-600 mt-1">View and manage invoices</p>
+      <div className="flex items-center space-x-4">
+        <BackButton href="/dashboard" />
+        <div>
+          <h1 className="text-3xl font-bold">Invoices</h1>
+          <p className="text-gray-600 mt-1">View and manage invoices</p>
+        </div>
       </div>
 
       <Card>
