@@ -37,28 +37,25 @@ export function FAQSection() {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="text-center mb-20"
       >
-        <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-4 tracking-tight">
-          Frequently asked questions
+        <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-5 tracking-tight">
+          FAQ
         </h2>
-        <p className="text-lg text-gray-600 max-w-xl mx-auto font-light">
-          Everything you need to know about BodyShopper.
-        </p>
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+        transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         className="max-w-3xl mx-auto"
       >
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`item-${index}`} className="border-gray-200">
-              <AccordionTrigger className="text-left text-gray-900 hover:no-underline font-medium">
+            <AccordionItem key={index} value={`item-${index}`} className="border-gray-100">
+              <AccordionTrigger className="text-left text-gray-900 hover:no-underline font-light text-lg">
                 {faq.question}
               </AccordionTrigger>
               <AccordionContent className="text-gray-600 leading-relaxed font-light">

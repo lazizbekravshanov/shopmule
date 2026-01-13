@@ -135,3 +135,16 @@ OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Session configuration for proper logout
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = os.environ.get('DJANGO_DEBUG', '1') != '1'  # True in production
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_SAVE_EVERY_REQUEST = False
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# CSRF cookie settings
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = os.environ.get('DJANGO_DEBUG', '1') != '1'  # True in production
+CSRF_COOKIE_SAMESITE = 'Lax'

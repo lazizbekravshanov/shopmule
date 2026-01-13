@@ -27,33 +27,27 @@ export function HowItWorks() {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="text-center mb-20"
       >
-        <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-4 tracking-tight">
+        <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-5 tracking-tight">
           How it works
         </h2>
-        <p className="text-lg text-gray-600 max-w-xl mx-auto font-light">
-          Simple. Fast. Effective.
-        </p>
       </motion.div>
 
-      <div className="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="grid md:grid-cols-3 gap-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {steps.map((step, index) => (
           <motion.div
             key={step.number}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
-            className="text-center"
+            transition={{ duration: 0.5, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="relative inline-flex items-center justify-center mb-6">
-              <span className="text-5xl font-semibold text-gray-200 tracking-tight">
-                {step.number}
-              </span>
+            <div className="text-4xl font-light text-gray-300 mb-6 tracking-tight">
+              {step.number}
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+            <h3 className="text-xl font-medium text-gray-900 mb-3">
               {step.title}
             </h3>
             <p className="text-gray-600 leading-relaxed font-light">
