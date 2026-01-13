@@ -9,6 +9,21 @@ import { RequestDemoModal } from "./request-demo-modal"
 export function LandingHero() {
   const [demoOpen, setDemoOpen] = useState(false)
 
+  const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault()
+    const element = document.querySelector(href)
+    if (element) {
+      const offset = 80
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+      const offsetPosition = elementPosition - offset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+    }
+  }
+
   return (
     <>
       <section className="relative pt-32 pb-40 px-4 sm:px-6 lg:px-8">
@@ -42,14 +57,13 @@ export function LandingHero() {
             >
               Request demo
             </Button>
-            <Button 
-              size="lg" 
-              variant="ghost" 
-              asChild
-              className="text-base px-10 h-14 font-medium"
+            <a 
+              href="#features"
+              onClick={(e) => handleAnchorClick(e, '#features')}
+              className="inline-flex items-center justify-center text-base px-10 h-14 font-medium text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
             >
-              <Link href="#features">See features</Link>
-            </Button>
+              See features
+            </a>
           </motion.div>
         </div>
       </section>
