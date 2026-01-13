@@ -8,6 +8,21 @@ import { RequestDemoModal } from "./request-demo-modal"
 export function LandingNav() {
   const [demoOpen, setDemoOpen] = useState(false)
 
+  const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault()
+    const element = document.querySelector(href)
+    if (element) {
+      const offset = 80 // Account for sticky navbar height
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+      const offsetPosition = elementPosition - offset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+    }
+  }
+
   return (
     <>
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-200/60">
@@ -18,15 +33,27 @@ export function LandingNav() {
             </Link>
             
             <div className="hidden md:flex items-center gap-10">
-              <Link href="#features" className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-light">
+              <a 
+                href="#features" 
+                onClick={(e) => handleAnchorClick(e, '#features')}
+                className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-light cursor-pointer"
+              >
                 Features
-              </Link>
-              <Link href="#pricing" className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-light">
+              </a>
+              <a 
+                href="#pricing" 
+                onClick={(e) => handleAnchorClick(e, '#pricing')}
+                className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-light cursor-pointer"
+              >
                 Pricing
-              </Link>
-              <Link href="#faq" className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-light">
+              </a>
+              <a 
+                href="#faq" 
+                onClick={(e) => handleAnchorClick(e, '#faq')}
+                className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-light cursor-pointer"
+              >
                 FAQ
-              </Link>
+              </a>
             </div>
 
             <div className="flex items-center gap-3">

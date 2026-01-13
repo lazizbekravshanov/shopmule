@@ -8,6 +8,21 @@ import { RequestDemoModal } from "./request-demo-modal"
 export function FinalCTA() {
   const [demoOpen, setDemoOpen] = useState(false)
 
+  const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault()
+    const element = document.querySelector(href)
+    if (element) {
+      const offset = 80
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+      const offsetPosition = elementPosition - offset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+    }
+  }
+
   return (
     <>
       <section className="py-32 border-t border-gray-100">
