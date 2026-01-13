@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { BackButton } from "@/components/dashboard/back-button"
 
 export default async function RepairOrderDetailPage({
   params,
@@ -39,13 +40,13 @@ export default async function RepairOrderDetailPage({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Repair Order RO-{repairOrder.id.slice(0, 8)}</h1>
-          <p className="text-gray-600 mt-1">{repairOrder.customer.name}</p>
+        <div className="flex items-center space-x-4">
+          <BackButton href="/repair-orders" />
+          <div>
+            <h1 className="text-3xl font-bold">Repair Order RO-{repairOrder.id.slice(0, 8)}</h1>
+            <p className="text-gray-600 mt-1">{repairOrder.customer.name}</p>
+          </div>
         </div>
-        <Link href="/repair-orders">
-          <Button variant="outline">Back to List</Button>
-        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

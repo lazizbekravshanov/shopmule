@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { BackButton } from "@/components/dashboard/back-button"
 
 export default async function RepairOrdersPage() {
   const session = await requireAuth()
@@ -21,10 +22,13 @@ export default async function RepairOrdersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Repair Orders</h1>
-          <p className="text-gray-600 mt-1">Manage repair orders</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <BackButton href="/dashboard" />
+          <div>
+            <h1 className="text-3xl font-bold">Repair Orders</h1>
+            <p className="text-gray-600 mt-1">Manage repair orders</p>
+          </div>
         </div>
         <Link href="/repair-orders/new">
           <Button>New Repair Order</Button>

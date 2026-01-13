@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Role } from "@prisma/client"
+import { BackButton } from "@/components/dashboard/back-button"
 
 export default async function TechniciansPage() {
   const session = await requireAuth()
@@ -31,9 +32,12 @@ export default async function TechniciansPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Technicians</h1>
-        <p className="text-gray-600 mt-1">View technician status and activity</p>
+      <div className="flex items-center space-x-4">
+        <BackButton href="/dashboard" />
+        <div>
+          <h1 className="text-3xl font-bold">Technicians</h1>
+          <p className="text-gray-600 mt-1">View technician status and activity</p>
+        </div>
       </div>
 
       <Card>

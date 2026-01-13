@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { BackButton } from "@/components/dashboard/back-button"
 
 export default async function InvoiceDetailPage({
   params,
@@ -47,14 +48,12 @@ export default async function InvoiceDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center space-x-4">
+        <BackButton href="/invoices" />
         <div>
           <h1 className="text-3xl font-bold">Invoice INV-{invoice.id.slice(0, 8)}</h1>
           <p className="text-gray-600 mt-1">{invoice.repairOrder.customer.name}</p>
         </div>
-        <Link href="/invoices">
-          <Button variant="outline">Back to List</Button>
-        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
