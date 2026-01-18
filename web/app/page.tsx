@@ -12,6 +12,7 @@ import { HowItWorks } from "@/components/landing/how-it-works"
 import { PricingSection } from "@/components/landing/pricing"
 import { FAQSection } from "@/components/landing/faq"
 import { FinalCTA } from "@/components/landing/final-cta"
+import { StatusSection } from "@/components/status"
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
@@ -44,6 +45,9 @@ export default async function LandingPage() {
           <FAQSection />
         </div>
         <FinalCTA />
+
+        {/* Platform Status Section */}
+        <StatusSection />
 
         {/* Footer */}
         <footer className="border-t border-gray-100 py-16">

@@ -1,43 +1,84 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { RepairOrderStatus } from "@prisma/client"
 import { z } from "zod"
+import { getAuthSession, isValidUUID, sanitizeInput } from "@/lib/security"
+import {
+  successResponse,
+  unauthorizedResponse,
+  handleApiError,
+  errorResponse,
+} from "@/lib/api/response"
 
 const createRepairOrderSchema = z.object({
-  customerId: z.string(),
+  customerId: z.string().min(1, "Customer ID is required"),
   vehicleId: z.string().optional(),
-  internalNotes: z.string().optional(),
-  customerNotes: z.string().optional(),
+  internalNotes: z.string().max(5000, "Notes too long").optional(),
+  customerNotes: z.string().max(5000, "Notes too long").optional(),
 })
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions)
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
   try {
+    const session = await getAuthSession()
+    if (!session) {
+      return unauthorizedResponse()
+    }
+
     const body = await request.json()
     const data = createRepairOrderSchema.parse(body)
+
+    // Validate UUIDs
+    if (!isValidUUID(data.customerId)) {
+      return errorResponse("Invalid customer ID format", 400, "INVALID_ID")
+    }
+
+    if (data.vehicleId && !isValidUUID(data.vehicleId)) {
+      return errorResponse("Invalid vehicle ID format", 400, "INVALID_ID")
+    }
+
+    // Verify customer belongs to shop
+    const customer = await prisma.customer.findFirst({
+      where: {
+        id: data.customerId,
+        shopId: session.user.shopId,
+      },
+    })
+
+    if (!customer) {
+      return errorResponse("Customer not found", 404, "NOT_FOUND")
+    }
+
+    // Verify vehicle if provided
+    if (data.vehicleId) {
+      const vehicle = await prisma.vehicle.findFirst({
+        where: {
+          id: data.vehicleId,
+          shopId: session.user.shopId,
+          customerId: data.customerId,
+        },
+      })
+
+      if (!vehicle) {
+        return errorResponse("Vehicle not found", 404, "NOT_FOUND")
+      }
+    }
 
     const repairOrder = await prisma.repairOrder.create({
       data: {
         shopId: session.user.shopId,
         customerId: data.customerId,
         vehicleId: data.vehicleId || null,
-        internalNotes: data.internalNotes || null,
-        customerNotes: data.customerNotes || null,
+        internalNotes: data.internalNotes ? sanitizeInput(data.internalNotes) : null,
+        customerNotes: data.customerNotes ? sanitizeInput(data.customerNotes) : null,
         status: RepairOrderStatus.DRAFT,
+      },
+      include: {
+        customer: true,
+        vehicle: true,
       },
     })
 
-    return NextResponse.json(repairOrder)
+    return successResponse(repairOrder, 201)
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 })
-    }
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return handleApiError(error)
   }
 }
