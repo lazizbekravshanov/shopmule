@@ -1,33 +1,15 @@
-import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export default withAuth(
-  function middleware(req) {
-    // Add shopId to headers for downstream use
-    return NextResponse.next()
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-    pages: {
-      signIn: "/login",
-    },
-  }
-)
+// Simple middleware - auth is handled client-side with localStorage token
+// Protected routes will redirect to login if no token is found (handled in layout)
+export function middleware(request: NextRequest) {
+  return NextResponse.next()
+}
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/repair-orders/:path*",
-    "/technicians/:path*",
-    "/time-clock/:path*",
-    "/invoices/:path*",
-    "/api/customers/:path*",
-    "/api/vehicles/:path*",
-    "/api/repair-orders/:path*",
-    "/api/attendance/:path*",
-    "/api/time-entries/:path*",
-    "/api/invoices/:path*",
+    // Skip static files and api routes
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 }
