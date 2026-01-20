@@ -50,4 +50,50 @@ function DashboardSkeleton() {
   );
 }
 
-export { Skeleton, DashboardSkeleton };
+function TableSkeleton() {
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-10 w-32" />
+      </div>
+
+      {/* Table Header */}
+      <div className="rounded-lg border">
+        <div className="border-b bg-muted/50 p-4">
+          <div className="flex gap-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-4 flex-1" />
+            ))}
+          </div>
+        </div>
+
+        {/* Table Rows */}
+        <div className="divide-y">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <div key={i} className="p-4">
+              <div className="flex gap-4">
+                {[1, 2, 3, 4, 5].map((j) => (
+                  <Skeleton key={j} className="h-5 flex-1" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-4 w-32" />
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-8" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export { Skeleton, DashboardSkeleton, TableSkeleton };
