@@ -9,6 +9,7 @@ import {
   HowItWorks,
   PricingSection,
   Testimonials,
+  StatusSection,
   FinalCTA,
   Footer,
 } from '@/components/landing';
@@ -25,6 +26,7 @@ export default function LandingPage() {
         <HowItWorks />
         <Testimonials />
         <PricingSection />
+        <StatusSection />
         <FinalCTA />
       </main>
       <Footer />

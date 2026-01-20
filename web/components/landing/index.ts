@@ -8,3 +8,4 @@ export { PricingSection } from './pricing';
 export { Testimonials } from './testimonials';
 export { FinalCTA } from './final-cta';
 export { Footer } from './footer';
+export { StatusSection } from '@/components/status/status-section';

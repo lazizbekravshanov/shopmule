@@ -1,34 +1,52 @@
 import type { PlatformStatus, DayStatus, StatusLevel } from "./types"
 
+// Fixed reference date to prevent hydration mismatch
+const REFERENCE_DATE = new Date("2026-01-20T00:00:00.000Z")
+
+// Seeded random for consistent server/client rendering
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed) * 10000
+  return x - Math.floor(x)
+}
+
+// Hash string to number for seeding
+function hashString(str: string): number {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash
+  }
+  return Math.abs(hash)
+}
+
 function generateHistoricalData(days: number): DayStatus[] {
   const data: DayStatus[] = []
-  const today = new Date()
 
   for (let i = days - 1; i >= 0; i--) {
-    const date = new Date(today)
+    const date = new Date(REFERENCE_DATE)
     date.setDate(date.getDate() - i)
     const dateStr = date.toISOString().split("T")[0]
 
-    // Generate mostly operational days with occasional issues
-    const rand = Math.random()
+    // Use seeded random based on date string for consistency
+    const seed = hashString(dateStr)
+    const rand = seededRandom(seed)
+
     let status: StatusLevel = "operational"
     let uptimePercent = 100
     let incidents = 0
 
     if (rand > 0.95) {
-      // ~5% chance of degraded
       status = "degraded"
-      uptimePercent = 98 + Math.random() * 1.9
+      uptimePercent = 98 + seededRandom(seed + 1) * 1.9
       incidents = 1
     } else if (rand > 0.98) {
-      // ~2% chance of outage
       status = "outage"
-      uptimePercent = 95 + Math.random() * 3
+      uptimePercent = 95 + seededRandom(seed + 2) * 3
       incidents = 1
     } else if (rand > 0.92) {
-      // ~3% chance of maintenance
       status = "maintenance"
-      uptimePercent = 99 + Math.random() * 0.9
+      uptimePercent = 99 + seededRandom(seed + 3) * 0.9
       incidents = 0
     }
 
@@ -43,10 +61,16 @@ function generateHistoricalData(days: number): DayStatus[] {
   return data
 }
 
+// Pre-compute static incident dates
+const incident1Start = new Date(REFERENCE_DATE.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString()
+const incident1Resolved = new Date(REFERENCE_DATE.getTime() - 3 * 24 * 60 * 60 * 1000 + 45 * 60 * 1000).toISOString()
+const incident2Start = new Date(REFERENCE_DATE.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString()
+const incident2Resolved = new Date(REFERENCE_DATE.getTime() - 10 * 24 * 60 * 60 * 1000 + 120 * 60 * 1000).toISOString()
+
 export const mockPlatformStatus: PlatformStatus = {
   currentStatus: "operational",
   statusMessage: "All systems operational",
-  lastUpdated: new Date().toISOString(),
+  lastUpdated: REFERENCE_DATE.toISOString(),
   uptime: {
     last24Hours: 100,
     last7Days: 99.98,
@@ -69,8 +93,8 @@ export const mockPlatformStatus: PlatformStatus = {
       status: "resolved",
       severity: "minor",
       affectedComponents: ["api"],
-      startedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-      resolvedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000 + 45 * 60 * 1000).toISOString(),
+      startedAt: incident1Start,
+      resolvedAt: incident1Resolved,
       duration: 45,
     },
     {
@@ -80,8 +104,8 @@ export const mockPlatformStatus: PlatformStatus = {
       status: "resolved",
       severity: "minor",
       affectedComponents: ["db"],
-      startedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-      resolvedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000 + 120 * 60 * 1000).toISOString(),
+      startedAt: incident2Start,
+      resolvedAt: incident2Resolved,
       duration: 120,
     },
   ],
@@ -91,6 +115,6 @@ export const mockPlatformStatus: PlatformStatus = {
 export function getMockStatus(): PlatformStatus {
   return {
     ...mockPlatformStatus,
-    lastUpdated: new Date().toISOString(),
+    lastUpdated: REFERENCE_DATE.toISOString(),
   }
 }
