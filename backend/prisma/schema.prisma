@@ -1,0 +1,194 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  MECHANIC
+  FRONT_DESK
+}
+
+enum WorkOrderStatus {
+  DIAGNOSED
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+}
+
+model User {
+  id           String           @id @default(uuid())
+  email        String           @unique
+  passwordHash String
+  role         Role
+  employee     EmployeeProfile?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model EmployeeProfile {
+  id           String                @id @default(uuid())
+  name         String
+  role         Role
+  payRate      Float
+  status       String                @default("active")
+  userId       String                @unique
+  user         User                  @relation(fields: [userId], references: [id])
+  timeEntries  TimeEntry[]
+  assignments  WorkOrderAssignment[]
+  laborEntries WorkOrderLabor[]
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+}
+
+model Customer {
+  id             String    @id @default(uuid())
+  name           String
+  contactName    String?
+  phone          String?
+  email          String?
+  billingAddress String?
+  vehicles       Vehicle[]
+  invoices       Invoice[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Vehicle {
+  id           String      @id @default(uuid())
+  vin          String      @unique
+  unitNumber   String?
+  make         String
+  model        String
+  year         Int?
+  mileage      Int?
+  licensePlate String?
+  customerId   String
+  customer     Customer    @relation(fields: [customerId], references: [id])
+  workOrders   WorkOrder[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model WorkOrder {
+  id           String                @id @default(uuid())
+  vehicleId    String
+  vehicle      Vehicle               @relation(fields: [vehicleId], references: [id])
+  status       WorkOrderStatus       @default(DIAGNOSED)
+  description  String
+  checklist    String?
+  notes        String?
+  laborHours   Float                 @default(0)
+  partsTotal   Float                 @default(0)
+  laborRate    Float                 @default(125)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  assignments  WorkOrderAssignment[]
+  partsUsed    WorkOrderPart[]
+  laborEntries WorkOrderLabor[]
+  invoice      Invoice?
+}
+
+model WorkOrderAssignment {
+  id          String          @id @default(uuid())
+  workOrderId String
+  employeeId  String
+  assignedAt  DateTime        @default(now())
+  workOrder   WorkOrder       @relation(fields: [workOrderId], references: [id])
+  employee    EmployeeProfile @relation(fields: [employeeId], references: [id])
+}
+
+model WorkOrderPart {
+  id          String    @id @default(uuid())
+  workOrderId String
+  partId      String
+  quantity    Int
+  unitPrice   Float
+  markupPct   Float     @default(0.15)
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id])
+  part        Part      @relation(fields: [partId], references: [id])
+}
+
+model WorkOrderLabor {
+  id          String          @id @default(uuid())
+  workOrderId String
+  employeeId  String
+  hours       Float
+  rate        Float
+  note        String?
+  workOrder   WorkOrder       @relation(fields: [workOrderId], references: [id])
+  employee    EmployeeProfile @relation(fields: [employeeId], references: [id])
+}
+
+model Part {
+  id           String          @id @default(uuid())
+  sku          String          @unique
+  name         String
+  category     String?
+  cost         Float
+  price        Float
+  stock        Int             @default(0)
+  reorderPoint Int             @default(0)
+  vendorId     String?
+  vendor       Vendor?         @relation(fields: [vendorId], references: [id])
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  usedIn       WorkOrderPart[]
+}
+
+model Vendor {
+  id        String   @id @default(uuid())
+  name      String
+  contact   String?
+  phone     String?
+  email     String?
+  parts     Part[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invoice {
+  id            String        @id @default(uuid())
+  workOrderId   String        @unique
+  customerId    String
+  subtotalParts Float
+  subtotalLabor Float
+  tax           Float
+  discount      Float         @default(0)
+  total         Float
+  status        PaymentStatus @default(UNPAID)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  workOrder     WorkOrder     @relation(fields: [workOrderId], references: [id])
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  payments      Payment[]
+}
+
+model Payment {
+  id         String   @id @default(uuid())
+  invoiceId  String
+  method     String
+  amount     Float
+  receivedAt DateTime @default(now())
+  invoice    Invoice  @relation(fields: [invoiceId], references: [id])
+}
+
+model TimeEntry {
+  id         String          @id @default(uuid())
+  employeeId String
+  clockIn    DateTime
+  clockOut   DateTime?
+  jobId      String?
+  employee   EmployeeProfile @relation(fields: [employeeId], references: [id])
+}
