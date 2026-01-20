@@ -1,55 +1,63 @@
-"use client"
+'use client';
 
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
-import { RequestDemoModal } from "./request-demo-modal"
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { ArrowRight, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export function FinalCTA() {
-  const [demoOpen, setDemoOpen] = useState(false)
-
-  const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault()
-    const element = document.querySelector(href)
-    if (element) {
-      const offset = 80
-      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
-      const offsetPosition = elementPosition - offset
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      })
-    }
-  }
-
   return (
-    <>
-      <section className="py-32 border-t border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-6 tracking-tight">
-              Train your shop to win, every time
-            </h2>
-            <p className="text-xl text-gray-600 mb-10 max-w-xl mx-auto leading-relaxed font-light">
-              Practice where it's safe. Perform when it counts. Your shop's next breakthrough starts here.
-            </p>
-            <Button 
-              size="lg" 
-              onClick={() => setDemoOpen(true)}
-              className="text-base px-10 h-14 bg-gradient-to-r from-amber-400 to-orange-500 text-gray-900 hover:from-amber-500 hover:to-orange-600 border-0 font-medium"
+    <section className="py-24 bg-black relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-blue-500/20 to-transparent rounded-full blur-3xl" />
+
+      <div className="relative max-w-4xl mx-auto px-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 mb-8">
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span className="text-sm font-medium text-white/90">Join 500+ repair shops</span>
+          </div>
+
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+            Ready to modernize
+            <br />
+            your shop?
+          </h2>
+
+          <p className="text-xl text-white/70 mb-10 max-w-xl mx-auto">
+            Start your 14-day free trial today. No credit card required.
+            <br />
+            See the difference BodyShopper can make.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button
+              asChild
+              size="lg"
+              className="bg-white hover:bg-gray-100 text-black rounded-full h-14 px-8 text-base font-semibold transition-all hover:scale-105"
             >
-              Request demo
+              <Link href="/login">
+                Start Free Trial
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
             </Button>
-          </motion.div>
-        </div>
-      </section>
-      <RequestDemoModal open={demoOpen} onOpenChange={setDemoOpen} />
-    </>
-  )
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="rounded-full h-14 px-8 text-base font-semibold border-2 border-white/30 bg-transparent text-white hover:bg-white/10 transition-all"
+            >
+              <a href="mailto:sales@bodyshopper.com">Talk to Sales</a>
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
 }

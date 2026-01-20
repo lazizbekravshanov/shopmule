@@ -1,132 +1,195 @@
-"use client"
+'use client';
 
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Check } from "lucide-react"
-import { useState } from "react"
-import { RequestDemoModal } from "./request-demo-modal"
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { Check, Zap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const tiers = [
   {
-    name: "Starter",
-    price: "$99",
-    period: "/month",
-    description: "Perfect for small shops getting started.",
+    name: 'Starter',
+    description: 'For small shops getting started',
+    monthlyPrice: 49,
+    yearlyPrice: 39,
     features: [
-      "Up to 5 technicians",
-      "Unlimited repair orders",
-      "Time tracking",
-      "Basic reporting",
-      "Email support",
+      'Up to 3 technicians',
+      'Unlimited work orders',
+      'Basic invoicing',
+      'Time tracking',
+      'Email support',
     ],
-    cta: "Get started",
+    cta: 'Start Free Trial',
     popular: false,
   },
   {
-    name: "Pro",
-    price: "$249",
-    period: "/month",
-    description: "For growing shops that need more.",
+    name: 'Professional',
+    description: 'For growing shops that need more',
+    monthlyPrice: 99,
+    yearlyPrice: 79,
     features: [
-      "Up to 20 technicians",
-      "Everything in Starter",
-      "Advanced reporting",
-      "Performance TV mode",
-      "Priority support",
-      "Custom integrations",
+      'Up to 10 technicians',
+      'Everything in Starter',
+      'Digital inspections',
+      'Inventory management',
+      'Advanced reporting',
+      'Priority support',
     ],
-    cta: "Get started",
+    cta: 'Start Free Trial',
     popular: true,
   },
   {
-    name: "Scale",
-    price: "Custom",
-    period: "",
-    description: "For large operations with specific needs.",
+    name: 'Enterprise',
+    description: 'For multi-location operations',
+    monthlyPrice: 249,
+    yearlyPrice: 199,
     features: [
-      "Unlimited technicians",
-      "Everything in Pro",
-      "Dedicated support",
-      "Custom features",
-      "SLA guarantee",
-      "Training & onboarding",
+      'Unlimited technicians',
+      'Everything in Professional',
+      'Multi-location support',
+      'Custom integrations',
+      'Dedicated account manager',
+      'SLA guarantee',
     ],
-    cta: "Contact sales",
+    cta: 'Contact Sales',
     popular: false,
   },
-]
+];
 
 export function PricingSection() {
-  const [demoOpen, setDemoOpen] = useState(false)
+  const [isYearly, setIsYearly] = useState(false);
 
   return (
-    <>
-      <section id="pricing" className="py-32 border-t border-gray-100">
+    <section id="pricing" className="py-24 bg-gray-50">
+      <div className="max-w-6xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mb-20"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
         >
-          <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-5 tracking-tight">
-            Pricing
+          <p className="text-sm font-semibold text-blue-600 mb-3 uppercase tracking-wider">Pricing</p>
+          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+            Simple, transparent pricing
           </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+            No hidden fees. No surprises. Cancel anytime.
+          </p>
+
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center gap-4">
+            <span className={cn('text-sm font-medium', !isYearly ? 'text-gray-900' : 'text-gray-500')}>
+              Monthly
+            </span>
+            <button
+              onClick={() => setIsYearly(!isYearly)}
+              className={cn(
+                'relative w-14 h-7 rounded-full transition-colors',
+                isYearly ? 'bg-blue-600' : 'bg-gray-300'
+              )}
+            >
+              <motion.div
+                initial={false}
+                animate={{ x: isYearly ? 28 : 4 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                className="absolute top-1 w-5 h-5 bg-white rounded-full shadow"
+              />
+            </button>
+            <span className={cn('text-sm font-medium flex items-center gap-2', isYearly ? 'text-gray-900' : 'text-gray-500')}>
+              Yearly
+              <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                Save 20%
+              </span>
+            </span>
+          </div>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-3 gap-6">
           {tiers.map((tier, index) => (
             <motion.div
               key={tier.name}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className={cn(
+                'relative bg-white rounded-2xl p-8 border-2 transition-all hover:shadow-lg',
+                tier.popular ? 'border-blue-600 shadow-lg' : 'border-gray-200'
+              )}
             >
-              <Card className="border-gray-200 h-full bg-white">
-                <CardHeader>
-                  <CardTitle className="text-lg font-medium">{tier.name}</CardTitle>
-                  <CardDescription className="mt-2 font-light text-sm">{tier.description}</CardDescription>
-                  <div className="mt-6">
-                    <span className="text-4xl font-light text-gray-900 tracking-tight">{tier.price}</span>
-                    {tier.period && (
-                      <span className="text-gray-600 ml-1 text-base font-light">{tier.period}</span>
-                    )}
+              {tier.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <div className="flex items-center gap-1 bg-blue-600 text-white text-sm font-semibold px-4 py-1 rounded-full">
+                    <Zap className="w-3 h-3" />
+                    Most Popular
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-4 mb-8">
-                    {tier.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3">
-                        <Check className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700 leading-relaxed font-light text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    className={`w-full h-12 font-medium ${
-                      tier.popular 
-                        ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-gray-900 hover:from-amber-500 hover:to-orange-600 border-0' 
-                        : 'border-gray-300'
-                    }`}
-                    variant={tier.popular ? "default" : "outline"}
-                    size="lg"
-                    onClick={() => {
-                      if (tier.name === "Scale") {
-                        setDemoOpen(true)
-                      }
-                    }}
-                  >
-                    {tier.cta}
-                  </Button>
-                </CardContent>
-              </Card>
+                </div>
+              )}
+
+              <div className="mb-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{tier.name}</h3>
+                <p className="text-sm text-gray-500">{tier.description}</p>
+              </div>
+
+              <div className="mb-6">
+                <div className="flex items-baseline">
+                  <span className="text-5xl font-bold text-gray-900">
+                    ${isYearly ? tier.yearlyPrice : tier.monthlyPrice}
+                  </span>
+                  <span className="text-gray-500 ml-2">/month</span>
+                </div>
+                {isYearly && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Billed annually (${tier.yearlyPrice * 12}/year)
+                  </p>
+                )}
+              </div>
+
+              <ul className="space-y-4 mb-8">
+                {tier.features.map((feature) => (
+                  <li key={feature} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm text-gray-600">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Button
+                asChild
+                className={cn(
+                  'w-full h-12 font-semibold',
+                  tier.popular
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                )}
+              >
+                <Link href="/login">{tier.cta}</Link>
+              </Button>
             </motion.div>
           ))}
         </div>
-      </section>
-      <RequestDemoModal open={demoOpen} onOpenChange={setDemoOpen} />
-    </>
-  )
+
+        {/* FAQ Link */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="text-center mt-12 text-gray-500"
+        >
+          Have questions?{' '}
+          <a href="#faq" className="text-blue-600 font-medium hover:underline">
+            Check our FAQ
+          </a>{' '}
+          or{' '}
+          <a href="mailto:support@bodyshopper.com" className="text-blue-600 font-medium hover:underline">
+            contact us
+          </a>
+        </motion.p>
+      </div>
+    </section>
+  );
 }
