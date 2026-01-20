@@ -1,0 +1,423 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  TECH
+  VIEWER
+}
+
+enum RepairOrderStatus {
+  DRAFT
+  AWAITING_APPROVAL
+  APPROVED
+  IN_PROGRESS
+  READY_TO_INVOICE
+  INVOICED
+  CLOSED
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+}
+
+enum EstimateStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+enum PaymentMethod {
+  CARD
+  ACH
+  CASH
+  CHECK
+}
+
+enum ShiftPunchSource {
+  WEB
+  KIOSK
+}
+
+model Shop {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users      User[]
+  customers  Customer[]
+  vehicles   Vehicle[]
+  parts      Part[]
+  repairOrders RepairOrder[]
+  invoices   Invoice[]
+  payments   Payment[]
+  estimates  Estimate[]
+  shiftPunches ShiftPunch[]
+  timeEntries TimeEntry[]
+  auditLogs  AuditLog[]
+  displayTokens DisplayToken[]
+  inventoryAdjustments InventoryAdjustment[]
+  laborLines LaborLine[]
+  partLines PartLine[]
+  attachments Attachment[]
+
+  @@index([slug])
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String?
+  phone        String?
+  role         Role     @default(TECH)
+  shopId       String   @map("shop_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  shop             Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  laborLines       LaborLine[]
+  timeEntries      TimeEntry[]
+  shiftPunches     ShiftPunch[]
+  auditLogs        AuditLog[]
+  uploadedAttachments Attachment[]
+
+  @@index([shopId])
+  @@index([email])
+  @@map("users")
+}
+
+model Customer {
+  id          String   @id @default(cuid())
+  shopId      String   @map("shop_id")
+  name        String
+  phone       String?
+  email       String?
+  billingTerms String? @map("billing_terms") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  shop       Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  vehicles   Vehicle[]
+  repairOrders RepairOrder[]
+
+  @@index([shopId])
+  @@map("customers")
+}
+
+model Vehicle {
+  id           String   @id @default(cuid())
+  shopId       String   @map("shop_id")
+  customerId   String   @map("customer_id")
+  vin          String
+  make         String?
+  model        String?
+  year         Int?
+  plate        String?
+  odometer     Int?
+  engineHours  Int?     @map("engine_hours")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  shop         Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  repairOrders RepairOrder[]
+
+  @@index([shopId])
+  @@index([customerId])
+  @@index([vin])
+  @@map("vehicles")
+}
+
+model Part {
+  id           String   @id @default(cuid())
+  shopId       String   @map("shop_id")
+  sku          String
+  description  String   @db.Text
+  vendor       String?
+  cost         Decimal  @db.Decimal(10, 2)
+  price        Decimal  @db.Decimal(10, 2)
+  qtyOnHand    Int      @default(0) @map("qty_on_hand")
+  reorderPoint Int      @default(0) @map("reorder_point")
+  binLocation  String?  @map("bin_location")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  shop               Shop                 @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  partLines          PartLine[]
+  inventoryAdjustments InventoryAdjustment[]
+
+  @@unique([shopId, sku])
+  @@index([shopId])
+  @@map("parts")
+}
+
+model InventoryAdjustment {
+  id             String   @id @default(cuid())
+  shopId         String   @map("shop_id")
+  partId         String   @map("part_id")
+  quantityChange Int      @map("quantity_change")
+  reason         String
+  adjustedAt     DateTime @default(now()) @map("adjusted_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  part Part @relation(fields: [partId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([partId])
+  @@map("inventory_adjustments")
+}
+
+model RepairOrder {
+  id            String            @id @default(cuid())
+  shopId        String            @map("shop_id")
+  customerId    String            @map("customer_id")
+  vehicleId     String?           @map("vehicle_id")
+  status        RepairOrderStatus @default(DRAFT)
+  internalNotes String?           @map("internal_notes") @db.Text
+  customerNotes String?           @map("customer_notes") @db.Text
+  openedAt      DateTime          @default(now()) @map("opened_at")
+  closedAt      DateTime?         @map("closed_at")
+  inProgressAt  DateTime?         @map("in_progress_at")
+  isComeback    Boolean           @default(false) @map("is_comeback")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+
+  shop        Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  customer    Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  vehicle     Vehicle?      @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  laborLines  LaborLine[]
+  partLines   PartLine[]
+  attachments Attachment[]
+  timeEntries TimeEntry[]
+  estimate    Estimate?
+  invoice     Invoice?
+
+  @@index([shopId])
+  @@index([customerId])
+  @@index([vehicleId])
+  @@index([status])
+  @@map("repair_orders")
+}
+
+model LaborLine {
+  id           String   @id @default(cuid())
+  shopId       String   @map("shop_id")
+  repairOrderId String  @map("repair_order_id")
+  techId       String?  @map("tech_id")
+  hours        Decimal  @db.Decimal(6, 2)
+  rate         Decimal  @db.Decimal(8, 2)
+  description  String   @db.Text
+  billedHours  Decimal  @default(0) @map("billed_hours") @db.Decimal(6, 2)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  shop        Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: Cascade)
+  tech        User?       @relation(fields: [techId], references: [id], onDelete: SetNull)
+
+  @@index([shopId])
+  @@index([repairOrderId])
+  @@index([techId])
+  @@map("labor_lines")
+}
+
+model PartLine {
+  id           String   @id @default(cuid())
+  shopId       String   @map("shop_id")
+  repairOrderId String  @map("repair_order_id")
+  partId       String?  @map("part_id")
+  qty          Int      @default(1)
+  unitCost     Decimal  @map("unit_cost") @db.Decimal(10, 2)
+  unitPrice    Decimal  @map("unit_price") @db.Decimal(10, 2)
+  taxable      Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  shop        Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: Cascade)
+  part        Part?       @relation(fields: [partId], references: [id], onDelete: SetNull)
+
+  @@index([shopId])
+  @@index([repairOrderId])
+  @@index([partId])
+  @@map("part_lines")
+}
+
+model Attachment {
+  id           String   @id @default(cuid())
+  shopId       String   @map("shop_id")
+  repairOrderId String  @map("repair_order_id")
+  fileUrl      String   @map("file_url")
+  uploadedById String?  @map("uploaded_by_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  shop        Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: Cascade)
+  uploadedBy  User?       @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([shopId])
+  @@index([repairOrderId])
+  @@map("attachments")
+}
+
+model ShiftPunch {
+  id          String          @id @default(cuid())
+  shopId      String          @map("shop_id")
+  userId      String          @map("user_id")
+  clockInAt   DateTime        @default(now()) @map("clock_in_at")
+  clockOutAt  DateTime?       @map("clock_out_at")
+  source      ShiftPunchSource @default(WEB)
+  ipAddress   String?         @map("ip_address")
+  userAgent   String?         @map("user_agent") @db.Text
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([userId])
+  @@index([clockInAt])
+  @@map("shift_punches")
+}
+
+// Note: Unique constraint on (shopId, userId) where clockOutAt IS NULL
+// is enforced via application logic in the API routes
+
+model TimeEntry {
+  id           String    @id @default(cuid())
+  shopId       String    @map("shop_id")
+  techId       String    @map("tech_id")
+  repairOrderId String   @map("repair_order_id")
+  clockIn      DateTime  @default(now()) @map("clock_in")
+  clockOut     DateTime? @map("clock_out")
+  notes        String?   @db.Text
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  shop        Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  tech        User        @relation(fields: [techId], references: [id], onDelete: Cascade)
+  repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([techId])
+  @@index([repairOrderId])
+  @@index([clockIn])
+  @@map("time_entries")
+}
+
+// Note: Unique constraint on (shopId, techId) where clockOut IS NULL
+// is enforced via application logic in the API routes
+
+model Estimate {
+  id                    String        @id @default(cuid())
+  shopId                String        @map("shop_id")
+  repairOrderId         String        @unique @map("repair_order_id")
+  status                EstimateStatus @default(PENDING)
+  total                 Decimal       @default(0) @db.Decimal(12, 2)
+  portalTokenHash       String?       @map("portal_token_hash") @db.VarChar(128)
+  portalTokenExpiresAt  DateTime?     @map("portal_token_expires_at")
+  approvedAt            DateTime?     @map("approved_at")
+  approvedByName        String?       @map("approved_by_name")
+  approvedIp            String?       @map("approved_ip")
+  approvedUserAgent     String?       @map("approved_user_agent") @db.Text
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  shop        Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@map("estimates")
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  shopId      String        @map("shop_id")
+  repairOrderId String      @unique @map("repair_order_id")
+  status      InvoiceStatus @default(UNPAID)
+  total       Decimal       @default(0) @db.Decimal(12, 2)
+  issuedAt    DateTime      @default(now()) @map("issued_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  shop        Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  repairOrder RepairOrder   @relation(fields: [repairOrderId], references: [id], onDelete: Cascade)
+  payments    Payment[]
+
+  @@index([shopId])
+  @@index([status])
+  @@map("invoices")
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  shopId      String        @map("shop_id")
+  invoiceId   String        @map("invoice_id")
+  method      PaymentMethod
+  amount      Decimal       @db.Decimal(12, 2)
+  reference   String?
+  paidAt      DateTime      @default(now()) @map("paid_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  shop    Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([invoiceId])
+  @@map("payments")
+}
+
+model DisplayToken {
+  id          String    @id @default(cuid())
+  shopId      String    @map("shop_id")
+  tokenHash   String?   @map("token_hash") @db.VarChar(128)
+  expiresAt   DateTime? @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@map("display_tokens")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  shopId      String   @map("shop_id")
+  userId      String?  @map("user_id")
+  action      String   @db.VarChar(100)
+  description String?  @db.Text
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  shop Shop  @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([shopId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

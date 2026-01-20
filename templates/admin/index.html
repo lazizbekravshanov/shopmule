@@ -1,0 +1,227 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_extras %}
+
+{% block content %}
+{% get_admin_metrics request.user request.GET.range as metrics %}
+<div class="bs-admin-hero">
+  <div>
+    <p class="bs-admin-kicker">Operations control</p>
+    <h1 class="bs-admin-title">Operations dashboard</h1>
+    <p class="bs-admin-subtitle">
+      Fast, role-focused visibility across the shop. Use the tiles and queues below to move work forward.
+    </p>
+  </div>
+  <div class="bs-admin-quick">
+    <div class="bs-quick-card">
+      <h3>Fast actions</h3>
+      <p>Common workflows for daily ops.</p>
+      <div class="bs-quick-links">
+        <a href="/admin/service_orders/serviceorder/">Service orders</a>
+        <a href="/admin/customers/customer/">Customers</a>
+        <a href="/admin/attendance/shiftpunch/">Attendance</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bs-admin-range">
+  <span>Range</span>
+  <div class="bs-admin-range-links">
+    <a class="{% if metrics.range_days == 7 %}is-active{% endif %}" href="?range=7">7d</a>
+    <a class="{% if metrics.range_days == 30 %}is-active{% endif %}" href="?range=30">30d</a>
+    <a class="{% if metrics.range_days == 90 %}is-active{% endif %}" href="?range=90">90d</a>
+  </div>
+</div>
+
+<div class="bs-admin-kpi-grid">
+  <a class="bs-admin-kpi" href="/admin/service_orders/serviceorder/">
+    <span>Open service orders</span>
+    <strong>{{ metrics.open_service_orders }}</strong>
+  </a>
+  <a class="bs-admin-kpi" href="/admin/service_orders/serviceorder/?status__exact=awaiting_approval">
+    <span>Awaiting approval</span>
+    <strong>{{ metrics.awaiting_approval }}</strong>
+  </a>
+  <a class="bs-admin-kpi" href="/admin/service_orders/serviceorder/?status__exact=in_progress">
+    <span>In progress</span>
+    <strong>{{ metrics.in_progress }}</strong>
+  </a>
+  <a class="bs-admin-kpi" href="/admin/service_orders/serviceorder/?status__exact=ready_to_invoice">
+    <span>Ready to invoice</span>
+    <strong>{{ metrics.ready_to_invoice }}</strong>
+  </a>
+  <a class="bs-admin-kpi" href="/admin/billing/invoice/?status_group=open">
+    <span>Unpaid + partial</span>
+    <strong>{{ metrics.unpaid_invoices }}</strong>
+  </a>
+  <a class="bs-admin-kpi" href="/admin/parts/part/">
+    <span>Parts below reorder</span>
+    <strong>{{ metrics.parts_low }}</strong>
+  </a>
+</div>
+
+<div class="bs-admin-role-grid">
+  {% if request.user|has_group:"Parts Manager" or request.user|has_group:"Owner/Admin" or request.user.is_superuser %}
+    <section class="bs-admin-role">
+      <header>
+        <h2>Parts team</h2>
+        <p>Inventory health and fulfillment.</p>
+      </header>
+      <ul>
+        <li>
+          <a href="/admin/parts/part/">Parts below reorder</a>
+          <span>{{ metrics.parts_low }}</span>
+        </li>
+        <li>
+          <a href="/admin/service_orders/serviceorder/?status__exact=awaiting_approval">Awaiting approval</a>
+          <span>{{ metrics.awaiting_approval }}</span>
+        </li>
+        <li>
+          <a href="/admin/service_orders/serviceorder/?status__exact=in_progress">In-progress orders</a>
+          <span>{{ metrics.in_progress }}</span>
+        </li>
+        <li>
+          <a href="/admin/inventory/inventoryadjustment/?range={{ metrics.range_days }}">Inventory adjustments ({{ metrics.range_days }}d)</a>
+          <span>{{ metrics.inventory_adjustments_range }}</span>
+        </li>
+        <li>
+          <a href="/admin/parts/part/">Parts on hand</a>
+          <span>{{ metrics.parts_on_hand_total }}</span>
+        </li>
+        <li>
+          <a href="/admin/inventory/inventoryadjustment/?range={{ metrics.range_days }}">Parts touched ({{ metrics.range_days }}d)</a>
+          <span>{{ metrics.parts_touched_range }}</span>
+        </li>
+      </ul>
+    </section>
+  {% endif %}
+
+  {% if request.user|has_group:"Technician" or request.user|has_group:"Owner/Admin" or request.user.is_superuser %}
+    <section class="bs-admin-role">
+      <header>
+        <h2>Mechanics</h2>
+        <p>Work in progress and time capture.</p>
+      </header>
+      <ul>
+        <li>
+          <a href="/admin/service_orders/serviceorder/?status__exact=in_progress">In-progress jobs</a>
+          <span>{{ metrics.in_progress }}</span>
+        </li>
+        <li>
+          <a href="/admin/attendance/timeentry/">My open time entries</a>
+          <span>{{ metrics.open_time_entries }}</span>
+        </li>
+        <li>
+          <a href="/admin/attendance/shiftpunch/">My open shift</a>
+          <span>{{ metrics.open_shifts }}</span>
+        </li>
+        <li>
+          <a href="/admin/service_orders/serviceorder/?status__exact=ready_to_invoice">Ready to invoice</a>
+          <span>{{ metrics.ready_to_invoice }}</span>
+        </li>
+        <li>
+          <a href="/admin/service_orders/serviceorder/?is_comeback__exact=1">Comebacks open</a>
+          <span>{{ metrics.comebacks }}</span>
+        </li>
+        <li>
+          <a href="/admin/service_orders/serviceorder/?status__exact=awaiting_approval">Jobs awaiting approval</a>
+          <span>{{ metrics.awaiting_approval }}</span>
+        </li>
+      </ul>
+    </section>
+  {% endif %}
+
+  {% if request.user|has_group:"Accounting" or request.user|has_group:"Owner/Admin" or request.user.is_superuser %}
+    <section class="bs-admin-role">
+      <header>
+        <h2>Accounting</h2>
+        <p>Revenue capture and collections.</p>
+      </header>
+      <ul>
+        <li>
+          <a href="/admin/billing/estimate/?status__exact=pending">Pending estimates</a>
+          <span>{{ metrics.estimates_pending }}</span>
+        </li>
+        <li>
+          <a href="/admin/billing/invoice/?status__exact=unpaid">Unpaid invoices</a>
+          <span>{{ metrics.invoices_unpaid }}</span>
+        </li>
+        <li>
+          <a href="/admin/billing/invoice/?status__exact=partially_paid">Partially paid</a>
+          <span>{{ metrics.invoices_partially_paid }}</span>
+        </li>
+        <li>
+          <a href="/admin/billing/payment/?range={{ metrics.range_days }}">Payments in last {{ metrics.range_days }}d</a>
+          <span>{{ metrics.payments_range }}</span>
+        </li>
+        <li>
+          <a href="/admin/service_orders/serviceorder/?status__exact=ready_to_invoice">Ready to invoice</a>
+          <span>{{ metrics.ready_to_invoice }}</span>
+        </li>
+        <li>
+          <a href="/admin/billing/invoice/?range={{ metrics.range_days }}">Invoices issued ({{ metrics.range_days }}d)</a>
+          <span>{{ metrics.invoices_issued_range }}</span>
+        </li>
+      </ul>
+    </section>
+  {% endif %}
+
+  {% if request.user|has_group:"Owner/Admin" or request.user.is_superuser %}
+    <section class="bs-admin-role">
+      <header>
+        <h2>General manager</h2>
+        <p>Flow health and risk watch.</p>
+      </header>
+      <ul>
+        <li>
+          <a href="/admin/service_orders/serviceorder/">Open service orders</a>
+          <span>{{ metrics.open_service_orders }}</span>
+        </li>
+        <li>
+          <a href="/admin/service_orders/serviceorder/?status__exact=awaiting_approval">Awaiting approval</a>
+          <span>{{ metrics.awaiting_approval }}</span>
+        </li>
+        <li>
+          <a href="/admin/service_orders/serviceorder/?status__exact=in_progress">In progress</a>
+          <span>{{ metrics.in_progress }}</span>
+        </li>
+        <li>
+          <a href="/admin/service_orders/serviceorder/?status__exact=ready_to_invoice">Ready to invoice</a>
+          <span>{{ metrics.ready_to_invoice }}</span>
+        </li>
+        <li>
+          <a href="/admin/billing/invoice/?status_group=open">Unpaid + partially paid</a>
+          <span>{{ metrics.unpaid_invoices }}</span>
+        </li>
+        <li>
+          <a href="/admin/service_orders/serviceorder/?is_comeback__exact=1">Comebacks</a>
+          <span>{{ metrics.comebacks }}</span>
+        </li>
+      </ul>
+    </section>
+  {% endif %}
+</div>
+
+<div class="bs-admin-grid">
+  {% for app in app_list %}
+    <section class="bs-admin-card">
+      <header>
+        <h2>{{ app.name }}</h2>
+        {% if app.app_url %}
+          <a class="bs-admin-app-link" href="{{ app.app_url }}">View all</a>
+        {% endif %}
+      </header>
+      <ul>
+        {% for model in app.models %}
+          <li>
+            <a href="{{ model.admin_url }}">{{ model.name }}</a>
+            {% if model.add_url %}
+              <a class="bs-admin-add" href="{{ model.add_url }}">Add</a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endfor %}
+</div>
+{% endblock %}

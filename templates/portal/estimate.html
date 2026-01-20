@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estimate Approval</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --ink: #111111;
+      --muted: #555555;
+      --accent: #ff6b2c;
+      --accent-dark: #d94c16;
+      --line: rgba(17, 17, 17, 0.12);
+      --soft: #f8f7f5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .page {
+      padding: 56px 20px 80px;
+    }
+
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+
+    .logo {
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .title {
+      margin: 0 0 10px;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: #fff;
+    }
+
+    .summary {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      font-weight: 600;
+    }
+
+    .summary-item span {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .form {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    label {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    input[type="text"] {
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      font-size: 1rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent-dark);
+    }
+
+    .btn.secondary {
+      background: #fff;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    .note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .thanks {
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="wrap">
+      <div class="nav">
+        <div class="logo">BodyShopper</div>
+        <div class="badge">Secure estimate approval</div>
+      </div>
+
+      <div class="hero">
+        <div>
+          <h1 class="title">Estimate for Service Order #{{ estimate.service_order.id }}</h1>
+          <p class="subtitle">
+            Review the summary below and provide your e-signature to approve or decline.
+            We will notify your service advisor immediately.
+          </p>
+          {% if demo_mode %}
+            <p class="note">Demo mode is active. This page is showing the most recent estimate.</p>
+          {% endif %}
+          {% if error %}
+            <p class="thanks">{{ error }}</p>
+          {% endif %}
+          <div class="card">
+            <strong>Status</strong>
+            <div class="summary">
+              <div class="summary-item">Current status <span>{{ estimate.get_status_display }}</span></div>
+              <div class="summary-item">Estimated total <span>${{ estimate.total }}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 style="margin: 0 0 8px;">Your response</h2>
+          <p class="note">Your signature confirms you have reviewed the estimate details.</p>
+
+          {% if error %}
+            <p class="note">Return to admin to create an estimate for this portal.</p>
+          {% elif submitted %}
+            <p class="thanks">Thank you! Your response has been recorded.</p>
+          {% else %}
+            <form method="post" class="form">
+              {% csrf_token %}
+              <label for="name">Your name (e-signature)</label>
+              <input type="text" name="name" id="name" required />
+              <div class="actions">
+                <button class="btn primary" type="submit" name="action" value="approve">Approve estimate</button>
+                <button class="btn secondary" type="submit" name="action" value="decline">Decline estimate</button>
+              </div>
+            </form>
+            <p class="note">Need changes? Decline and we will follow up with updates.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

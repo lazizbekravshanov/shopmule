@@ -1,0 +1,387 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BodyShopper</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --ink: #111111;
+      --muted: #555555;
+      --accent: #ff6b2c;
+      --accent-dark: #d94c16;
+      --line: rgba(17, 17, 17, 0.12);
+      --soft: #f8f7f5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      min-height: 100vh;
+    }
+
+    .page {
+      padding: 72px 20px 110px;
+    }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 72px;
+    }
+
+    .logo {
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 16px;
+      font-size: 0.95rem;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 48px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .eyebrow span {
+      color: var(--accent-dark);
+      font-weight: 600;
+    }
+
+    .title {
+      font-size: clamp(2.6rem, 3.4vw + 1.6rem, 4rem);
+      line-height: 1.05;
+      margin: 20px 0 18px;
+    }
+
+    .lead {
+      font-size: 1.1rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 0 0 28px;
+    }
+
+    .cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 12px 26px rgba(255, 107, 44, 0.2);
+    }
+
+    .btn.secondary {
+      background: #fff;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    .hero-card {
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      padding: 22px;
+      background: var(--soft);
+    }
+
+    .hero-image {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      margin-bottom: 16px;
+      display: block;
+      object-fit: cover;
+    }
+
+    .hero-card h3 {
+      margin: 0 0 10px;
+    }
+
+    .hero-card p {
+      margin: 0 0 16px;
+      color: var(--muted);
+    }
+
+    .metrics {
+      display: grid;
+      gap: 10px;
+    }
+
+    .metric {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .section {
+      margin-top: 96px;
+    }
+
+    .section h2 {
+      margin: 0 0 16px;
+      font-size: 1.8rem;
+    }
+
+    .section p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      max-width: 680px;
+    }
+
+    .logos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .logos span {
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fafafa;
+    }
+
+    .features {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .feature {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: #fff;
+    }
+
+    .feature h3 {
+      margin: 0 0 8px;
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .proof {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .quote {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: #fff;
+    }
+
+    .quote p {
+      margin: 0 0 12px;
+    }
+
+    .quote span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .cta-band {
+      margin-top: 96px;
+      padding: 28px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .cta-band h2 {
+      margin: 0;
+      font-size: 1.6rem;
+    }
+
+    .cta-band p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="wrap">
+      <nav class="nav">
+        <div class="logo">BodyShopper</div>
+        <div class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#proof">Customers</a>
+          <a href="/admin/">Login</a>
+        </div>
+      </nav>
+
+      <section class="hero">
+        <div>
+          <div class="eyebrow">
+            AI-wrapped shop operations
+            <span>Live</span>
+          </div>
+          <h1 class="title">Run every service bay with absolute clarity.</h1>
+          <p class="lead">
+            BodyShopper is the operations OS for heavy-duty repair. It turns service orders,
+            labor, approvals, and inventory into one calm, real-time system.
+          </p>
+          <div class="cta">
+            <a class="btn primary" href="/admin/">Launch admin</a>
+            <a class="btn secondary" href="/portal/estimate/">Customer portal</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <img class="hero-image" src="{% static 'images/landing-hero.png' %}" alt="BodyShopper operations overview">
+          <h3>Operations at a glance</h3>
+          <p>Instant context, clean notes, and a TV dashboard that keeps the floor aligned.</p>
+          <div class="metrics">
+            <div class="metric">Faster estimates <span>with AI cleanup</span></div>
+            <div class="metric">Live visibility <span>for every bay</span></div>
+            <div class="metric">Multi-tenant ready <span>by default</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Trusted by serious repair teams</h2>
+        <p>Built for fast-growing fleets and modern independent shops.</p>
+        <div class="logos">
+          <span>Fleet Service Group</span>
+          <span>Atlas Diesel</span>
+          <span>Northline Logistics</span>
+          <span>Ridgeway Repair</span>
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <h2>Designed for high-throughput shops</h2>
+        <p>Every workflow is focused on speed, accountability, and accuracy.</p>
+        <div class="features">
+          <div class="feature">
+            <h3>Service order command center</h3>
+            <p>Track status, parts, and labor in one place with clean handoffs.</p>
+          </div>
+          <div class="feature">
+            <h3>AI-cleaned customer notes</h3>
+            <p>Normalize tech notes instantly so approvals are always readable.</p>
+          </div>
+          <div class="feature">
+            <h3>Live floor visibility</h3>
+            <p>Keep teams aligned with real-time status across bays and shifts.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="proof">
+        <h2>Operational lift teams feel fast</h2>
+        <p>Short feedback loops. Cleaner data. Happier customers.</p>
+        <div class="proof">
+          <div class="quote">
+            <p>“We replaced three tools and finally got one reliable source of truth.”</p>
+            <span>Fleet Ops Manager</span>
+          </div>
+          <div class="quote">
+            <p>“Techs know what is next before the morning huddle is over.”</p>
+            <span>Service Director</span>
+          </div>
+          <div class="quote">
+            <p>“Approvals are same-day and notes read like a professional report.”</p>
+            <span>Shop Owner</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta-band">
+        <div>
+          <h2>Ready to run the shop from one screen?</h2>
+          <p>Launch the admin console and explore the demo data.</p>
+        </div>
+        <div class="cta">
+          <a class="btn primary" href="/admin/">Open admin</a>
+          <a class="btn secondary" href="/tv/dashboard/">View TV dashboard</a>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
