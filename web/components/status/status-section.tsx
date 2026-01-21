@@ -46,22 +46,23 @@ export function StatusSection({
 
   return (
     <section
-      className="bg-gray-50 border-t border-gray-200"
+      className="bg-neutral-50 border-t border-neutral-200"
       aria-labelledby="status-heading"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <motion.div
           {...fadeInUp}
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
+          <p className="text-sm font-medium text-primary-600 mb-3 uppercase tracking-widest">Status</p>
           <h2
             id="status-heading"
-            className="text-3xl font-light text-gray-900 mb-2"
+            className="text-3xl md:text-4xl font-bold text-neutral-900 mb-2 tracking-tight"
           >
             Platform Status
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-neutral-600">
             Real-time operational status and historical uptime data
           </p>
         </motion.div>
@@ -70,7 +71,7 @@ export function StatusSection({
         <motion.div
           {...fadeInUp}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-white rounded-xl border border-gray-200 p-6 mb-8 shadow-sm"
+          className="bg-white rounded-2xl border border-neutral-200 p-6 mb-8 shadow-premium"
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <StatusIndicator
@@ -83,7 +84,7 @@ export function StatusSection({
               <Button
                 variant="outline"
                 size="sm"
-                className="text-sm"
+                className="text-sm font-medium rounded-lg border-neutral-300 hover:bg-neutral-50"
                 onClick={toggleExpanded}
               >
                 {isExpanded ? "Show less" : "Show details"}
@@ -107,7 +108,7 @@ export function StatusSection({
             <motion.div
               {...fadeInUp}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
+              className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-premium"
             >
               <UptimeMetrics metrics={status.uptime} />
             </motion.div>
@@ -118,7 +119,7 @@ export function StatusSection({
               <motion.div
                 {...fadeInUp}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
+                className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-premium"
               >
                 <ComponentStatusList components={status.components} />
               </motion.div>
@@ -127,7 +128,7 @@ export function StatusSection({
               <motion.div
                 {...fadeInUp}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
+                className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-premium"
               >
                 <UptimeCalendar data={status.historicalData} />
               </motion.div>
@@ -137,7 +138,7 @@ export function StatusSection({
             <motion.div
               {...fadeInUp}
               transition={{ duration: 0.5, delay: 0.5 }}
-              className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
+              className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-premium"
             >
               <IncidentList incidents={status.incidents} />
             </motion.div>
@@ -152,32 +153,32 @@ export function StatusSection({
             className="grid md:grid-cols-3 gap-6"
           >
             {/* Quick Uptime */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm text-center">
-              <p className="text-3xl font-semibold text-green-600">
+            <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-premium text-center">
+              <p className="text-3xl font-bold text-success-500 tracking-tight">
                 {status.uptime.last30Days.toFixed(2)}%
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-neutral-500 mt-1">
                 30-day uptime
               </p>
             </div>
 
             {/* Component Summary */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm text-center">
-              <p className="text-3xl font-semibold text-green-600">
+            <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-premium text-center">
+              <p className="text-3xl font-bold text-success-500 tracking-tight">
                 {status.components.filter((c) => c.status === "operational").length}/
                 {status.components.length}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-neutral-500 mt-1">
                 Systems operational
               </p>
             </div>
 
             {/* Recent Incidents */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm text-center">
-              <p className="text-3xl font-semibold text-gray-900">
+            <div className="bg-white rounded-2xl border border-neutral-200 p-6 shadow-premium text-center">
+              <p className="text-3xl font-bold text-neutral-900 tracking-tight">
                 {status.incidents.filter((i) => i.status !== "resolved").length}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-neutral-500 mt-1">
                 Active incidents
               </p>
             </div>
@@ -190,15 +191,15 @@ export function StatusSection({
           transition={{ duration: 0.5, delay: 0.6 }}
           className="flex flex-wrap justify-center gap-4 mt-8"
         >
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2 rounded-lg border-neutral-300 hover:bg-neutral-50">
             <Bell className="w-4 h-4" />
             Subscribe to updates
           </Button>
-          <Button variant="ghost" size="sm" className="gap-2">
+          <Button variant="ghost" size="sm" className="gap-2 rounded-lg hover:bg-neutral-100">
             <Rss className="w-4 h-4" />
             RSS feed
           </Button>
-          <Button variant="ghost" size="sm" className="gap-2">
+          <Button variant="ghost" size="sm" className="gap-2 rounded-lg hover:bg-neutral-100">
             <ExternalLink className="w-4 h-4" />
             View full status page
           </Button>

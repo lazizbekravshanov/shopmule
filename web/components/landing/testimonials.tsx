@@ -27,7 +27,7 @@ const testimonials = [
 export function Testimonials() {
   return (
     <section className="py-24 bg-white">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -35,11 +35,11 @@ export function Testimonials() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <p className="text-sm font-semibold text-blue-600 mb-3 uppercase tracking-wider">Testimonials</p>
-          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+          <p className="text-sm font-medium text-primary-600 mb-3 uppercase tracking-widest">Testimonials</p>
+          <h2 className="text-3xl md:text-5xl font-bold text-neutral-900 mb-4 tracking-tight">
             Loved by shop owners
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-neutral-600 max-w-2xl mx-auto leading-relaxed">
             Don&apos;t just take our word for it. Here&apos;s what our customers have to say.
           </p>
         </motion.div>
@@ -52,24 +52,24 @@ export function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="relative bg-gray-50 rounded-2xl p-8 hover:bg-gray-100 transition-colors"
+              className="relative bg-neutral-50 rounded-2xl p-8 border border-neutral-100 hover:border-primary-100 hover:shadow-premium-lg transition-all duration-300"
             >
-              <Quote className="w-10 h-10 text-gray-200 mb-4" />
+              <Quote className="w-10 h-10 text-neutral-200 mb-4" />
 
               {/* Stars */}
               <div className="flex gap-1 mb-4">
                 {Array.from({ length: testimonial.rating }).map((_, i) => (
-                  <Star key={i} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                  <Star key={i} className="w-4 h-4 text-warning-500 fill-warning-500" />
                 ))}
               </div>
 
-              <p className="text-gray-700 leading-relaxed mb-6">
+              <p className="text-neutral-700 leading-relaxed mb-6">
                 &ldquo;{testimonial.quote}&rdquo;
               </p>
 
               <div>
-                <p className="font-semibold text-gray-900">{testimonial.author}</p>
-                <p className="text-sm text-gray-500">{testimonial.role}</p>
+                <p className="font-semibold text-neutral-900">{testimonial.author}</p>
+                <p className="text-sm text-neutral-500">{testimonial.role}</p>
               </div>
             </motion.div>
           ))}

@@ -21,8 +21,8 @@ const logos = [
 
 export function SocialProof() {
   return (
-    <section className="relative py-20 bg-gray-50/50">
-      <div className="max-w-6xl mx-auto px-6">
+    <section className="relative py-20 bg-neutral-50">
+      <div className="max-w-7xl mx-auto px-6">
         {/* Stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -40,13 +40,13 @@ export function SocialProof() {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className="text-center"
             >
-              <div className="flex items-center justify-center gap-1 mb-2">
-                <span className="text-4xl md:text-5xl font-bold text-gray-900">
+              <div className="flex items-center justify-center gap-1.5 mb-2">
+                <span className="text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
                   {stat.value}
                 </span>
-                {stat.icon && <Star className="w-6 h-6 text-yellow-500 fill-yellow-500" />}
+                {stat.icon && <Star className="w-5 h-5 text-warning-500 fill-warning-500" />}
               </div>
-              <p className="text-sm text-gray-500 font-medium">{stat.label}</p>
+              <p className="text-sm text-neutral-500 font-medium">{stat.label}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -59,10 +59,10 @@ export function SocialProof() {
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <p className="text-sm text-gray-500 mb-8 uppercase tracking-wider font-medium">
+          <p className="text-xs text-neutral-400 mb-8 uppercase tracking-widest font-medium">
             Trusted by leading repair shops
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
             {logos.map((logo, index) => (
               <motion.div
                 key={logo}
@@ -70,7 +70,7 @@ export function SocialProof() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="text-xl md:text-2xl font-bold text-gray-300 hover:text-gray-400 transition-colors cursor-default"
+                className="text-xl md:text-2xl font-semibold text-neutral-300 hover:text-neutral-400 transition-colors duration-200 cursor-default"
               >
                 {logo}
               </motion.div>

@@ -37,31 +37,31 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-gray-50 border-t border-gray-200">
-      <div className="max-w-6xl mx-auto px-6 py-16">
+    <footer className="bg-neutral-50 border-t border-neutral-200">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           {/* Logo & Description */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 bg-black rounded-lg flex items-center justify-center">
-                <Wrench className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-primary-500 rounded-lg flex items-center justify-center">
+                <Wrench className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-xl tracking-tight">BodyShopper</span>
+              <span className="font-semibold text-lg text-neutral-900">BodyShopper</span>
             </Link>
-            <p className="text-sm text-gray-500 leading-relaxed">
+            <p className="text-sm text-neutral-500 leading-relaxed">
               Modern shop management software for the digital age.
             </p>
           </div>
 
           {/* Product */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Product</h4>
+            <h4 className="font-semibold text-neutral-900 mb-4 text-sm">Product</h4>
             <ul className="space-y-3">
               {footerLinks.product.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                    className="text-sm text-neutral-500 hover:text-primary-600 transition-colors duration-200"
                   >
                     {link.label}
                   </a>
@@ -72,13 +72,13 @@ export function Footer() {
 
           {/* Company */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Company</h4>
+            <h4 className="font-semibold text-neutral-900 mb-4 text-sm">Company</h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                    className="text-sm text-neutral-500 hover:text-primary-600 transition-colors duration-200"
                   >
                     {link.label}
                   </a>
@@ -89,13 +89,13 @@ export function Footer() {
 
           {/* Resources */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
+            <h4 className="font-semibold text-neutral-900 mb-4 text-sm">Resources</h4>
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                    className="text-sm text-neutral-500 hover:text-primary-600 transition-colors duration-200"
                   >
                     {link.label}
                   </a>
@@ -106,13 +106,13 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-4">Legal</h4>
+            <h4 className="font-semibold text-neutral-900 mb-4 text-sm">Legal</h4>
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                    className="text-sm text-neutral-500 hover:text-primary-600 transition-colors duration-200"
                   >
                     {link.label}
                   </a>
@@ -123,21 +123,21 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-200 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-500">
+        <div className="pt-8 border-t border-neutral-200 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-neutral-500">
             &copy; {new Date().getFullYear()} BodyShopper. All rights reserved.
           </p>
 
           {/* Social Links */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {socialLinks.map((social) => (
               <a
                 key={social.label}
                 href={social.href}
                 aria-label={social.label}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="w-10 h-10 flex items-center justify-center rounded-lg bg-neutral-100 hover:bg-primary-50 hover:text-primary-600 text-neutral-600 transition-all duration-200"
               >
-                <social.icon className="w-4 h-4 text-gray-600" />
+                <social.icon className="w-4 h-4" />
               </a>
             ))}
           </div>
