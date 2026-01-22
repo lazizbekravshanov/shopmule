@@ -5,6 +5,7 @@ export const inventoryKeys = {
   all: ['inventory'] as const,
   lists: () => [...inventoryKeys.all, 'list'] as const,
   lowStock: () => [...inventoryKeys.all, 'low-stock'] as const,
+  lowStockCount: () => [...inventoryKeys.all, 'low-stock-count'] as const,
 };
 
 export function useInventory() {
@@ -18,6 +19,13 @@ export function useLowStockParts() {
   return useQuery({
     queryKey: inventoryKeys.lowStock(),
     queryFn: () => api.inventory.lowStock(),
+  });
+}
+
+export function useLowStockCount() {
+  return useQuery({
+    queryKey: inventoryKeys.lowStockCount(),
+    queryFn: () => api.inventory.lowStockCount(),
   });
 }
 
