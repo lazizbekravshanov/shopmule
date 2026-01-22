@@ -39,11 +39,10 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getAuthToken();
   const res = await fetch(`${API_BASE}${path}`, {
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
     ...options,
@@ -54,14 +53,21 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     let message = 'Request failed';
     try {
       const json = JSON.parse(text);
-      message = json.message || message;
+      message = json.error || json.message || message;
     } catch {
       message = text || message;
     }
     throw new ApiError(message, res.status);
   }
 
-  return res.json();
+  const json = await res.json();
+
+  // Handle wrapped responses { success: true, data: ... }
+  if (json && typeof json === 'object' && 'success' in json && 'data' in json) {
+    return json.data as T;
+  }
+
+  return json as T;
 }
 
 // Types
@@ -180,6 +186,33 @@ export interface Payment {
   method: string;
   amount: number;
   receivedAt: string;
+  stripePaymentIntentId?: string;
+  stripeChargeId?: string;
+  stripeStatus?: string;
+}
+
+export interface CreatePaymentIntentData {
+  clientSecret: string;
+  paymentIntentId: string;
+  amount: number;
+  remainingBalance: number;
+}
+
+export interface CreatePaymentIntentResponse {
+  success: true;
+  data: CreatePaymentIntentData;
+}
+
+export interface GeneratePaymentLinkData {
+  paymentLink: string;
+  expiresAt: string;
+  customerEmail?: string;
+  customerPhone?: string;
+}
+
+export interface GeneratePaymentLinkResponse {
+  success: true;
+  data: GeneratePaymentLinkData;
 }
 
 export interface TimeEntry {
@@ -283,6 +316,15 @@ export const api = {
       request<Invoice>(`/invoices/${id}/pay`, {
         method: 'POST',
         body: JSON.stringify(payload),
+      }),
+    createPaymentIntent: (invoiceId: string, amount?: number) =>
+      request<CreatePaymentIntentResponse>('/payments/create-intent', {
+        method: 'POST',
+        body: JSON.stringify({ invoiceId, amount }),
+      }),
+    generatePaymentLink: (invoiceId: string) =>
+      request<GeneratePaymentLinkResponse>(`/invoices/${invoiceId}/payment-link`, {
+        method: 'POST',
       }),
   },
   employees: {

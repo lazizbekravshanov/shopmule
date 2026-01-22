@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal, Plus, Eye } from 'lucide-react';
@@ -19,6 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useWorkOrders, useUpdateWorkOrderStatus } from '@/lib/queries/work-orders';
 import { type WorkOrder } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
+import { NewWorkOrderModal } from '@/components/work-orders/new-work-order-modal';
 
 const statusOptions = [
   { label: 'Diagnosed', value: 'DIAGNOSED' },
@@ -147,6 +149,7 @@ function WorkOrderActions({ workOrder }: { workOrder: WorkOrder }) {
 
 export default function WorkOrdersPage() {
   const { data: workOrders, isLoading } = useWorkOrders();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -157,13 +160,13 @@ export default function WorkOrdersPage() {
             Manage repair orders and track progress
           </p>
         </div>
-        <Button asChild>
-          <Link href="/work-orders/new">
-            <Plus className="mr-2 h-4 w-4" />
-            New Work Order
-          </Link>
+        <Button onClick={() => setIsModalOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          New Work Order
         </Button>
       </div>
+
+      <NewWorkOrderModal open={isModalOpen} onOpenChange={setIsModalOpen} />
 
       {isLoading ? (
         <div className="space-y-4">

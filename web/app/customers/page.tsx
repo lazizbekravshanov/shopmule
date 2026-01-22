@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Plus, Car } from 'lucide-react';
+import { MoreHorizontal, Plus, Car, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/column-header';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/use-toast';
 import { useCustomers, useCreateCustomer, useAddVehicle } from '@/lib/queries/customers';
 import { type Customer } from '@/lib/api';
 
@@ -176,6 +177,7 @@ function CustomerActions({ customer }: { customer: Customer }) {
 }
 
 export default function CustomersPage() {
+  const { toast } = useToast();
   const { data: customers, isLoading } = useCustomers();
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
@@ -185,7 +187,14 @@ export default function CustomersPage() {
   const createCustomer = useCreateCustomer();
 
   const handleCreate = () => {
-    if (!name) return;
+    if (!name) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please enter a customer name',
+      });
+      return;
+    }
     createCustomer.mutate(
       {
         name,
@@ -195,11 +204,22 @@ export default function CustomersPage() {
       },
       {
         onSuccess: () => {
+          toast({
+            title: 'Success',
+            description: 'Customer created successfully',
+          });
           setCreateOpen(false);
           setName('');
           setContactName('');
           setPhone('');
           setEmail('');
+        },
+        onError: (error) => {
+          toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Failed to create customer',
+          });
         },
       }
     );
@@ -285,7 +305,10 @@ export default function CustomersPage() {
             <Button variant="outline" onClick={() => setCreateOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreate} disabled={!name}>
+            <Button onClick={handleCreate} disabled={!name || createCustomer.isPending}>
+              {createCustomer.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Create Customer
             </Button>
           </DialogFooter>

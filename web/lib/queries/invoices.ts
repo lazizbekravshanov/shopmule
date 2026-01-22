@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, type Invoice } from '@/lib/api';
+import { api, type Invoice, type CreatePaymentIntentResponse } from '@/lib/api';
 
 export const invoiceKeys = {
   all: ['invoices'] as const,
@@ -52,5 +52,23 @@ export function useRecordPayment() {
       queryClient.invalidateQueries({ queryKey: invoiceKeys.detail(invoiceId) });
       queryClient.invalidateQueries({ queryKey: invoiceKeys.lists() });
     },
+  });
+}
+
+export function useCreatePaymentIntent() {
+  return useMutation({
+    mutationFn: ({
+      invoiceId,
+      amount,
+    }: {
+      invoiceId: string;
+      amount?: number;
+    }) => api.invoices.createPaymentIntent(invoiceId, amount),
+  });
+}
+
+export function useGeneratePaymentLink() {
+  return useMutation({
+    mutationFn: (invoiceId: string) => api.invoices.generatePaymentLink(invoiceId),
   });
 }

@@ -1,0 +1,107 @@
+import { NextRequest } from 'next/server';
+import { z } from 'zod';
+import { prisma } from '@/lib/db';
+import { stripe } from '@/lib/stripe';
+import { hashToken } from '@/lib/tokens';
+import {
+  successResponse,
+  handleApiError,
+  notFoundResponse,
+  errorResponse,
+} from '@/lib/api/response';
+
+const createIntentSchema = z.object({
+  amount: z.number().positive().optional(),
+});
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ token: string }> }
+) {
+  try {
+    const { token } = await params;
+    const tokenHash = hashToken(token);
+
+    const body = await request.json();
+    const { amount: requestedAmount } = createIntentSchema.parse(body);
+
+    const invoice = await prisma.invoice.findFirst({
+      where: {
+        portalTokenHash: tokenHash,
+      },
+      include: {
+        shop: {
+          select: {
+            name: true,
+          },
+        },
+        repairOrder: {
+          include: {
+            customer: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+        payments: true,
+      },
+    });
+
+    if (!invoice) {
+      return notFoundResponse('Invoice not found or link has expired');
+    }
+
+    if (
+      invoice.portalTokenExpiresAt &&
+      new Date() > invoice.portalTokenExpiresAt
+    ) {
+      return errorResponse('Payment link has expired', 410, 'LINK_EXPIRED');
+    }
+
+    if (invoice.status === 'PAID') {
+      return errorResponse('Invoice is already paid', 400, 'ALREADY_PAID');
+    }
+
+    const paidAmount = invoice.payments.reduce(
+      (sum, p) => sum + Number(p.amount),
+      0
+    );
+    const remainingBalance = Number(invoice.total) - paidAmount;
+
+    if (remainingBalance <= 0) {
+      return errorResponse('No remaining balance on invoice', 400, 'NO_BALANCE');
+    }
+
+    const paymentAmount = requestedAmount
+      ? Math.min(requestedAmount, remainingBalance)
+      : remainingBalance;
+
+    const amountInCents = Math.round(paymentAmount * 100);
+    const customerName = invoice.repairOrder?.customer?.name || 'Customer';
+    const shopName = invoice.shop?.name || 'Shop';
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amountInCents,
+      currency: 'usd',
+      metadata: {
+        invoiceId: invoice.id,
+        shopId: invoice.shopId,
+        customerName,
+        source: 'customer_portal',
+      },
+      description: `Payment for Invoice #${invoice.id.slice(0, 8)} - ${shopName}`,
+      receipt_email: invoice.repairOrder?.customer?.email || undefined,
+    });
+
+    return successResponse({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      amount: paymentAmount,
+      remainingBalance,
+    });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}

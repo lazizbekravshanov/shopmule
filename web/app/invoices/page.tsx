@@ -2,7 +2,16 @@
 
 import { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, CreditCard } from 'lucide-react';
+import {
+  MoreHorizontal,
+  CreditCard,
+  Banknote,
+  Link,
+  Copy,
+  Check,
+  Loader2,
+  Send,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -10,6 +19,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -32,27 +42,36 @@ import {
 import { DataTable } from '@/components/data-table/data-table';
 import { DataTableColumnHeader } from '@/components/data-table/column-header';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useInvoices, useRecordPayment } from '@/lib/queries/invoices';
+import { StripePaymentModal } from '@/components/payments/stripe-payment-modal';
+import {
+  useInvoices,
+  useRecordPayment,
+  useGeneratePaymentLink,
+} from '@/lib/queries/invoices';
 import { type Invoice } from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
 const statusOptions = [
   { label: 'Unpaid', value: 'UNPAID' },
-  { label: 'Partial', value: 'PARTIAL' },
+  { label: 'Partial', value: 'PARTIALLY_PAID' },
   { label: 'Paid', value: 'PAID' },
 ];
 
 const columns: ColumnDef<Invoice>[] = [
   {
     accessorKey: 'id',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Invoice #" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Invoice #" />
+    ),
     cell: ({ row }) => (
       <span className="font-mono text-xs">{row.original.id.slice(0, 8)}</span>
     ),
   },
   {
     accessorKey: 'customer',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Customer" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Customer" />
+    ),
     cell: ({ row }) => {
       const customer = row.original.customer;
       return customer ? (
@@ -64,14 +83,18 @@ const columns: ColumnDef<Invoice>[] = [
   },
   {
     accessorKey: 'total',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Total" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Total" />
+    ),
     cell: ({ row }) => (
       <div className="font-medium">{formatCurrency(row.original.total)}</div>
     ),
   },
   {
     accessorKey: 'status',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
     cell: ({ row }) => {
       const status = row.original.status;
       return (
@@ -79,12 +102,12 @@ const columns: ColumnDef<Invoice>[] = [
           variant={
             status === 'PAID'
               ? 'success'
-              : status === 'PARTIAL'
-              ? 'warning'
-              : 'destructive'
+              : status === 'PARTIALLY_PAID'
+                ? 'warning'
+                : 'destructive'
           }
         >
-          {status}
+          {status === 'PARTIALLY_PAID' ? 'PARTIAL' : status}
         </Badge>
       );
     },
@@ -94,7 +117,9 @@ const columns: ColumnDef<Invoice>[] = [
   },
   {
     accessorKey: 'createdAt',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Created" />
+    ),
     cell: ({ row }) => {
       const date = row.original.createdAt;
       return date ? formatDate(date) : '-';
@@ -108,9 +133,15 @@ const columns: ColumnDef<Invoice>[] = [
 
 function InvoiceActions({ invoice }: { invoice: Invoice }) {
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [stripePaymentOpen, setStripePaymentOpen] = useState(false);
+  const [paymentLinkOpen, setPaymentLinkOpen] = useState(false);
+  const [paymentLink, setPaymentLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState('');
+
   const recordPayment = useRecordPayment();
+  const generatePaymentLink = useGeneratePaymentLink();
 
   const handlePayment = () => {
     if (!amount || !method) return;
@@ -130,7 +161,30 @@ function InvoiceActions({ invoice }: { invoice: Invoice }) {
     );
   };
 
-  const remaining = invoice.total - (invoice.payments?.reduce((sum, p) => sum + p.amount, 0) ?? 0);
+  const handleGeneratePaymentLink = async () => {
+    setPaymentLinkOpen(true);
+    setPaymentLink(null);
+    setCopied(false);
+
+    try {
+      const result = await generatePaymentLink.mutateAsync(invoice.id);
+      setPaymentLink(result.data.paymentLink);
+    } catch {
+      // Error handling done via mutation state
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!paymentLink) return;
+    await navigator.clipboard.writeText(paymentLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const remaining =
+    invoice.total - (invoice.payments?.reduce((sum, p) => sum + p.amount, 0) ?? 0);
+
+  const isPaid = invoice.status === 'PAID';
 
   return (
     <>
@@ -144,19 +198,123 @@ function InvoiceActions({ invoice }: { invoice: Invoice }) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => setPaymentOpen(true)}
-            disabled={invoice.status === 'PAID'}
+            onClick={handleGeneratePaymentLink}
+            disabled={isPaid}
+          >
+            <Link className="mr-2 h-4 w-4" />
+            Send Payment Link
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => setStripePaymentOpen(true)}
+            disabled={isPaid}
           >
             <CreditCard className="mr-2 h-4 w-4" />
-            Record Payment
+            Pay with Card
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => setPaymentOpen(true)}
+            disabled={isPaid}
+          >
+            <Banknote className="mr-2 h-4 w-4" />
+            Record Manual Payment
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
+      {/* Send Payment Link Dialog */}
+      <Dialog open={paymentLinkOpen} onOpenChange={setPaymentLinkOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send Payment Link</DialogTitle>
+            <DialogDescription>
+              Share this link with your customer to collect payment online.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            {generatePaymentLink.isPending ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : generatePaymentLink.isError ? (
+              <div className="text-center py-4 text-destructive">
+                Failed to generate payment link. Please try again.
+              </div>
+            ) : paymentLink ? (
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    value={paymentLink}
+                    readOnly
+                    className="font-mono text-sm"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleCopyLink}
+                  >
+                    {copied ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+
+                <div className="bg-muted p-3 rounded-md text-sm">
+                  <p className="font-medium mb-2">Invoice Details:</p>
+                  <p>
+                    Amount Due:{' '}
+                    <span className="font-semibold">
+                      {formatCurrency(remaining)}
+                    </span>
+                  </p>
+                  {invoice.customer?.name && (
+                    <p>Customer: {invoice.customer.name}</p>
+                  )}
+                </div>
+
+                <p className="text-xs text-muted-foreground">
+                  This link expires in 30 days.
+                </p>
+              </div>
+            ) : null}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPaymentLinkOpen(false)}>
+              Close
+            </Button>
+            {paymentLink && (
+              <Button onClick={handleCopyLink}>
+                {copied ? (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Copy & Share
+                  </>
+                )}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <StripePaymentModal
+        invoice={invoice}
+        open={stripePaymentOpen}
+        onOpenChange={setStripePaymentOpen}
+      />
+
       <Dialog open={paymentOpen} onOpenChange={setPaymentOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Record Payment</DialogTitle>
+            <DialogTitle>Record Manual Payment</DialogTitle>
             <DialogDescription>
               Total: {formatCurrency(invoice.total)} | Remaining:{' '}
               {formatCurrency(remaining)}
@@ -182,10 +340,9 @@ function InvoiceActions({ invoice }: { invoice: Invoice }) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="CASH">Cash</SelectItem>
-                  <SelectItem value="CREDIT_CARD">Credit Card</SelectItem>
-                  <SelectItem value="DEBIT_CARD">Debit Card</SelectItem>
+                  <SelectItem value="CARD">Credit Card</SelectItem>
                   <SelectItem value="CHECK">Check</SelectItem>
-                  <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+                  <SelectItem value="ACH">Bank Transfer</SelectItem>
                 </SelectContent>
               </Select>
             </div>

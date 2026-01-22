@@ -176,12 +176,15 @@ model Invoice {
 }
 
 model Payment {
-  id         String   @id @default(uuid())
-  invoiceId  String
-  method     String
-  amount     Float
-  receivedAt DateTime @default(now())
-  invoice    Invoice  @relation(fields: [invoiceId], references: [id])
+  id                    String   @id @default(uuid())
+  invoiceId             String
+  method                String
+  amount                Float
+  receivedAt            DateTime @default(now())
+  invoice               Invoice  @relation(fields: [invoiceId], references: [id])
+  stripePaymentIntentId String?  @unique
+  stripeChargeId        String?
+  stripeStatus          String?
 }
 
 model TimeEntry {

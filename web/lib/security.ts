@@ -8,13 +8,12 @@ export interface AuthenticatedSession {
     email: string
     name?: string | null
     role: Role
-    shopId: string
   }
 }
 
 export async function getAuthSession(): Promise<AuthenticatedSession | null> {
   const session = await getServerSession(authOptions)
-  if (!session?.user?.shopId) {
+  if (!session?.user?.id) {
     return null
   }
   return session as AuthenticatedSession
@@ -62,6 +61,15 @@ export function sanitizeHtml(input: string): string {
 export function isValidUUID(str: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
   return uuidRegex.test(str)
+}
+
+export function isValidCuid(str: string): boolean {
+  const cuidRegex = /^c[a-z0-9]{20,30}$/
+  return cuidRegex.test(str)
+}
+
+export function isValidId(str: string): boolean {
+  return isValidUUID(str) || isValidCuid(str)
 }
 
 export function rateLimitKey(identifier: string, action: string): string {

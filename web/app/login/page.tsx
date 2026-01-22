@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { Truck } from 'lucide-react';
-import { api, setAuthToken, setAuthRole } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,10 +22,18 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { token, role } = await api.auth.login({ email, password });
-      setAuthToken(token);
-      setAuthRole(role);
-      router.push('/dashboard');
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Invalid email or password');
+      } else if (result?.ok) {
+        router.push('/dashboard');
+        router.refresh();
+      }
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
