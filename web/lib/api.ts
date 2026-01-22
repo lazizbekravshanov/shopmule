@@ -127,6 +127,23 @@ export interface WorkOrder {
   updatedAt?: string;
 }
 
+export interface WorkOrderSummary {
+  total: number;
+  open: number;
+  activeCustomers: number;
+  byStatus: Record<string, number>;
+  recent: Array<{
+    id: string;
+    status: WorkOrder['status'];
+    description: string;
+    vehicle?: {
+      make?: string;
+      model?: string;
+      customerId: string;
+    };
+  }>;
+}
+
 export interface WorkOrderPart {
   id: string;
   quantity: number;
@@ -262,7 +279,22 @@ export const api = {
       }),
   },
   workOrders: {
-    list: () => request<WorkOrder[]>('/work-orders'),
+    list: (params?: { limit?: number; offset?: number; fields?: string[] }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.limit !== undefined) {
+        searchParams.set('limit', String(params.limit));
+      }
+      if (params?.offset !== undefined) {
+        searchParams.set('offset', String(params.offset));
+      }
+      if (params?.fields?.length) {
+        searchParams.set('fields', params.fields.join(','));
+      }
+      const query = searchParams.toString();
+      return request<WorkOrder[]>(`/work-orders${query ? `?${query}` : ''}`);
+    },
+    summary: (limit = 5) =>
+      request<WorkOrderSummary>(`/work-orders?summary=true&limit=${limit}`),
     get: (id: string) => request<WorkOrder>(`/work-orders/${id}`),
     create: (payload: Partial<WorkOrder>) =>
       request<WorkOrder>('/work-orders', {
@@ -303,6 +335,7 @@ export const api = {
         body: JSON.stringify({ quantity }),
       }),
     lowStock: () => request<Part[]>('/inventory/low-stock'),
+    lowStockCount: () => request<{ count: number }>('/inventory/low-stock?countOnly=true'),
   },
   invoices: {
     list: () => request<Invoice[]>('/invoices'),

@@ -17,8 +17,8 @@ import { RevenueChart } from '@/components/charts/revenue-chart';
 import { JobsChart } from '@/components/charts/jobs-chart';
 import { StatusDistribution } from '@/components/charts/status-distribution';
 import { useRevenueReport } from '@/lib/queries/reports';
-import { useWorkOrders } from '@/lib/queries/work-orders';
-import { useLowStockParts } from '@/lib/queries/inventory';
+import { useWorkOrdersSummary } from '@/lib/queries/work-orders';
+import { useLowStockCount } from '@/lib/queries/inventory';
 import { formatCurrency } from '@/lib/utils';
 
 // Static chart data (in real app, this would come from API)
@@ -42,32 +42,32 @@ const jobsData = [
 
 export default function DashboardPage() {
   const { data: revenue, isLoading: revenueLoading } = useRevenueReport();
-  const { data: workOrders, isLoading: workOrdersLoading } = useWorkOrders();
-  const { data: lowStockParts, isLoading: lowStockLoading } = useLowStockParts();
+  const { data: workOrderSummary, isLoading: workOrdersLoading } = useWorkOrdersSummary(5);
+  const { data: lowStockCount, isLoading: lowStockLoading } = useLowStockCount();
 
-  const openWorkOrders = workOrders?.filter(
-    (wo) => wo.status !== 'COMPLETED'
-  ).length ?? 0;
+  const openWorkOrders = workOrderSummary?.open ?? 0;
+  const totalWorkOrders = workOrderSummary?.total ?? 0;
+  const activeCustomers = workOrderSummary?.activeCustomers ?? 0;
 
   const statusData = [
     {
       name: 'Diagnosed',
-      value: workOrders?.filter((wo) => wo.status === 'DIAGNOSED').length ?? 0,
+      value: workOrderSummary?.byStatus?.DIAGNOSED ?? 0,
       color: '#64748b',
     },
     {
       name: 'Approved',
-      value: workOrders?.filter((wo) => wo.status === 'APPROVED').length ?? 0,
+      value: workOrderSummary?.byStatus?.APPROVED ?? 0,
       color: '#3b82f6',
     },
     {
       name: 'In Progress',
-      value: workOrders?.filter((wo) => wo.status === 'IN_PROGRESS').length ?? 0,
+      value: workOrderSummary?.byStatus?.IN_PROGRESS ?? 0,
       color: '#f59e0b',
     },
     {
       name: 'Completed',
-      value: workOrders?.filter((wo) => wo.status === 'COMPLETED').length ?? 0,
+      value: workOrderSummary?.byStatus?.COMPLETED ?? 0,
       color: '#22c55e',
     },
   ];
@@ -119,7 +119,7 @@ export default function DashboardPage() {
               <div className="text-2xl font-bold">{openWorkOrders}</div>
             )}
             <p className="text-xs text-muted-foreground">
-              {workOrders?.length ?? 0} total
+              {totalWorkOrders} total
             </p>
           </CardContent>
         </Card>
@@ -130,9 +130,7 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {new Set(workOrders?.map((wo) => wo.vehicle?.customerId)).size || 0}
-            </div>
+            <div className="text-2xl font-bold">{activeCustomers}</div>
             <p className="text-xs text-muted-foreground">With open orders</p>
           </CardContent>
         </Card>
@@ -146,7 +144,7 @@ export default function DashboardPage() {
             {lowStockLoading ? (
               <Skeleton className="h-8 w-16" />
             ) : (
-              <div className="text-2xl font-bold">{lowStockParts?.length ?? 0}</div>
+              <div className="text-2xl font-bold">{lowStockCount?.count ?? 0}</div>
             )}
             <p className="text-xs text-muted-foreground">Need reorder</p>
           </CardContent>
@@ -186,7 +184,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {workOrders?.slice(0, 5).map((wo) => (
+                {workOrderSummary?.recent.map((wo) => (
                   <div
                     key={wo.id}
                     className="flex items-center justify-between"
@@ -212,7 +210,7 @@ export default function DashboardPage() {
                     </Badge>
                   </div>
                 ))}
-                {(!workOrders || workOrders.length === 0) && (
+                {(!workOrderSummary || workOrderSummary.recent.length === 0) && (
                   <p className="text-center text-muted-foreground py-4">
                     No work orders yet
                   </p>

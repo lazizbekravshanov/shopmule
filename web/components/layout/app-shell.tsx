@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
@@ -14,14 +15,13 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const router = useRouter();
+  const { status } = useSession();
 
   useEffect(() => {
-    // Check for auth token
-    const token = localStorage.getItem('authToken');
-    if (!token) {
+    if (status === 'unauthenticated') {
       router.push('/login');
     }
-  }, [router]);
+  }, [router, status]);
 
   return (
     <TooltipProvider delayDuration={0}>

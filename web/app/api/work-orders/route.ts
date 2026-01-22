@@ -12,38 +12,301 @@ const createWorkOrderSchema = z.object({
   checklist: z.string().max(5000).optional(),
 })
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const workOrders = await prisma.workOrder.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        Vehicle: {
-          include: {
-            Customer: true,
+    const { searchParams } = new URL(request.url)
+    const summary = searchParams.get("summary") === "true"
+    const fieldsParam = searchParams.get("fields")
+    const limitParam = Number(searchParams.get("limit"))
+    const offsetParam = Number(searchParams.get("offset"))
+    const take = Number.isFinite(limitParam)
+      ? Math.max(1, Math.min(100, limitParam))
+      : undefined
+    const skip = Number.isFinite(offsetParam) ? Math.max(0, offsetParam) : undefined
+
+    if (summary) {
+      const limit = take ?? 5
+
+      const [total, open, statusCounts, recentOrders] = await prisma.$transaction([
+        prisma.workOrder.count(),
+        prisma.workOrder.count({
+          where: {
+            status: {
+              not: "COMPLETED",
+            },
+          },
+        }),
+        prisma.workOrder.groupBy({
+          by: ["status"],
+          _count: {
+            _all: true,
+          },
+        }),
+        prisma.workOrder.findMany({
+          orderBy: { createdAt: "desc" },
+          take: limit,
+          select: {
+            id: true,
+            status: true,
+            description: true,
+            Vehicle: {
+              select: {
+                make: true,
+                model: true,
+                customerId: true,
+              },
+            },
+          },
+        }),
+      ])
+
+      const activeCustomers = await prisma.vehicle.findMany({
+        where: {
+          WorkOrder: {
+            some: {
+              status: {
+                not: "COMPLETED",
+              },
+            },
           },
         },
-        WorkOrderAssignment: {
-          include: {
-            EmployeeProfile: true,
-          },
+        select: {
+          customerId: true,
         },
-        WorkOrderLabor: {
-          include: {
-            EmployeeProfile: true,
+        distinct: ["customerId"],
+      })
+
+      const byStatus = statusCounts.reduce<Record<string, number>>((acc, item) => {
+        acc[item.status] = item._count._all
+        return acc
+      }, {})
+
+      const recent = recentOrders.map((order) => ({
+        id: order.id,
+        status: order.status,
+        description: order.description,
+        vehicle: order.Vehicle
+          ? {
+              make: order.Vehicle.make,
+              model: order.Vehicle.model,
+              customerId: order.Vehicle.customerId,
+            }
+          : undefined,
+      }))
+
+      return NextResponse.json({
+        total,
+        open,
+        activeCustomers: activeCustomers.length,
+        byStatus,
+        recent,
+      })
+    }
+
+    const allowedFields = new Set([
+      "id",
+      "vehicleId",
+      "status",
+      "description",
+      "checklist",
+      "notes",
+      "laborHours",
+      "partsTotal",
+      "laborRate",
+      "createdAt",
+      "updatedAt",
+      "vehicle",
+      "vehicle.id",
+      "vehicle.vin",
+      "vehicle.unitNumber",
+      "vehicle.make",
+      "vehicle.model",
+      "vehicle.year",
+      "vehicle.mileage",
+      "vehicle.licensePlate",
+      "vehicle.customerId",
+      "vehicle.customer",
+    ])
+
+    const selectedFields = fieldsParam
+      ? new Set(
+          fieldsParam
+            .split(",")
+            .map((field) => field.trim())
+            .filter((field) => allowedFields.has(field))
+        )
+      : null
+
+    const vehicleFieldKeys = [
+      "vehicle.id",
+      "vehicle.vin",
+      "vehicle.unitNumber",
+      "vehicle.make",
+      "vehicle.model",
+      "vehicle.year",
+      "vehicle.mileage",
+      "vehicle.licensePlate",
+      "vehicle.customerId",
+      "vehicle.customer",
+    ]
+
+    const hasVehicleFields = selectedFields
+      ? vehicleFieldKeys.some((field) => selectedFields.has(field))
+      : false
+    const includeVehicle = selectedFields
+      ? selectedFields.has("vehicle") || hasVehicleFields
+      : false
+    const useDefaultVehicleFields = selectedFields
+      ? selectedFields.has("vehicle") && !hasVehicleFields
+      : false
+
+    const workOrders = selectedFields && selectedFields.size > 0
+      ? await prisma.workOrder.findMany({
+          orderBy: { createdAt: "desc" },
+          take,
+          skip,
+          select: {
+            id: selectedFields.has("id"),
+            vehicleId: selectedFields.has("vehicleId"),
+            status: selectedFields.has("status"),
+            description: selectedFields.has("description"),
+            checklist: selectedFields.has("checklist"),
+            notes: selectedFields.has("notes"),
+            laborHours: selectedFields.has("laborHours"),
+            partsTotal: selectedFields.has("partsTotal"),
+            laborRate: selectedFields.has("laborRate"),
+            createdAt: selectedFields.has("createdAt"),
+            updatedAt: selectedFields.has("updatedAt"),
+            Vehicle: includeVehicle
+              ? {
+                  select: {
+                    id: useDefaultVehicleFields || selectedFields.has("vehicle.id"),
+                    vin: useDefaultVehicleFields || selectedFields.has("vehicle.vin"),
+                    unitNumber: useDefaultVehicleFields || selectedFields.has("vehicle.unitNumber"),
+                    make: useDefaultVehicleFields || selectedFields.has("vehicle.make"),
+                    model: useDefaultVehicleFields || selectedFields.has("vehicle.model"),
+                    year: useDefaultVehicleFields || selectedFields.has("vehicle.year"),
+                    mileage: useDefaultVehicleFields || selectedFields.has("vehicle.mileage"),
+                    licensePlate: useDefaultVehicleFields || selectedFields.has("vehicle.licensePlate"),
+                    customerId: useDefaultVehicleFields || selectedFields.has("vehicle.customerId"),
+                    Customer: selectedFields.has("vehicle.customer")
+                      ? {
+                          select: {
+                            id: true,
+                            name: true,
+                            phone: true,
+                            email: true,
+                          },
+                        }
+                      : false,
+                  },
+                }
+              : false,
           },
-        },
-        WorkOrderPart: {
+        })
+      : await prisma.workOrder.findMany({
+          orderBy: { createdAt: "desc" },
+          take,
+          skip,
           include: {
-            Part: true,
+            Vehicle: {
+              include: {
+                Customer: true,
+              },
+            },
+            WorkOrderAssignment: {
+              include: {
+                EmployeeProfile: true,
+              },
+            },
+            WorkOrderLabor: {
+              include: {
+                EmployeeProfile: true,
+              },
+            },
+            WorkOrderPart: {
+              include: {
+                Part: true,
+              },
+            },
           },
-        },
-      },
-    })
+        })
+
+    if (selectedFields && selectedFields.size > 0) {
+      const transformed = workOrders.map((wo) => {
+        const vehicle = wo.Vehicle
+          ? {
+              ...(useDefaultVehicleFields || selectedFields.has("vehicle.id")
+                ? { id: wo.Vehicle.id }
+                : {}),
+              ...(useDefaultVehicleFields || selectedFields.has("vehicle.vin")
+                ? { vin: wo.Vehicle.vin }
+                : {}),
+              ...(useDefaultVehicleFields || selectedFields.has("vehicle.unitNumber")
+                ? { unitNumber: wo.Vehicle.unitNumber }
+                : {}),
+              ...(useDefaultVehicleFields || selectedFields.has("vehicle.make")
+                ? { make: wo.Vehicle.make }
+                : {}),
+              ...(useDefaultVehicleFields || selectedFields.has("vehicle.model")
+                ? { model: wo.Vehicle.model }
+                : {}),
+              ...(useDefaultVehicleFields || selectedFields.has("vehicle.year")
+                ? { year: wo.Vehicle.year }
+                : {}),
+              ...(useDefaultVehicleFields || selectedFields.has("vehicle.mileage")
+                ? { mileage: wo.Vehicle.mileage }
+                : {}),
+              ...(useDefaultVehicleFields || selectedFields.has("vehicle.licensePlate")
+                ? { licensePlate: wo.Vehicle.licensePlate }
+                : {}),
+              ...(useDefaultVehicleFields || selectedFields.has("vehicle.customerId")
+                ? { customerId: wo.Vehicle.customerId }
+                : {}),
+              ...(selectedFields.has("vehicle.customer")
+                ? {
+                    customer: wo.Vehicle.Customer
+                      ? {
+                          id: wo.Vehicle.Customer.id,
+                          name: wo.Vehicle.Customer.name,
+                          phone: wo.Vehicle.Customer.phone,
+                          email: wo.Vehicle.Customer.email,
+                        }
+                      : undefined,
+                  }
+                : {}),
+            }
+          : undefined
+
+        return {
+          ...(selectedFields.has("id") ? { id: wo.id } : {}),
+          ...(selectedFields.has("vehicleId") ? { vehicleId: wo.vehicleId } : {}),
+          ...(selectedFields.has("status") ? { status: wo.status } : {}),
+          ...(selectedFields.has("description")
+            ? { description: wo.description }
+            : {}),
+          ...(selectedFields.has("checklist") ? { checklist: wo.checklist } : {}),
+          ...(selectedFields.has("notes") ? { notes: wo.notes } : {}),
+          ...(selectedFields.has("laborHours") ? { laborHours: wo.laborHours } : {}),
+          ...(selectedFields.has("partsTotal") ? { partsTotal: wo.partsTotal } : {}),
+          ...(selectedFields.has("laborRate") ? { laborRate: wo.laborRate } : {}),
+          ...(selectedFields.has("createdAt")
+            ? { createdAt: wo.createdAt?.toISOString?.() }
+            : {}),
+          ...(selectedFields.has("updatedAt")
+            ? { updatedAt: wo.updatedAt?.toISOString?.() }
+            : {}),
+          ...(includeVehicle ? { vehicle } : {}),
+        }
+      })
+
+      return NextResponse.json(transformed)
+    }
 
     // Transform to match frontend expected format
     const transformed = workOrders.map((wo) => ({

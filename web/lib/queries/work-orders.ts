@@ -5,14 +5,22 @@ export const workOrderKeys = {
   all: ['work-orders'] as const,
   lists: () => [...workOrderKeys.all, 'list'] as const,
   list: (filters: string) => [...workOrderKeys.lists(), { filters }] as const,
+  summary: (limit: number) => [...workOrderKeys.all, 'summary', limit] as const,
   details: () => [...workOrderKeys.all, 'detail'] as const,
   detail: (id: string) => [...workOrderKeys.details(), id] as const,
 };
 
-export function useWorkOrders() {
+export function useWorkOrders(params?: { limit?: number; offset?: number; fields?: string[] }) {
   return useQuery({
-    queryKey: workOrderKeys.lists(),
-    queryFn: () => api.workOrders.list(),
+    queryKey: workOrderKeys.list(JSON.stringify(params ?? {})),
+    queryFn: () => api.workOrders.list(params),
+  });
+}
+
+export function useWorkOrdersSummary(limit = 5) {
+  return useQuery({
+    queryKey: workOrderKeys.summary(limit),
+    queryFn: () => api.workOrders.summary(limit),
   });
 }
 
