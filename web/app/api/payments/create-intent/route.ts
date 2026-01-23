@@ -30,12 +30,8 @@ export async function POST(request: NextRequest) {
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
       include: {
-        payments: true,
-        repairOrder: {
-          include: {
-            customer: true,
-          },
-        },
+        Payment: true,
+        Customer: true,
       },
     });
 
@@ -43,15 +39,11 @@ export async function POST(request: NextRequest) {
       return notFoundResponse('Invoice not found');
     }
 
-    if (invoice.shopId !== session.user.shopId) {
-      return notFoundResponse('Invoice not found');
-    }
-
     if (invoice.status === 'PAID') {
       return errorResponse('Invoice is already paid', 400, 'ALREADY_PAID');
     }
 
-    const paidAmount = invoice.payments.reduce(
+    const paidAmount = invoice.Payment.reduce(
       (sum, p) => sum + Number(p.amount),
       0
     );
@@ -67,14 +59,13 @@ export async function POST(request: NextRequest) {
 
     const amountInCents = Math.round(paymentAmount * 100);
 
-    const customerName = invoice.repairOrder?.customer?.name || 'Unknown';
+    const customerName = invoice.Customer?.name || 'Unknown';
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: 'usd',
       metadata: {
         invoiceId: invoice.id,
-        shopId: invoice.shopId,
         customerName,
       },
       description: `Payment for Invoice #${invoice.id.slice(0, 8)}`,

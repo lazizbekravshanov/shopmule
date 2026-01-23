@@ -21,61 +21,55 @@ export async function GET(
         portalTokenHash: tokenHash,
       },
       include: {
-        shop: {
+        Customer: {
           select: {
             id: true,
             name: true,
+            email: true,
+            phone: true,
           },
         },
-        repairOrder: {
+        WorkOrder: {
           include: {
-            customer: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-              },
-            },
-            vehicle: {
+            Vehicle: {
               select: {
                 id: true,
                 make: true,
                 model: true,
                 year: true,
-                plate: true,
+                licensePlate: true,
                 vin: true,
               },
             },
-            laborLines: {
+            WorkOrderLabor: {
               select: {
                 id: true,
-                description: true,
+                note: true,
                 hours: true,
                 rate: true,
               },
             },
-            partLines: {
+            WorkOrderPart: {
               include: {
-                part: {
+                Part: {
                   select: {
                     id: true,
-                    description: true,
+                    name: true,
                   },
                 },
               },
             },
           },
         },
-        payments: {
+        Payment: {
           select: {
             id: true,
             amount: true,
             method: true,
-            paidAt: true,
+            receivedAt: true,
           },
           orderBy: {
-            paidAt: 'desc',
+            receivedAt: 'desc',
           },
         },
       },
@@ -99,26 +93,26 @@ export async function GET(
       });
     }
 
-    const paidAmount = invoice.payments.reduce(
+    const paidAmount = invoice.Payment.reduce(
       (sum, p) => sum + Number(p.amount),
       0
     );
     const remainingBalance = Number(invoice.total) - paidAmount;
 
-    const laborLines = invoice.repairOrder?.laborLines.map((line) => ({
+    const laborLines = invoice.WorkOrder?.WorkOrderLabor.map((line) => ({
       id: line.id,
-      description: line.description,
+      description: line.note || 'Labor',
       hours: Number(line.hours),
       rate: Number(line.rate),
       total: Number(line.hours) * Number(line.rate),
     })) || [];
 
-    const partLines = invoice.repairOrder?.partLines.map((line) => ({
+    const partLines = invoice.WorkOrder?.WorkOrderPart.map((line) => ({
       id: line.id,
-      description: line.part?.description || 'Part',
-      qty: line.qty,
+      description: line.Part?.name || 'Part',
+      qty: line.quantity,
       unitPrice: Number(line.unitPrice),
-      total: line.qty * Number(line.unitPrice),
+      total: line.quantity * Number(line.unitPrice) * (1 + line.markupPct),
     })) || [];
 
     const laborTotal = laborLines.reduce((sum, line) => sum + line.total, 0);
@@ -128,20 +122,23 @@ export async function GET(
       id: invoice.id,
       status: invoice.status,
       total: Number(invoice.total),
+      subtotalParts: Number(invoice.subtotalParts),
+      subtotalLabor: Number(invoice.subtotalLabor),
+      tax: Number(invoice.tax),
+      discount: Number(invoice.discount),
       paidAmount,
       remainingBalance,
-      issuedAt: invoice.issuedAt.toISOString(),
-      shop: invoice.shop,
-      customer: invoice.repairOrder?.customer,
-      vehicle: invoice.repairOrder?.vehicle,
+      createdAt: invoice.createdAt.toISOString(),
+      customer: invoice.Customer,
+      vehicle: invoice.WorkOrder?.Vehicle,
       laborLines,
       partLines,
       laborTotal,
       partsTotal,
-      payments: invoice.payments.map((p) => ({
+      payments: invoice.Payment.map((p) => ({
         ...p,
         amount: Number(p.amount),
-        paidAt: p.paidAt.toISOString(),
+        paidAt: p.receivedAt.toISOString(),
       })),
     });
   } catch (error) {

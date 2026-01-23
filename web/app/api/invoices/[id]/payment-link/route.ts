@@ -26,19 +26,16 @@ export async function POST(
     const invoice = await prisma.invoice.findUnique({
       where: { id },
       include: {
-        repairOrder: {
+        Customer: true,
+        WorkOrder: {
           include: {
-            customer: true,
+            Vehicle: true,
           },
         },
       },
     });
 
     if (!invoice) {
-      return notFoundResponse('Invoice not found');
-    }
-
-    if (invoice.shopId !== session.user.shopId) {
       return notFoundResponse('Invoice not found');
     }
 
@@ -65,8 +62,8 @@ export async function POST(
     return successResponse({
       paymentLink,
       expiresAt: expiresAt.toISOString(),
-      customerEmail: invoice.repairOrder?.customer?.email,
-      customerPhone: invoice.repairOrder?.customer?.phone,
+      customerEmail: invoice.Customer?.email,
+      customerPhone: invoice.Customer?.phone,
     });
   } catch (error) {
     return handleApiError(error);

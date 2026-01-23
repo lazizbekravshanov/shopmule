@@ -30,22 +30,13 @@ export async function POST(
         portalTokenHash: tokenHash,
       },
       include: {
-        shop: {
+        Customer: {
           select: {
             name: true,
+            email: true,
           },
         },
-        repairOrder: {
-          include: {
-            customer: {
-              select: {
-                name: true,
-                email: true,
-              },
-            },
-          },
-        },
-        payments: true,
+        Payment: true,
       },
     });
 
@@ -64,7 +55,7 @@ export async function POST(
       return errorResponse('Invoice is already paid', 400, 'ALREADY_PAID');
     }
 
-    const paidAmount = invoice.payments.reduce(
+    const paidAmount = invoice.Payment.reduce(
       (sum, p) => sum + Number(p.amount),
       0
     );
@@ -79,20 +70,18 @@ export async function POST(
       : remainingBalance;
 
     const amountInCents = Math.round(paymentAmount * 100);
-    const customerName = invoice.repairOrder?.customer?.name || 'Customer';
-    const shopName = invoice.shop?.name || 'Shop';
+    const customerName = invoice.Customer?.name || 'Customer';
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: 'usd',
       metadata: {
         invoiceId: invoice.id,
-        shopId: invoice.shopId,
         customerName,
         source: 'customer_portal',
       },
-      description: `Payment for Invoice #${invoice.id.slice(0, 8)} - ${shopName}`,
-      receipt_email: invoice.repairOrder?.customer?.email || undefined,
+      description: `Payment for Invoice #${invoice.id.slice(0, 8)}`,
+      receipt_email: invoice.Customer?.email || undefined,
     });
 
     return successResponse({
