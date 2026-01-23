@@ -13,23 +13,38 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log('[Auth] Login attempt:', credentials?.email ? 'email provided' : 'no email')
+
+        // Strict validation - require both email and password
         if (!credentials?.email || !credentials?.password) {
-          return null
+          console.log('[Auth] Missing credentials')
+          throw new Error('Email and password are required')
+        }
+
+        const email = credentials.email.trim().toLowerCase()
+        const password = credentials.password
+
+        if (!email || !password) {
+          console.log('[Auth] Empty credentials after trim')
+          throw new Error('Email and password are required')
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
         })
 
         if (!user) {
-          return null
+          console.log('[Auth] User not found:', email)
+          throw new Error('Invalid email or password')
         }
 
-        const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
+        const isValid = await bcrypt.compare(password, user.passwordHash)
         if (!isValid) {
-          return null
+          console.log('[Auth] Invalid password for:', email)
+          throw new Error('Invalid email or password')
         }
 
+        console.log('[Auth] Login successful:', email)
         return {
           id: user.id,
           email: user.email,

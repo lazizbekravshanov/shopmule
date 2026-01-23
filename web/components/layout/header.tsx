@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
 import { Bell, LogOut, Menu, Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,17 +15,14 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { SidebarNav } from './sidebar-nav';
 import { useUIStore } from '@/lib/stores/ui-store';
-import { setAuthToken, getAuthRole } from '@/lib/api';
 import { Breadcrumbs } from './breadcrumbs';
 
 export function Header() {
-  const router = useRouter();
+  const { data: session } = useSession();
   const { sidebarOpen, setSidebarOpen, setCommandOpen } = useUIStore();
-  const role = getAuthRole();
 
-  const handleLogout = () => {
-    setAuthToken(null);
-    router.push('/login');
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/login', redirect: true });
   };
 
   return (
@@ -87,9 +84,11 @@ export function Header() {
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">Admin</p>
+              <p className="text-sm font-medium leading-none">
+                {session?.user?.email || 'User'}
+              </p>
               <p className="text-xs leading-none text-muted-foreground">
-                {role || 'User'}
+                {session?.user?.role || 'User'}
               </p>
             </div>
           </DropdownMenuLabel>

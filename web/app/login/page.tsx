@@ -19,12 +19,22 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Client-side validation
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
+      setError('Email and password are required');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const result = await signIn('credentials', {
-        email,
-        password,
+        email: trimmedEmail,
+        password: trimmedPassword,
         redirect: false,
       });
 
