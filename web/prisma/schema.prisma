@@ -36,20 +36,23 @@ model EmployeeProfile {
 }
 
 model Invoice {
-  id            String        @id @default(cuid())
-  workOrderId   String        @unique
-  customerId    String
-  subtotalParts Float
-  subtotalLabor Float
-  tax           Float
-  discount      Float         @default(0)
-  total         Float
-  status        PaymentStatus @default(UNPAID)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  Customer      Customer      @relation(fields: [customerId], references: [id])
-  WorkOrder     WorkOrder     @relation(fields: [workOrderId], references: [id])
-  Payment       Payment[]
+  id                   String        @id @default(cuid())
+  workOrderId          String        @unique
+  customerId           String
+  subtotalParts        Float
+  subtotalLabor        Float
+  tax                  Float
+  discount             Float         @default(0)
+  total                Float
+  status               PaymentStatus @default(UNPAID)
+  portalTokenHash      String?
+  portalTokenExpiresAt DateTime?
+  portalViewedAt       DateTime?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  Customer             Customer      @relation(fields: [customerId], references: [id])
+  WorkOrder            WorkOrder     @relation(fields: [workOrderId], references: [id])
+  Payment              Payment[]
 }
 
 model Part {
