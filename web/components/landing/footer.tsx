@@ -14,7 +14,7 @@ const footerLinks = {
     { label: 'About', href: '#' },
     { label: 'Blog', href: '#' },
     { label: 'Careers', href: '#' },
-    { label: 'Contact', href: 'mailto:hello@bodyshopper.com' },
+    { label: 'Contact', href: 'mailto:hello@shopmule.com' },
   ],
   resources: [
     { label: 'Documentation', href: '#' },
@@ -46,7 +46,7 @@ export function Footer() {
               <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-primary-500 rounded-lg flex items-center justify-center">
                 <Wrench className="w-4 h-4 text-white" />
               </div>
-              <span className="font-semibold text-lg text-neutral-900">BodyShopper</span>
+              <span className="font-semibold text-lg text-neutral-900">ShopMule</span>
             </Link>
             <p className="text-sm text-neutral-500 leading-relaxed">
               Modern shop management software for the digital age.
@@ -125,7 +125,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-neutral-200 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-neutral-500">
-            &copy; {new Date().getFullYear()} BodyShopper. All rights reserved.
+            &copy; {new Date().getFullYear()} ShopMule. All rights reserved.
           </p>
 
           {/* Social Links */}

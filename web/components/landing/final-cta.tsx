@@ -33,7 +33,7 @@ export function FinalCTA() {
           <p className="text-xl text-white/70 mb-10 max-w-xl mx-auto leading-relaxed">
             Start your 14-day free trial today. No credit card required.
             <br />
-            See the difference BodyShopper can make.
+            See the difference ShopMule can make.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -53,7 +53,7 @@ export function FinalCTA() {
               size="lg"
               className="rounded-lg h-14 px-8 text-base font-medium border-white/30 bg-transparent text-white hover:bg-white/10 transition-all duration-200"
             >
-              <a href="mailto:sales@bodyshopper.com">Talk to Sales</a>
+              <a href="mailto:sales@shopmule.com">Talk to Sales</a>
             </Button>
           </div>
         </motion.div>

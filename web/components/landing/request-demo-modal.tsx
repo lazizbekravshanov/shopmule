@@ -61,7 +61,7 @@ export function RequestDemoModal({ open, onOpenChange }: RequestDemoModalProps) 
         <DialogHeader>
           <DialogTitle>Request a demo</DialogTitle>
           <DialogDescription>
-            See how BodyShopper can transform your shop operations.
+            See how ShopMule can transform your shop operations.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

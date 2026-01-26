@@ -30,9 +30,9 @@ export function LandingNav() {
             <Link
               href="/"
               className="text-base font-medium text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2 rounded-sm"
-              aria-label="BodyShopper home"
+              aria-label="ShopMule home"
             >
-              BodyShopper
+              ShopMule
             </Link>
 
             <div className="hidden md:flex items-center gap-10" role="list">

@@ -5,7 +5,7 @@ import { Star, Quote } from 'lucide-react';
 
 const testimonials = [
   {
-    quote: "BodyShopper transformed how we run our shop. We went from chaos to organized in just a week. The time tracking alone saved us thousands in lost billable hours.",
+    quote: "ShopMule transformed how we run our shop. We went from chaos to organized in just a week. The time tracking alone saved us thousands in lost billable hours.",
     author: "Mike Rodriguez",
     role: "Owner, Rodriguez Truck Repair",
     rating: 5,

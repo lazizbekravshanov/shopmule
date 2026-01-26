@@ -45,7 +45,7 @@ export function Navigation() {
               <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-primary-500 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
                 <Wrench className="w-4 h-4 text-white" />
               </div>
-              <span className="font-semibold text-lg text-neutral-900">BodyShopper</span>
+              <span className="font-semibold text-lg text-neutral-900">ShopMule</span>
             </Link>
 
             {/* Desktop Nav */}

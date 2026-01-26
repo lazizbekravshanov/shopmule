@@ -61,7 +61,7 @@ export async function sendPaymentLinkSms(options: {
     customerName,
     paymentLink,
     totalAmount,
-    shopName = 'BodyShopper Auto',
+    shopName = 'ShopMule Auto',
   } = options;
 
   const formattedAmount = new Intl.NumberFormat('en-US', {

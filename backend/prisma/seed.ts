@@ -25,7 +25,7 @@ async function main() {
   const adminHash = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@bodyshopper.com',
+      email: 'admin@shopmule.com',
       passwordHash: adminHash,
       role: Role.ADMIN,
     },
@@ -34,11 +34,11 @@ async function main() {
   // Create employees with users
   const employees = [];
   const employeeData = [
-    { name: 'Mike Johnson', email: 'mike@bodyshopper.com', role: Role.MECHANIC, payRate: 35 },
-    { name: 'Sarah Williams', email: 'sarah@bodyshopper.com', role: Role.MECHANIC, payRate: 38 },
-    { name: 'Carlos Garcia', email: 'carlos@bodyshopper.com', role: Role.MECHANIC, payRate: 32 },
-    { name: 'James Chen', email: 'james@bodyshopper.com', role: Role.MANAGER, payRate: 45 },
-    { name: 'Emily Davis', email: 'emily@bodyshopper.com', role: Role.FRONT_DESK, payRate: 22 },
+    { name: 'Mike Johnson', email: 'mike@shopmule.com', role: Role.MECHANIC, payRate: 35 },
+    { name: 'Sarah Williams', email: 'sarah@shopmule.com', role: Role.MECHANIC, payRate: 38 },
+    { name: 'Carlos Garcia', email: 'carlos@shopmule.com', role: Role.MECHANIC, payRate: 32 },
+    { name: 'James Chen', email: 'james@shopmule.com', role: Role.MANAGER, payRate: 45 },
+    { name: 'Emily Davis', email: 'emily@shopmule.com', role: Role.FRONT_DESK, payRate: 22 },
   ];
 
   for (const emp of employeeData) {

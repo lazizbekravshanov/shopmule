@@ -9,7 +9,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgresql://bodyshopper:bodyshopper@db:5432/bodyshopper?schema=public
+      DATABASE_URL: postgresql://shopmule:shopmule@db:5432/shopmule?schema=public
       NEXTAUTH_URL: http://localhost:3000
       NEXTAUTH_SECRET: dev-secret-key-change-in-production
       NODE_ENV: development
@@ -19,9 +19,9 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: bodyshopper
-      POSTGRES_USER: bodyshopper
-      POSTGRES_PASSWORD: bodyshopper
+      POSTGRES_DB: shopmule
+      POSTGRES_USER: shopmule
+      POSTGRES_PASSWORD: shopmule
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:

@@ -1,4 +1,4 @@
-# BodyShopper Web App
+# ShopMule Web App
 
 See the main [README.md](../README.md) in the repository root for full documentation.
 

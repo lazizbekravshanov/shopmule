@@ -32,7 +32,7 @@ export function ScreenshotsSection() {
           Built for shop operations
         </h2>
         <p className="text-xl text-gray-600 max-w-xl mx-auto font-light">
-          See how BodyShopper works in practice.
+          See how ShopMule works in practice.
         </p>
       </motion.div>
 

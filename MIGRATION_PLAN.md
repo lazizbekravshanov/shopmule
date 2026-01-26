@@ -1,7 +1,7 @@
 # Migration Plan: Django → Next.js
 
 ## Overview
-Migration of BodyShopper Django/Python SaaS to Next.js 14+ (App Router), TypeScript, Prisma, and shadcn/ui.
+Migration of ShopMule Django/Python SaaS to Next.js 14+ (App Router), TypeScript, Prisma, and shadcn/ui.
 
 ## Django Apps Inventory
 

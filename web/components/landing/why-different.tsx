@@ -29,7 +29,7 @@ export function WhyDifferent() {
           className="text-center mb-20"
         >
           <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-5 tracking-tight">
-            Why BodyShopper
+            Why ShopMule
           </h2>
         </motion.div>
 

@@ -2,7 +2,7 @@
 
 ## Summary
 
-This document outlines the comprehensive optimizations made to the BodyShopper frontend codebase following 2025 best practices.
+This document outlines the comprehensive optimizations made to the ShopMule frontend codebase following 2025 best practices.
 
 ---
 
@@ -159,7 +159,7 @@ components/
 
 ### Enhanced Root Layout
 
-- Dynamic title template (`%s | BodyShopper`)
+- Dynamic title template (`%s | ShopMule`)
 - OpenGraph metadata
 - Twitter card metadata
 - Proper viewport configuration

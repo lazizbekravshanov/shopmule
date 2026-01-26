@@ -159,7 +159,7 @@ export function Hero() {
               </div>
               <div className="flex-1 mx-4">
                 <div className="bg-neutral-800 rounded-md px-4 py-1.5 text-xs text-neutral-400 text-center max-w-xs mx-auto">
-                  app.bodyshopper.com/dashboard
+                  app.shopmule.com/dashboard
                 </div>
               </div>
             </div>
@@ -174,7 +174,7 @@ export function Hero() {
                     <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
                       <Wrench className="w-4 h-4 text-neutral-900" />
                     </div>
-                    <span className="text-white font-semibold text-sm">BodyShopper</span>
+                    <span className="text-white font-semibold text-sm">ShopMule</span>
                   </div>
 
                   {/* Nav Items */}

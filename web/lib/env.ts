@@ -27,7 +27,7 @@ function validateEnv(): Env {
 
     // In development, return defaults for missing vars
     return {
-      DATABASE_URL: process.env.DATABASE_URL || "postgresql://localhost:5432/bodyshopper",
+      DATABASE_URL: process.env.DATABASE_URL || "postgresql://localhost:5432/shopmule",
       NEXTAUTH_URL: process.env.NEXTAUTH_URL || "http://localhost:3000",
       NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || "development-secret-key-at-least-32-chars",
       NODE_ENV: (process.env.NODE_ENV as "development" | "production" | "test") || "development",

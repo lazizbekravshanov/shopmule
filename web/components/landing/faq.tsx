@@ -14,7 +14,7 @@ const faqs = [
   },
   {
     question: "Can we customize it for our workflow?",
-    answer: "BodyShopper is designed to work with standard shop workflows out of the box. Scale plans include custom feature development to match your specific needs.",
+    answer: "ShopMule is designed to work with standard shop workflows out of the box. Scale plans include custom feature development to match your specific needs.",
   },
   {
     question: "What about data security?",

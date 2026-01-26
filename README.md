@@ -1,8 +1,8 @@
-# BodyShopper - Heavy-Duty Truck Repair Shop SaaS
+# ShopMule - Heavy-Duty Truck Repair Shop SaaS
 
 ## Overview
 
-BodyShopper is a multi-tenant SaaS application for managing heavy-duty truck repair shop operations, including repair orders, technician time tracking, parts inventory, billing, and performance dashboards.
+ShopMule is a multi-tenant SaaS application for managing heavy-duty truck repair shop operations, including repair orders, technician time tracking, parts inventory, billing, and performance dashboards.
 
 ## ⚠️ Migration Status
 

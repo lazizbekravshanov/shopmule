@@ -172,7 +172,7 @@ export default function TechniciansPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="john@bodyshopper.com"
+                  placeholder="john@shopmule.com"
                 />
               </div>
               <div className="grid gap-2">

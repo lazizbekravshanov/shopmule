@@ -188,7 +188,7 @@ export function PricingSection() {
             Check our FAQ
           </a>{' '}
           or{' '}
-          <a href="mailto:support@bodyshopper.com" className="text-primary-600 font-medium hover:text-primary-700 transition-colors">
+          <a href="mailto:support@shopmule.com" className="text-primary-600 font-medium hover:text-primary-700 transition-colors">
             contact us
           </a>
         </motion.p>

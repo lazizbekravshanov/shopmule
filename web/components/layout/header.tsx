@@ -37,7 +37,7 @@ export function Header() {
         </SheetTrigger>
         <SheetContent side="left" className="w-64 p-0">
           <div className="flex h-16 items-center border-b px-4">
-            <span className="text-lg font-semibold">BodyShopper</span>
+            <span className="text-lg font-semibold">ShopMule</span>
           </div>
           <div className="py-4">
             <SidebarNav />

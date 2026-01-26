@@ -10,9 +10,9 @@ services:
     environment:
       DJANGO_DEBUG: "1"
       DJANGO_ALLOWED_HOSTS: "*"
-      POSTGRES_DB: bodyshopper
-      POSTGRES_USER: bodyshopper
-      POSTGRES_PASSWORD: bodyshopper
+      POSTGRES_DB: shopmule
+      POSTGRES_USER: shopmule
+      POSTGRES_PASSWORD: shopmule
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       REDIS_URL: redis://redis:6379/0
@@ -28,9 +28,9 @@ services:
     environment:
       DJANGO_DEBUG: "1"
       DJANGO_ALLOWED_HOSTS: "*"
-      POSTGRES_DB: bodyshopper
-      POSTGRES_USER: bodyshopper
-      POSTGRES_PASSWORD: bodyshopper
+      POSTGRES_DB: shopmule
+      POSTGRES_USER: shopmule
+      POSTGRES_PASSWORD: shopmule
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       REDIS_URL: redis://redis:6379/0
@@ -41,9 +41,9 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: bodyshopper
-      POSTGRES_USER: bodyshopper
-      POSTGRES_PASSWORD: bodyshopper
+      POSTGRES_DB: shopmule
+      POSTGRES_USER: shopmule
+      POSTGRES_PASSWORD: shopmule
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:

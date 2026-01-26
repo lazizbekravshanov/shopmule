@@ -6,7 +6,7 @@ import { Providers } from '@/lib/providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'BodyShopper Admin',
+  title: 'ShopMule Admin',
   description: 'Body shop management dashboard',
 };
 

@@ -87,7 +87,7 @@ export default function TVDashboardPage() {
     <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold mb-2">BodyShopper TV Dashboard</h1>
+          <h1 className="text-5xl font-bold mb-2">ShopMule TV Dashboard</h1>
           <p className="text-2xl text-gray-400">
             {new Date().toLocaleDateString("en-US", {
               weekday: "long",

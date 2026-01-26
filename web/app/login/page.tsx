@@ -58,7 +58,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <div className="flex items-center gap-2">
               <Truck className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">BodyShopper</span>
+              <span className="text-2xl font-bold">ShopMule</span>
             </div>
           </div>
           <CardTitle className="text-2xl">Welcome back</CardTitle>
@@ -78,7 +78,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@bodyshopper.com"
+                placeholder="admin@shopmule.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

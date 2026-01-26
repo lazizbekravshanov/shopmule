@@ -16,7 +16,7 @@ export interface EmailResult {
   error?: string;
 }
 
-const DEFAULT_FROM = process.env.EMAIL_FROM || 'BodyShopper <noreply@bodyshopper.com>';
+const DEFAULT_FROM = process.env.EMAIL_FROM || 'ShopMule <noreply@shopmule.com>';
 
 export async function sendEmail(options: SendEmailOptions): Promise<EmailResult> {
   const { to, subject, html, text, from = DEFAULT_FROM } = options;
@@ -74,7 +74,7 @@ export async function sendPaymentLinkEmail(options: {
     vehicleInfo,
     paymentLink,
     totalAmount,
-    shopName = 'BodyShopper Auto',
+    shopName = 'ShopMule Auto',
     customMessage,
   } = options;
 

@@ -25,7 +25,7 @@ export function Sidebar() {
       )}>
         <Truck className="h-6 w-6 text-primary" />
         {!sidebarCollapsed && (
-          <span className="ml-2 text-lg font-semibold">BodyShopper</span>
+          <span className="ml-2 text-lg font-semibold">ShopMule</span>
         )}
       </div>
 

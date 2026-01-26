@@ -1,6 +1,6 @@
 import { RepairOrderStatus, Role, InvoiceStatus } from "@prisma/client"
 
-export const APP_NAME = "BodyShopper"
+export const APP_NAME = "ShopMule"
 export const APP_DESCRIPTION = "Modern SaaS for trucking service centers"
 
 // Pagination
