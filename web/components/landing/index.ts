@@ -6,6 +6,7 @@ export { FeaturesBento } from './features-bento';
 export { HowItWorks } from './how-it-works';
 export { PricingSection } from './pricing';
 export { Testimonials } from './testimonials';
+export { FAQSection } from './faq';
 export { FinalCTA } from './final-cta';
 export { Footer } from './footer';
 export { StatusSection } from '@/components/status/status-section';

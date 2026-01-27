@@ -1,14 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
-
-const stats = [
-  { value: '500+', label: 'Repair Shops' },
-  { value: '50K+', label: 'Jobs Completed' },
-  { value: '4.9', label: 'Star Rating', icon: Star },
-  { value: '99.9%', label: 'Uptime' },
-];
 
 const logos = [
   'FleetMax',
@@ -16,64 +8,34 @@ const logos = [
   'AutoCare',
   'RoadReady',
   'MechWorks',
-  'FixItFast',
 ];
 
 export function SocialProof() {
   return (
-    <section className="relative py-20 bg-neutral-50">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16"
-        >
-          {stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="text-center"
-            >
-              <div className="flex items-center justify-center gap-1.5 mb-2">
-                <span className="text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
-                  {stat.value}
-                </span>
-                {stat.icon && <Star className="w-5 h-5 text-warning-500 fill-warning-500" />}
-              </div>
-              <p className="text-sm text-neutral-500 font-medium">{stat.label}</p>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Logos */}
+    <section className="py-16 bg-white border-b border-neutral-100">
+      <div className="max-w-6xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center"
+          transition={{ duration: 0.5 }}
+          className="flex flex-col md:flex-row items-center justify-between gap-8"
         >
-          <p className="text-xs text-neutral-400 mb-8 uppercase tracking-widest font-medium">
-            Trusted by leading repair shops
+          <p className="text-sm text-neutral-400 uppercase tracking-wide shrink-0">
+            Trusted by
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
             {logos.map((logo, index) => (
-              <motion.div
+              <motion.span
                 key={logo}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="text-xl md:text-2xl font-semibold text-neutral-300 hover:text-neutral-400 transition-colors duration-200 cursor-default"
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className="text-lg font-medium text-neutral-300"
               >
                 {logo}
-              </motion.div>
+              </motion.span>
             ))}
           </div>
         </motion.div>

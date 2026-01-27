@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Check, Zap } from 'lucide-react';
+import { Check, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const tiers = [
   {
     name: 'Starter',
-    description: 'For small shops getting started',
+    description: 'For small shops',
     monthlyPrice: 49,
     yearlyPrice: 39,
     features: [
@@ -20,12 +20,11 @@ const tiers = [
       'Time tracking',
       'Email support',
     ],
-    cta: 'Start Free Trial',
     popular: false,
   },
   {
     name: 'Professional',
-    description: 'For growing shops that need more',
+    description: 'For growing shops',
     monthlyPrice: 99,
     yearlyPrice: 79,
     features: [
@@ -36,12 +35,11 @@ const tiers = [
       'Advanced reporting',
       'Priority support',
     ],
-    cta: 'Start Free Trial',
     popular: true,
   },
   {
     name: 'Enterprise',
-    description: 'For multi-location operations',
+    description: 'For multi-location',
     monthlyPrice: 249,
     yearlyPrice: 199,
     features: [
@@ -50,57 +48,64 @@ const tiers = [
       'Multi-location support',
       'Custom integrations',
       'Dedicated account manager',
-      'SLA guarantee',
     ],
-    cta: 'Contact Sales',
     popular: false,
   },
 ];
 
 export function PricingSection() {
-  const [isYearly, setIsYearly] = useState(false);
+  const [isYearly, setIsYearly] = useState(true);
 
   return (
-    <section id="pricing" className="py-24 bg-neutral-50">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="pricing" className="py-24 bg-white">
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          transition={{ duration: 0.5 }}
+          className="mb-12"
         >
-          <p className="text-sm font-medium text-primary-600 mb-3 uppercase tracking-widest">Pricing</p>
-          <h2 className="text-3xl md:text-5xl font-bold text-neutral-900 mb-4 tracking-tight">
-            Simple, transparent pricing
+          <span className="text-sm font-medium text-neutral-500 uppercase tracking-wide">
+            Pricing
+          </span>
+          <h2 className="mt-2 text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
+            Simple pricing.
           </h2>
-          <p className="text-lg text-neutral-600 max-w-2xl mx-auto mb-8 leading-relaxed">
-            No hidden fees. No surprises. Cancel anytime.
+          <p className="mt-4 text-lg text-neutral-600">
+            No hidden fees. Cancel anytime.
           </p>
 
           {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-4">
-            <span className={cn('text-sm font-medium transition-colors', !isYearly ? 'text-neutral-900' : 'text-neutral-500')}>
+          <div className="mt-8 flex items-center gap-4">
+            <span className={cn(
+              'text-sm font-medium transition-colors',
+              !isYearly ? 'text-neutral-900' : 'text-neutral-400'
+            )}>
               Monthly
             </span>
             <button
               onClick={() => setIsYearly(!isYearly)}
               className={cn(
-                'relative w-14 h-7 rounded-full transition-colors duration-200',
-                isYearly ? 'bg-primary-600' : 'bg-neutral-300'
+                'relative w-12 h-6 rounded-full transition-colors',
+                isYearly ? 'bg-primary-500' : 'bg-neutral-300'
               )}
               aria-label="Toggle billing period"
             >
               <motion.div
                 initial={false}
-                animate={{ x: isYearly ? 28 : 4 }}
+                animate={{ x: isYearly ? 26 : 2 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-sm"
+                className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm"
               />
             </button>
-            <span className={cn('text-sm font-medium flex items-center gap-2 transition-colors', isYearly ? 'text-neutral-900' : 'text-neutral-500')}>
+            <span className={cn(
+              'text-sm font-medium transition-colors',
+              isYearly ? 'text-neutral-900' : 'text-neutral-400'
+            )}>
               Yearly
-              <span className="bg-success-50 text-success-600 text-xs font-semibold px-2 py-0.5 rounded-full">
+              <span className="ml-2 text-xs text-primary-600 font-semibold">
                 Save 20%
               </span>
             </span>
@@ -108,90 +113,73 @@ export function PricingSection() {
         </motion.div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-px bg-neutral-200 rounded-xl overflow-hidden">
           {tiers.map((tier, index) => (
             <motion.div
               key={tier.name}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
               className={cn(
-                'relative bg-white rounded-2xl p-8 transition-all duration-300',
-                tier.popular
-                  ? 'border-2 border-primary-600 shadow-glow'
-                  : 'border border-neutral-200 hover:border-primary-200 hover:shadow-premium-lg'
+                'bg-white p-8 flex flex-col',
+                tier.popular && 'bg-neutral-50'
               )}
             >
-              {tier.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <div className="flex items-center gap-1.5 bg-primary-600 text-white text-sm font-medium px-4 py-1.5 rounded-full shadow-sm">
-                    <Zap className="w-3.5 h-3.5" />
-                    Most Popular
-                  </div>
-                </div>
-              )}
-
+              {/* Header */}
               <div className="mb-6">
-                <h3 className="text-xl font-semibold text-neutral-900 mb-2">{tier.name}</h3>
+                {tier.popular && (
+                  <span className="text-xs font-semibold text-primary-600 uppercase tracking-wide">
+                    Most Popular
+                  </span>
+                )}
+                <h3 className="text-xl font-semibold text-neutral-900 mt-1">
+                  {tier.name}
+                </h3>
                 <p className="text-sm text-neutral-500">{tier.description}</p>
               </div>
 
+              {/* Price */}
               <div className="mb-6">
-                <div className="flex items-baseline">
-                  <span className="text-5xl font-bold text-neutral-900 tracking-tight">
-                    ${isYearly ? tier.yearlyPrice : tier.monthlyPrice}
-                  </span>
-                  <span className="text-neutral-500 ml-2">/month</span>
-                </div>
+                <span className="text-4xl font-bold text-neutral-900 tracking-tight">
+                  ${isYearly ? tier.yearlyPrice : tier.monthlyPrice}
+                </span>
+                <span className="text-neutral-500 ml-1">/mo</span>
                 {isYearly && (
-                  <p className="text-sm text-neutral-500 mt-1">
-                    Billed annually (${tier.yearlyPrice * 12}/year)
+                  <p className="text-sm text-neutral-400 mt-1">
+                    Billed annually
                   </p>
                 )}
               </div>
 
-              <ul className="space-y-4 mb-8">
+              {/* Features */}
+              <ul className="space-y-3 mb-8 flex-grow">
                 {tier.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-neutral-700">{feature}</span>
+                    <Check className="w-4 h-4 text-primary-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-neutral-600">{feature}</span>
                   </li>
                 ))}
               </ul>
 
+              {/* CTA */}
               <Button
                 asChild
                 className={cn(
-                  'w-full h-12 font-medium rounded-lg transition-all duration-200',
+                  'w-full h-11 font-medium rounded-lg',
                   tier.popular
-                    ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm hover:shadow-md'
-                    : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-900'
+                    ? 'bg-primary-500 hover:bg-primary-600 text-white'
+                    : 'bg-neutral-900 hover:bg-neutral-800 text-white'
                 )}
               >
-                <Link href="/login">{tier.cta}</Link>
+                <Link href="/login">
+                  Start free trial
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Link>
               </Button>
             </motion.div>
           ))}
         </div>
-
-        {/* FAQ Link */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center mt-12 text-neutral-500"
-        >
-          Have questions?{' '}
-          <a href="#faq" className="text-primary-600 font-medium hover:text-primary-700 transition-colors">
-            Check our FAQ
-          </a>{' '}
-          or{' '}
-          <a href="mailto:support@shopmule.com" className="text-primary-600 font-medium hover:text-primary-700 transition-colors">
-            contact us
-          </a>
-        </motion.p>
       </div>
     </section>
   );

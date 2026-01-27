@@ -9,6 +9,7 @@ import {
   HowItWorks,
   PricingSection,
   Testimonials,
+  FAQSection,
   StatusSection,
   FinalCTA,
   Footer,
@@ -26,6 +27,7 @@ export default function LandingPage() {
         <HowItWorks />
         <Testimonials />
         <PricingSection />
+        <FAQSection />
         <StatusSection />
         <FinalCTA />
       </main>
