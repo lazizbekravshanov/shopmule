@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
 
 interface RevenueChartProps {
@@ -17,28 +16,28 @@ interface RevenueChartProps {
 
 export function RevenueChart({ data }: RevenueChartProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Revenue Overview</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={350}>
+    <div className="bg-white rounded-lg border border-neutral-200">
+      <div className="p-5 border-b border-neutral-200">
+        <h3 className="font-semibold text-neutral-900">Revenue Overview</h3>
+      </div>
+      <div className="p-5">
+        <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={data}>
             <defs>
               <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                <stop offset="5%" stopColor="#ee7a14" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="#ee7a14" stopOpacity={0} />
               </linearGradient>
             </defs>
             <XAxis
               dataKey="month"
-              stroke="hsl(var(--muted-foreground))"
+              stroke="#a8a29e"
               fontSize={12}
               tickLine={false}
               axisLine={false}
             />
             <YAxis
-              stroke="hsl(var(--muted-foreground))"
+              stroke="#a8a29e"
               fontSize={12}
               tickLine={false}
               axisLine={false}
@@ -48,17 +47,13 @@ export function RevenueChart({ data }: RevenueChartProps) {
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   return (
-                    <div className="rounded-lg border bg-background p-2 shadow-sm">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="flex flex-col">
-                          <span className="text-[0.70rem] uppercase text-muted-foreground">
-                            Revenue
-                          </span>
-                          <span className="font-bold text-muted-foreground">
-                            {formatCurrency(payload[0].value as number)}
-                          </span>
-                        </div>
-                      </div>
+                    <div className="rounded-lg border border-neutral-200 bg-white p-3 shadow-sm">
+                      <p className="text-xs text-neutral-500 uppercase tracking-wide mb-1">
+                        Revenue
+                      </p>
+                      <p className="text-sm font-semibold text-neutral-900">
+                        {formatCurrency(payload[0].value as number)}
+                      </p>
                     </div>
                   );
                 }
@@ -68,13 +63,13 @@ export function RevenueChart({ data }: RevenueChartProps) {
             <Area
               type="monotone"
               dataKey="revenue"
-              stroke="hsl(var(--primary))"
+              stroke="#ee7a14"
               strokeWidth={2}
               fill="url(#colorRevenue)"
             />
           </AreaChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

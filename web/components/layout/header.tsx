@@ -16,6 +16,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { SidebarNav } from './sidebar-nav';
 import { useUIStore } from '@/lib/stores/ui-store';
 import { Breadcrumbs } from './breadcrumbs';
+import { MuleIcon } from '@/components/ui/mule-logo';
 
 export function Header() {
   const { data: session } = useSession();
@@ -26,18 +27,25 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6">
+    <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-neutral-200 bg-white px-4 lg:px-6">
       {/* Mobile menu */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="lg:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden text-neutral-600"
+          >
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0">
-          <div className="flex h-16 items-center border-b px-4">
-            <span className="text-lg font-semibold">ShopMule</span>
+        <SheetContent side="left" className="w-56 p-0 bg-neutral-50">
+          <div className="flex h-14 items-center border-b border-neutral-200 px-4">
+            <div className="w-7 h-7 bg-primary-500 rounded flex items-center justify-center mr-2">
+              <MuleIcon className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-semibold text-neutral-900">ShopMule</span>
           </div>
           <div className="py-4">
             <SidebarNav />
@@ -54,28 +62,35 @@ export function Header() {
       {/* Search */}
       <Button
         variant="outline"
-        className="hidden w-64 justify-start text-muted-foreground md:flex"
+        className="hidden w-56 justify-start text-neutral-400 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 md:flex"
         onClick={() => setCommandOpen(true)}
       >
         <Search className="mr-2 h-4 w-4" />
-        <span>Search...</span>
-        <kbd className="pointer-events-none ml-auto inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+        <span className="text-sm">Search...</span>
+        <kbd className="pointer-events-none ml-auto inline-flex h-5 select-none items-center gap-1 rounded border border-neutral-200 bg-neutral-100 px-1.5 font-mono text-[10px] font-medium text-neutral-500">
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>
 
       {/* Notifications */}
-      <Button variant="ghost" size="icon">
-        <Bell className="h-5 w-5" />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="text-neutral-500 hover:text-neutral-900"
+      >
+        <Bell className="h-5 w-5" strokeWidth={1.5} />
         <span className="sr-only">Notifications</span>
       </Button>
 
       {/* User menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>
+          <Button
+            variant="ghost"
+            className="relative h-8 w-8 rounded-full hover:bg-neutral-100"
+          >
+            <Avatar className="h-8 w-8 border border-neutral-200">
+              <AvatarFallback className="bg-neutral-100 text-neutral-600">
                 <User className="h-4 w-4" />
               </AvatarFallback>
             </Avatar>
@@ -84,16 +99,19 @@ export function Header() {
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">
+              <p className="text-sm font-medium text-neutral-900">
                 {session?.user?.email || 'User'}
               </p>
-              <p className="text-xs leading-none text-muted-foreground">
+              <p className="text-xs text-neutral-500">
                 {session?.user?.role || 'User'}
               </p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout}>
+          <DropdownMenuItem
+            onClick={handleLogout}
+            className="text-neutral-600 focus:text-neutral-900"
+          >
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>
           </DropdownMenuItem>

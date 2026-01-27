@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import Link from 'next/link';
 import { MuleIcon } from '@/components/ui/mule-logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,7 +20,6 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
 
-    // Client-side validation
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
@@ -52,54 +51,115 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-2">
-              <MuleIcon className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">ShopMule</span>
-            </div>
+    <div className="min-h-screen flex">
+      {/* Left Panel - Brand */}
+      <div className="hidden lg:flex lg:w-1/2 bg-neutral-900 flex-col justify-between p-12">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary-500 rounded flex items-center justify-center">
+            <MuleIcon className="h-5 w-5 text-white" />
           </div>
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
-          <CardDescription>
-            Sign in to your account to continue
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <span className="text-lg font-semibold text-white">ShopMule</span>
+        </Link>
+
+        <div>
+          <h1 className="text-4xl font-bold text-white tracking-tight leading-tight">
+            Run your shop
+            <br />
+            <span className="text-primary-400">with precision.</span>
+          </h1>
+          <p className="mt-4 text-neutral-400 max-w-sm">
+            Work orders. Time tracking. Invoicing.
+            Everything you need, nothing you don&apos;t.
+          </p>
+        </div>
+
+        <p className="text-sm text-neutral-500">
+          &copy; {new Date().getFullYear()} ShopMule
+        </p>
+      </div>
+
+      {/* Right Panel - Login Form */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-neutral-50">
+        <div className="w-full max-w-sm">
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
+            <div className="w-8 h-8 bg-primary-500 rounded flex items-center justify-center">
+              <MuleIcon className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-lg font-semibold text-neutral-900">ShopMule</span>
+          </div>
+
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">
+              Welcome back
+            </h2>
+            <p className="mt-1 text-sm text-neutral-500">
+              Sign in to your account
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+              <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">
                 {error}
               </div>
             )}
+
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label
+                htmlFor="email"
+                className="text-sm font-medium text-neutral-700"
+              >
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@shopmule.com"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="h-11 border-neutral-200 focus:border-primary-500 focus:ring-primary-500"
                 required
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label
+                htmlFor="password"
+                className="text-sm font-medium text-neutral-700"
+              >
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="h-11 border-neutral-200 focus:border-primary-500 focus:ring-primary-500"
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+
+            <Button
+              type="submit"
+              className="w-full h-11 bg-primary-500 hover:bg-primary-600 text-white font-medium"
+              disabled={loading}
+            >
               {loading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+
+          <p className="mt-8 text-center text-sm text-neutral-500">
+            Don&apos;t have an account?{' '}
+            <Link
+              href="/"
+              className="text-primary-600 hover:text-primary-700 font-medium"
+            >
+              Start free trial
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
