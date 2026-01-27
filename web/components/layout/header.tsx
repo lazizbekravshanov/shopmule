@@ -1,12 +1,11 @@
 'use client';
 
-import { signOut, useSession } from 'next-auth/react';
-import { Bell, LogOut, Menu, Search, User } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { Bell, Menu, Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -17,14 +16,11 @@ import { SidebarNav } from './sidebar-nav';
 import { useUIStore } from '@/lib/stores/ui-store';
 import { Breadcrumbs } from './breadcrumbs';
 import { MuleIcon } from '@/components/ui/mule-logo';
+import { LogoutButton } from '@/components/logout-button';
 
 export function Header() {
   const { data: session } = useSession();
   const { sidebarOpen, setSidebarOpen, setCommandOpen } = useUIStore();
-
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: '/login', redirect: true });
-  };
 
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-neutral-200 bg-white px-4 lg:px-6">
@@ -108,13 +104,7 @@ export function Header() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={handleLogout}
-            className="text-neutral-600 focus:text-neutral-900"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
-          </DropdownMenuItem>
+          <LogoutButton />
         </DropdownMenuContent>
       </DropdownMenu>
     </header>

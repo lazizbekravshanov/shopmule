@@ -85,6 +85,12 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/login",
+    signOut: "/",
+  },
+  events: {
+    async signOut() {
+      console.log('[Auth] User signed out');
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
