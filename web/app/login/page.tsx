@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { Truck } from 'lucide-react';
+import { MuleIcon } from '@/components/ui/mule-logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -57,7 +57,7 @@ export default function LoginPage() {
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
             <div className="flex items-center gap-2">
-              <Truck className="h-8 w-8 text-primary" />
+              <MuleIcon className="h-8 w-8 text-primary" />
               <span className="text-2xl font-bold">ShopMule</span>
             </div>
           </div>

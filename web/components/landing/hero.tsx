@@ -15,6 +15,7 @@ import {
   Package,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { MuleIcon } from '@/components/ui/mule-logo';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -172,7 +173,7 @@ export function Hero() {
                   {/* Logo */}
                   <div className="flex items-center gap-2 mb-6 px-2">
                     <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                      <Wrench className="w-4 h-4 text-neutral-900" />
+                      <MuleIcon className="w-4 h-4 text-neutral-900" />
                     </div>
                     <span className="text-white font-semibold text-sm">ShopMule</span>
                   </div>

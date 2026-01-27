@@ -1,6 +1,7 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Truck } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { MuleIcon } from '@/components/ui/mule-logo';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,7 +24,7 @@ export function Sidebar() {
         'flex h-16 items-center border-b px-4',
         sidebarCollapsed && 'justify-center px-2'
       )}>
-        <Truck className="h-6 w-6 text-primary" />
+        <MuleIcon className="h-6 w-6 text-primary" />
         {!sidebarCollapsed && (
           <span className="ml-2 text-lg font-semibold">ShopMule</span>
         )}
