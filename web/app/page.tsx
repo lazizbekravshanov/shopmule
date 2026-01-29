@@ -10,6 +10,7 @@ import {
   PricingSection,
   Testimonials,
   FAQSection,
+  SecuritySection,
   StatusSection,
   FinalCTA,
   Footer,
@@ -27,6 +28,7 @@ export default function LandingPage() {
         <HowItWorks />
         <Testimonials />
         <PricingSection />
+        <SecuritySection />
         <FAQSection />
         <StatusSection />
         <FinalCTA />
