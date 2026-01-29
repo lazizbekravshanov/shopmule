@@ -3,9 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Plus, Eye } from 'lucide-react';
+import { MoreHorizontal, Plus, Eye, ChevronRight, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,12 +28,19 @@ const statusOptions = [
   { label: 'Completed', value: 'COMPLETED' },
 ];
 
+const statusColors: Record<string, { bg: string; text: string; border: string }> = {
+  DIAGNOSED: { bg: 'bg-neutral-50', text: 'text-neutral-600', border: 'border-neutral-200' },
+  APPROVED: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+  IN_PROGRESS: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+  COMPLETED: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+};
+
 const columns: ColumnDef<WorkOrder>[] = [
   {
     accessorKey: 'id',
     header: ({ column }) => <DataTableColumnHeader column={column} title="ID" />,
     cell: ({ row }) => (
-      <span className="font-mono text-xs">{row.original.id.slice(0, 8)}</span>
+      <span className="font-mono text-xs text-neutral-500">{row.original.id.slice(0, 8)}</span>
     ),
   },
   {
@@ -44,15 +50,15 @@ const columns: ColumnDef<WorkOrder>[] = [
       const vehicle = row.original.vehicle;
       return vehicle ? (
         <div>
-          <div className="font-medium">
+          <div className="font-medium text-neutral-900">
             {vehicle.make} {vehicle.model}
           </div>
           {vehicle.year && (
-            <div className="text-sm text-muted-foreground">{vehicle.year}</div>
+            <div className="text-sm text-neutral-500">{vehicle.year}</div>
           )}
         </div>
       ) : (
-        <span className="text-muted-foreground">-</span>
+        <span className="text-neutral-400">—</span>
       );
     },
     filterFn: (row, id, value) => {
@@ -66,7 +72,7 @@ const columns: ColumnDef<WorkOrder>[] = [
     accessorKey: 'description',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
     cell: ({ row }) => (
-      <div className="max-w-[300px] truncate">{row.original.description}</div>
+      <div className="max-w-[300px] truncate text-neutral-600">{row.original.description}</div>
     ),
   },
   {
@@ -74,20 +80,13 @@ const columns: ColumnDef<WorkOrder>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
       const status = row.original.status;
+      const colors = statusColors[status] || statusColors.DIAGNOSED;
       return (
-        <Badge
-          variant={
-            status === 'COMPLETED'
-              ? 'success'
-              : status === 'IN_PROGRESS'
-              ? 'warning'
-              : status === 'APPROVED'
-              ? 'default'
-              : 'secondary'
-          }
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full border ${colors.bg} ${colors.text} ${colors.border}`}
         >
           {status.replace('_', ' ')}
-        </Badge>
+        </span>
       );
     },
     filterFn: (row, id, value) => {
@@ -99,7 +98,11 @@ const columns: ColumnDef<WorkOrder>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
     cell: ({ row }) => {
       const date = row.original.createdAt;
-      return date ? formatDate(date) : '-';
+      return date ? (
+        <span className="text-neutral-500">{formatDate(date)}</span>
+      ) : (
+        <span className="text-neutral-400">—</span>
+      );
     },
   },
   {
@@ -118,27 +121,29 @@ function WorkOrderActions({ workOrder }: { workOrder: WorkOrder }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
+        <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-neutral-100">
           <span className="sr-only">Open menu</span>
-          <MoreHorizontal className="h-4 w-4" />
+          <MoreHorizontal className="h-4 w-4 text-neutral-500" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem asChild>
-          <Link href={`/work-orders/${workOrder.id}`}>
+      <DropdownMenuContent align="end" className="w-48 border-neutral-200">
+        <DropdownMenuLabel className="text-neutral-500 text-xs font-medium">Actions</DropdownMenuLabel>
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href={`/work-orders/${workOrder.id}`} className="flex items-center">
             <Eye className="mr-2 h-4 w-4" />
             View details
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuLabel>Update Status</DropdownMenuLabel>
+        <DropdownMenuSeparator className="bg-neutral-100" />
+        <DropdownMenuLabel className="text-neutral-500 text-xs font-medium">Update Status</DropdownMenuLabel>
         {statusOptions.map((option) => (
           <DropdownMenuItem
             key={option.value}
             onClick={() => handleStatusChange(option.value)}
             disabled={workOrder.status === option.value}
+            className="cursor-pointer"
           >
+            <ChevronRight className="mr-2 h-3 w-3 text-neutral-400" />
             {option.label}
           </DropdownMenuItem>
         ))}
@@ -148,46 +153,83 @@ function WorkOrderActions({ workOrder }: { workOrder: WorkOrder }) {
 }
 
 export default function WorkOrdersPage() {
-  const { data: workOrders, isLoading } = useWorkOrders();
+  const { data: workOrders, isLoading, error, refetch, isFetching } = useWorkOrders();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Work Orders</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Work Orders</h1>
+          <p className="text-neutral-500 mt-1">
             Manage repair orders and track progress
           </p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Work Order
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="border-neutral-200"
+          >
+            <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white border-0"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            New Work Order
+          </Button>
+        </div>
       </div>
 
       <NewWorkOrderModal open={isModalOpen} onOpenChange={setIsModalOpen} />
 
-      {isLoading ? (
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-[400px] w-full" />
+      {/* Stats Summary */}
+      {!isLoading && workOrders && (
+        <div className="grid grid-cols-4 gap-4">
+          {statusOptions.map((status) => {
+            const count = workOrders.filter((wo) => wo.status === status.value).length;
+            const colors = statusColors[status.value];
+            return (
+              <div
+                key={status.value}
+                className="bg-white border border-neutral-200 rounded-lg p-4"
+              >
+                <div className="text-sm text-neutral-500">{status.label}</div>
+                <div className={`text-2xl font-semibold mt-1 ${colors.text}`}>{count}</div>
+              </div>
+            );
+          })}
         </div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={workOrders ?? []}
-          searchKey="vehicle"
-          searchPlaceholder="Search vehicles..."
-          filterableColumns={[
-            {
-              id: 'status',
-              title: 'Status',
-              options: statusOptions,
-            },
-          ]}
-        />
       )}
+
+      {/* Data Table */}
+      <div className="bg-white border border-neutral-200 rounded-lg">
+        {isLoading ? (
+          <div className="p-6 space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-[400px] w-full" />
+          </div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={workOrders ?? []}
+            searchKey="vehicle"
+            searchPlaceholder="Search vehicles..."
+            filterableColumns={[
+              {
+                id: 'status',
+                title: 'Status',
+                options: statusOptions,
+              },
+            ]}
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -15,6 +15,7 @@ const createWorkOrderSchema = z.object({
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
+    console.log("GET /api/work-orders - session:", session ? "exists" : "null")
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -22,12 +23,11 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const summary = searchParams.get("summary") === "true"
     const fieldsParam = searchParams.get("fields")
-    const limitParam = Number(searchParams.get("limit"))
-    const offsetParam = Number(searchParams.get("offset"))
-    const take = Number.isFinite(limitParam)
-      ? Math.max(1, Math.min(100, limitParam))
-      : undefined
-    const skip = Number.isFinite(offsetParam) ? Math.max(0, offsetParam) : undefined
+    const limitParam = searchParams.get("limit")
+    const offsetParam = searchParams.get("offset")
+    // Only apply limit/offset if explicitly provided (not null)
+    const take = limitParam !== null ? Math.max(1, Math.min(100, parseInt(limitParam, 10) || 100)) : undefined
+    const skip = offsetParam !== null ? Math.max(0, parseInt(offsetParam, 10) || 0) : undefined
 
     if (summary) {
       const limit = take ?? 5
@@ -307,6 +307,8 @@ export async function GET(request: Request) {
 
       return NextResponse.json(transformed)
     }
+
+    console.log("GET /api/work-orders - found", workOrders.length, "work orders")
 
     // Transform to match frontend expected format
     const transformed = workOrders.map((wo) => ({

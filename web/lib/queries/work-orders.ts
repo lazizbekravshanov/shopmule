@@ -38,7 +38,8 @@ export function useCreateWorkOrder() {
   return useMutation({
     mutationFn: (data: Partial<WorkOrder>) => api.workOrders.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: workOrderKeys.lists() });
+      // Invalidate all work order queries to ensure list and summary are refreshed
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.all });
     },
   });
 }
