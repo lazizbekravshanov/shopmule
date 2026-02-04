@@ -20,8 +20,9 @@ const protectedRoutes = [
 const publicRoutes = [
   "/login",
   "/register",
-  "/pay", // Customer payment portal
-  "/",    // Landing page
+  "/pay",     // Customer payment portal
+  "/contact", // Contact form
+  "/",        // Landing page
 ]
 
 // API routes that are public (no auth required)

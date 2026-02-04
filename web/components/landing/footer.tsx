@@ -12,7 +12,7 @@ const footerLinks = {
   company: [
     { label: 'About', href: '#' },
     { label: 'Blog', href: '#' },
-    { label: 'Contact', href: 'mailto:hello@shopmule.com' },
+    { label: 'Contact', href: '/contact' },
   ],
   legal: [
     { label: 'Privacy', href: '#' },

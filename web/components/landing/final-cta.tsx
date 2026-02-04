@@ -42,7 +42,7 @@ export function FinalCTA() {
               size="lg"
               className="rounded-lg h-12 px-8 font-medium border-neutral-700 bg-transparent text-white hover:bg-neutral-800"
             >
-              <a href="mailto:sales@shopmule.com">Talk to sales</a>
+              <Link href="/contact">Talk to sales</Link>
             </Button>
           </div>
         </motion.div>
