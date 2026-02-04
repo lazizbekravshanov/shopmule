@@ -10,6 +10,8 @@ type FormData = {
   email: string;
   phone: string;
   company: string;
+  mcNumber: string;
+  usdotNumber: string;
   subject: string;
   message: string;
 };
@@ -19,6 +21,8 @@ const initialForm: FormData = {
   email: '',
   phone: '',
   company: '',
+  mcNumber: '',
+  usdotNumber: '',
   subject: '',
   message: '',
 };
@@ -54,7 +58,7 @@ export default function ContactPage() {
     setIsSubmitted(true);
   };
 
-  const isValid = form.name && form.email && form.subject && form.message;
+  const isValid = form.name && form.email && form.mcNumber && form.usdotNumber && form.subject && form.message;
 
   return (
     <div className="min-h-screen bg-white">
@@ -220,6 +224,48 @@ export default function ContactPage() {
                           placeholder="Acme Truck Repair"
                           className="w-full h-11 px-4 text-sm bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#ee7a14]/20 focus:border-[#ee7a14] transition-all"
                         />
+                      </div>
+                    </div>
+
+                    {/* MC + USDOT */}
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="mcNumber"
+                          className="text-sm font-medium text-neutral-700"
+                        >
+                          MC Number <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="mcNumber"
+                          name="mcNumber"
+                          type="text"
+                          required
+                          value={form.mcNumber}
+                          onChange={handleChange}
+                          placeholder="MC-123456"
+                          className="w-full h-11 px-4 text-sm bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#ee7a14]/20 focus:border-[#ee7a14] transition-all font-mono"
+                        />
+                        <p className="text-xs text-neutral-400">Motor Carrier number issued by FMCSA</p>
+                      </div>
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="usdotNumber"
+                          className="text-sm font-medium text-neutral-700"
+                        >
+                          USDOT Number <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="usdotNumber"
+                          name="usdotNumber"
+                          type="text"
+                          required
+                          value={form.usdotNumber}
+                          onChange={handleChange}
+                          placeholder="1234567"
+                          className="w-full h-11 px-4 text-sm bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#ee7a14]/20 focus:border-[#ee7a14] transition-all font-mono"
+                        />
+                        <p className="text-xs text-neutral-400">US Department of Transportation number</p>
                       </div>
                     </div>
 
