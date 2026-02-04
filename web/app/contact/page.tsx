@@ -26,7 +26,6 @@ type FormData = {
   phone: string;
   company: string;
   mcNumber: string;
-  usdotNumber: string;
   subject: string;
   message: string;
 };
@@ -52,7 +51,6 @@ const initialForm: FormData = {
   phone: '',
   company: '',
   mcNumber: '',
-  usdotNumber: '',
   subject: '',
   message: '',
 };
@@ -84,20 +82,19 @@ export default function ContactPage() {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
 
-    // Reset verification when numbers change
-    if (name === 'mcNumber' || name === 'usdotNumber') {
+    // Reset verification when MC number changes
+    if (name === 'mcNumber') {
       setCarrierVerified(false);
       setCarrierInfo(null);
       setLookupError(null);
     }
   };
 
-  const lookupCarrier = useCallback(async (type: 'dot' | 'mc') => {
-    const number = type === 'dot' ? form.usdotNumber : form.mcNumber;
-    const cleaned = number.replace(/[^0-9]/g, '');
+  const lookupCarrier = useCallback(async () => {
+    const cleaned = form.mcNumber.replace(/[^0-9]/g, '');
 
     if (!cleaned) {
-      setLookupError(`Enter a valid ${type === 'dot' ? 'USDOT' : 'MC'} number first`);
+      setLookupError('Enter a valid MC number first');
       return;
     }
 
@@ -105,17 +102,17 @@ export default function ContactPage() {
     setLookupError(null);
     setCarrierInfo(null);
     setCarrierVerified(false);
-    setLookupType(type);
+    setLookupType('mc');
 
     try {
-      const res = await fetch(`/api/fmcsa?type=${type}&number=${cleaned}`);
+      const res = await fetch(`/api/fmcsa?type=mc&number=${cleaned}`);
       const data = await res.json();
 
       if (!res.ok) {
         if (res.status === 503) {
           setLookupError('FMCSA verification is not configured yet. Enter your details manually.');
         } else if (res.status === 404) {
-          setLookupError(`No carrier found for ${type === 'dot' ? 'USDOT' : 'MC'} #${cleaned}. Please verify the number.`);
+          setLookupError(`No carrier found for MC #${cleaned}. Please verify the number.`);
         } else {
           setLookupError(data.error || 'Lookup failed. Please try again.');
         }
@@ -128,7 +125,7 @@ export default function ContactPage() {
     } finally {
       setLookupLoading(false);
     }
-  }, [form.usdotNumber, form.mcNumber]);
+  }, [form.mcNumber]);
 
   const confirmCarrier = () => {
     if (!carrierInfo) return;
@@ -137,7 +134,6 @@ export default function ContactPage() {
     setForm((prev) => ({
       ...prev,
       company: carrierInfo.dbaName || carrierInfo.legalName,
-      usdotNumber: carrierInfo.dotNumber || prev.usdotNumber,
       mcNumber: carrierInfo.mcNumber || prev.mcNumber,
       phone: prev.phone || carrierInfo.phone,
     }));
@@ -150,15 +146,37 @@ export default function ContactPage() {
     setLookupType(null);
   };
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    setSubmitError(null);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          carrierVerified,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to send message');
+      }
+
+      setIsSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const isValid = form.name && form.email && form.mcNumber && form.usdotNumber && form.subject && form.message;
+  const isValid = form.name && form.email && form.mcNumber && form.subject && form.message;
 
   return (
     <div className="min-h-screen bg-white">
@@ -321,11 +339,11 @@ export default function ContactPage() {
                       </div>
                     </div>
 
-                    {/* MC + USDOT with FMCSA Verification */}
+                    {/* MC Number with FMCSA Verification */}
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-neutral-700">
-                          Carrier Identification <span className="text-red-500">*</span>
+                          MC Number <span className="text-red-500">*</span>
                         </p>
                         {carrierVerified && (
                           <button
@@ -339,87 +357,42 @@ export default function ContactPage() {
                         )}
                       </div>
 
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label htmlFor="usdotNumber" className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                            USDOT Number
-                          </label>
-                          <div className="flex gap-2">
-                            <input
-                              id="usdotNumber"
-                              name="usdotNumber"
-                              type="text"
-                              required
-                              value={form.usdotNumber}
-                              onChange={handleChange}
-                              placeholder="1234567"
-                              readOnly={carrierVerified}
-                              className={`flex-1 h-11 px-4 text-sm border rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#ee7a14]/20 focus:border-[#ee7a14] transition-all font-mono ${
-                                carrierVerified
-                                  ? 'bg-emerald-50 border-emerald-200'
-                                  : 'bg-white border-neutral-200'
-                              }`}
-                            />
-                            {!carrierVerified && (
-                              <button
-                                type="button"
-                                onClick={() => lookupCarrier('dot')}
-                                disabled={lookupLoading || !form.usdotNumber.replace(/[^0-9]/g, '')}
-                                className="h-11 px-3 bg-neutral-900 hover:bg-neutral-800 disabled:bg-neutral-200 disabled:text-neutral-400 text-white rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium flex-shrink-0"
-                                title="Verify with FMCSA"
-                              >
-                                {lookupLoading && lookupType === 'dot' ? (
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                ) : (
-                                  <Search className="w-3.5 h-3.5" />
-                                )}
-                                Verify
-                              </button>
+                      <div className="flex gap-2">
+                        <input
+                          id="mcNumber"
+                          name="mcNumber"
+                          type="text"
+                          required
+                          value={form.mcNumber}
+                          onChange={handleChange}
+                          placeholder="MC-123456"
+                          readOnly={carrierVerified}
+                          className={`flex-1 h-11 px-4 text-sm border rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#ee7a14]/20 focus:border-[#ee7a14] transition-all font-mono ${
+                            carrierVerified
+                              ? 'bg-emerald-50 border-emerald-200'
+                              : 'bg-white border-neutral-200'
+                          }`}
+                        />
+                        {!carrierVerified && (
+                          <button
+                            type="button"
+                            onClick={() => lookupCarrier()}
+                            disabled={lookupLoading || !form.mcNumber.replace(/[^0-9]/g, '')}
+                            className="h-11 px-4 bg-neutral-900 hover:bg-neutral-800 disabled:bg-neutral-200 disabled:text-neutral-400 text-white rounded-lg transition-all flex items-center gap-1.5 text-sm font-medium flex-shrink-0"
+                            title="Verify with FMCSA"
+                          >
+                            {lookupLoading ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Search className="w-3.5 h-3.5" />
                             )}
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <label htmlFor="mcNumber" className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
-                            MC Number
-                          </label>
-                          <div className="flex gap-2">
-                            <input
-                              id="mcNumber"
-                              name="mcNumber"
-                              type="text"
-                              required
-                              value={form.mcNumber}
-                              onChange={handleChange}
-                              placeholder="MC-123456"
-                              readOnly={carrierVerified}
-                              className={`flex-1 h-11 px-4 text-sm border rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#ee7a14]/20 focus:border-[#ee7a14] transition-all font-mono ${
-                                carrierVerified
-                                  ? 'bg-emerald-50 border-emerald-200'
-                                  : 'bg-white border-neutral-200'
-                              }`}
-                            />
-                            {!carrierVerified && (
-                              <button
-                                type="button"
-                                onClick={() => lookupCarrier('mc')}
-                                disabled={lookupLoading || !form.mcNumber.replace(/[^0-9]/g, '')}
-                                className="h-11 px-3 bg-neutral-900 hover:bg-neutral-800 disabled:bg-neutral-200 disabled:text-neutral-400 text-white rounded-lg transition-all flex items-center gap-1.5 text-xs font-medium flex-shrink-0"
-                                title="Verify with FMCSA"
-                              >
-                                {lookupLoading && lookupType === 'mc' ? (
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                ) : (
-                                  <Search className="w-3.5 h-3.5" />
-                                )}
-                                Verify
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                            Verify
+                          </button>
+                        )}
                       </div>
 
                       <p className="text-xs text-neutral-400">
-                        Enter either number and click Verify to look up your company via FMCSA SAFER.
+                        Enter your MC number and click Verify to look up your company via FMCSA SAFER.
                       </p>
 
                       {/* Lookup Error */}
@@ -544,7 +517,7 @@ export default function ContactPage() {
                                   {carrierInfo.legalName}
                                 </p>
                                 <p className="text-xs text-neutral-500">
-                                  USDOT {carrierInfo.dotNumber} &middot; MC {carrierInfo.mcNumber} &middot; Verified via FMCSA SAFER
+                                  MC {carrierInfo.mcNumber} &middot; Verified via FMCSA SAFER
                                 </p>
                               </div>
                             </div>
@@ -599,6 +572,14 @@ export default function ContactPage() {
                         className="w-full px-4 py-3 text-sm bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#ee7a14]/20 focus:border-[#ee7a14] transition-all resize-none"
                       />
                     </div>
+
+                    {/* Submit Error */}
+                    {submitError && (
+                      <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-red-700">{submitError}</p>
+                      </div>
+                    )}
 
                     {/* Submit */}
                     <button

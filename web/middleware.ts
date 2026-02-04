@@ -29,6 +29,8 @@ const publicRoutes = [
 const publicApiRoutes = [
   "/api/auth",
   "/api/health",
+  "/api/fmcsa",
+  "/api/contact",
 ]
 
 // In-memory rate limiter store
