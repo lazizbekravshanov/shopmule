@@ -72,20 +72,20 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">
+          <h1 className="text-2xl font-semibold text-neutral-900 tracking-tight">
             Dashboard
           </h1>
-          <p className="text-sm text-neutral-500 mt-1">
+          <p className="text-neutral-500 mt-1">
             Overview of your shop performance
           </p>
         </div>
         <Button
           asChild
-          className="bg-primary-500 hover:bg-primary-600 text-white"
+          className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white border-0"
         >
           <Link href="/work-orders/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -95,9 +95,12 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-px bg-neutral-200 rounded-lg overflow-hidden md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Revenue */}
-        <div className="bg-white p-5">
+        <Link
+          href="/invoices"
+          className="bg-white border border-neutral-200 rounded-lg p-5 transition-all hover:border-neutral-300 hover:shadow-sm"
+        >
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-neutral-500">
               Total Revenue
@@ -114,10 +117,13 @@ export default function DashboardPage() {
           <p className="text-xs text-neutral-400 mt-1">
             {revenue?.count ?? 0} invoices
           </p>
-        </div>
+        </Link>
 
         {/* Work Orders */}
-        <div className="bg-white p-5">
+        <Link
+          href="/work-orders"
+          className="bg-white border border-neutral-200 rounded-lg p-5 transition-all hover:border-neutral-300 hover:shadow-sm"
+        >
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-neutral-500">
               Open Work Orders
@@ -132,10 +138,13 @@ export default function DashboardPage() {
             </div>
           )}
           <p className="text-xs text-neutral-400 mt-1">{totalWorkOrders} total</p>
-        </div>
+        </Link>
 
         {/* Customers */}
-        <div className="bg-white p-5">
+        <Link
+          href="/customers"
+          className="bg-white border border-neutral-200 rounded-lg p-5 transition-all hover:border-neutral-300 hover:shadow-sm"
+        >
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-neutral-500">
               Active Customers
@@ -146,28 +155,35 @@ export default function DashboardPage() {
             {activeCustomers}
           </div>
           <p className="text-xs text-neutral-400 mt-1">With open orders</p>
-        </div>
+        </Link>
 
         {/* Low Stock */}
-        <div className="bg-white p-5">
+        <Link
+          href="/inventory"
+          className={`bg-white border rounded-lg p-5 transition-all hover:shadow-sm ${
+            (lowStockCount?.count ?? 0) > 0
+              ? 'border-red-200 hover:border-red-300 bg-red-50'
+              : 'border-neutral-200 hover:border-neutral-300'
+          }`}
+        >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-neutral-500">
+            <span className={`text-sm font-medium ${(lowStockCount?.count ?? 0) > 0 ? 'text-red-600' : 'text-neutral-500'}`}>
               Low Stock Items
             </span>
             <AlertTriangle
-              className="h-4 w-4 text-neutral-400"
+              className={`h-4 w-4 ${(lowStockCount?.count ?? 0) > 0 ? 'text-red-500' : 'text-neutral-400'}`}
               strokeWidth={1.5}
             />
           </div>
           {lowStockLoading ? (
             <Skeleton className="h-8 w-16" />
           ) : (
-            <div className="text-2xl font-bold text-neutral-900 tracking-tight">
+            <div className={`text-2xl font-bold tracking-tight ${(lowStockCount?.count ?? 0) > 0 ? 'text-red-600' : 'text-neutral-900'}`}>
               {lowStockCount?.count ?? 0}
             </div>
           )}
           <p className="text-xs text-neutral-400 mt-1">Need reorder</p>
-        </div>
+        </Link>
       </div>
 
       {/* Charts Row */}
@@ -208,11 +224,12 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-1">
                 {workOrderSummary?.recent.map((wo) => (
-                  <div
+                  <Link
                     key={wo.id}
-                    className="flex items-center justify-between py-2"
+                    href={`/work-orders/${wo.id}`}
+                    className="flex items-center justify-between py-3 px-3 -mx-3 rounded-lg transition-colors hover:bg-neutral-50"
                   >
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-neutral-900">
@@ -233,7 +250,7 @@ export default function DashboardPage() {
                     >
                       {wo.status.replace('_', ' ')}
                     </Badge>
-                  </div>
+                  </Link>
                 ))}
                 {(!workOrderSummary || workOrderSummary.recent.length === 0) && (
                   <p className="text-center text-neutral-400 py-8">

@@ -11,6 +11,10 @@ import {
   Check,
   Loader2,
   Send,
+  RefreshCw,
+  DollarSign,
+  FileText,
+  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -64,7 +68,7 @@ const columns: ColumnDef<Invoice>[] = [
       <DataTableColumnHeader column={column} title="Invoice #" />
     ),
     cell: ({ row }) => (
-      <span className="font-mono text-xs">{row.original.id.slice(0, 8)}</span>
+      <span className="font-mono text-xs text-neutral-500">{row.original.id.slice(0, 8)}</span>
     ),
   },
   {
@@ -75,9 +79,9 @@ const columns: ColumnDef<Invoice>[] = [
     cell: ({ row }) => {
       const customer = row.original.customer;
       return customer ? (
-        <div className="font-medium">{customer.name}</div>
+        <div className="font-medium text-neutral-900">{customer.name}</div>
       ) : (
-        <span className="text-muted-foreground">-</span>
+        <span className="text-neutral-400">—</span>
       );
     },
   },
@@ -87,7 +91,7 @@ const columns: ColumnDef<Invoice>[] = [
       <DataTableColumnHeader column={column} title="Total" />
     ),
     cell: ({ row }) => (
-      <div className="font-medium">{formatCurrency(row.original.total)}</div>
+      <div className="font-medium text-neutral-900">{formatCurrency(row.original.total)}</div>
     ),
   },
   {
@@ -122,7 +126,11 @@ const columns: ColumnDef<Invoice>[] = [
     ),
     cell: ({ row }) => {
       const date = row.original.createdAt;
-      return date ? formatDate(date) : '-';
+      return date ? (
+        <span className="text-neutral-500">{formatDate(date)}</span>
+      ) : (
+        <span className="text-neutral-400">—</span>
+      );
     },
   },
   {
@@ -362,37 +370,94 @@ function InvoiceActions({ invoice }: { invoice: Invoice }) {
 }
 
 export default function InvoicesPage() {
-  const { data: invoices, isLoading } = useInvoices();
+  const { data: invoices, isLoading, refetch, isFetching } = useInvoices();
+
+  // Calculate stats
+  const totalInvoices = invoices?.length || 0;
+  const totalRevenue = invoices?.reduce((sum, inv) => sum + inv.total, 0) || 0;
+  const unpaidCount = invoices?.filter((inv) => inv.status === 'UNPAID').length || 0;
+  const paidCount = invoices?.filter((inv) => inv.status === 'PAID').length || 0;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Invoices</h1>
-        <p className="text-muted-foreground">
-          Manage invoices and track payments
-        </p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Invoices</h1>
+          <p className="text-neutral-500 mt-1">
+            Manage invoices and track payments
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="border-neutral-200"
+        >
+          <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+        </Button>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-[400px] w-full" />
+      {/* Stats */}
+      {!isLoading && (
+        <div className="grid grid-cols-4 gap-4">
+          <div className="bg-white border border-neutral-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-neutral-500">
+              <FileText className="h-4 w-4" />
+              <span className="text-sm">Total Invoices</span>
+            </div>
+            <div className="text-2xl font-semibold text-neutral-900 mt-1">{totalInvoices}</div>
+          </div>
+          <div className="bg-white border border-neutral-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-neutral-500">
+              <DollarSign className="h-4 w-4" />
+              <span className="text-sm">Total Revenue</span>
+            </div>
+            <div className="text-2xl font-semibold text-neutral-900 mt-1">{formatCurrency(totalRevenue)}</div>
+          </div>
+          <div className="bg-white border border-neutral-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-emerald-600">
+              <Check className="h-4 w-4" />
+              <span className="text-sm">Paid</span>
+            </div>
+            <div className="text-2xl font-semibold text-emerald-600 mt-1">{paidCount}</div>
+          </div>
+          <div className={`bg-white border rounded-lg p-4 ${unpaidCount > 0 ? 'border-orange-200 bg-orange-50' : 'border-neutral-200'}`}>
+            <div className={`flex items-center gap-2 ${unpaidCount > 0 ? 'text-orange-600' : 'text-neutral-500'}`}>
+              <AlertCircle className="h-4 w-4" />
+              <span className="text-sm">Unpaid</span>
+            </div>
+            <div className={`text-2xl font-semibold mt-1 ${unpaidCount > 0 ? 'text-orange-600' : 'text-neutral-900'}`}>
+              {unpaidCount}
+            </div>
+          </div>
         </div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={invoices ?? []}
-          searchKey="customer"
-          searchPlaceholder="Search customers..."
-          filterableColumns={[
-            {
-              id: 'status',
-              title: 'Status',
-              options: statusOptions,
-            },
-          ]}
-        />
       )}
+
+      {/* Data Table */}
+      <div className="bg-white border border-neutral-200 rounded-lg">
+        {isLoading ? (
+          <div className="p-6 space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-[400px] w-full" />
+          </div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={invoices ?? []}
+            searchKey="customer"
+            searchPlaceholder="Search customers..."
+            filterableColumns={[
+              {
+                id: 'status',
+                title: 'Status',
+                options: statusOptions,
+              },
+            ]}
+          />
+        )}
+      </div>
     </div>
   );
 }

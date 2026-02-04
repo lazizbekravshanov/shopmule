@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
@@ -42,16 +41,17 @@ export default function ReportsPage() {
   const { data: productivity, isLoading: productivityLoading } = useProductivityReport(selectedEmployee);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Reports</h1>
+        <p className="text-neutral-500 mt-1">
           View business analytics and performance metrics
         </p>
       </div>
 
       <Tabs defaultValue="revenue" className="space-y-6">
-        <TabsList>
+        <TabsList className="border-neutral-200">
           <TabsTrigger value="revenue">Revenue</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="payroll">Payroll</TabsTrigger>
@@ -59,34 +59,26 @@ export default function ReportsPage() {
 
         <TabsContent value="revenue" className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Total Revenue</CardTitle>
-                <CardDescription>All time revenue</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {revenueLoading ? (
-                  <Skeleton className="h-10 w-32" />
-                ) : (
-                  <div className="text-3xl font-bold">
-                    {formatCurrency(revenue?.total ?? 0)}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Invoices</CardTitle>
-                <CardDescription>Total invoices created</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {revenueLoading ? (
-                  <Skeleton className="h-10 w-16" />
-                ) : (
-                  <div className="text-3xl font-bold">{revenue?.count ?? 0}</div>
-                )}
-              </CardContent>
-            </Card>
+            <div className="bg-white border border-neutral-200 rounded-lg p-5">
+              <div className="text-sm font-medium text-neutral-500 mb-2">Total Revenue</div>
+              <div className="text-sm text-neutral-400 mb-3">All time revenue</div>
+              {revenueLoading ? (
+                <Skeleton className="h-10 w-32" />
+              ) : (
+                <div className="text-3xl font-bold text-neutral-900">
+                  {formatCurrency(revenue?.total ?? 0)}
+                </div>
+              )}
+            </div>
+            <div className="bg-white border border-neutral-200 rounded-lg p-5">
+              <div className="text-sm font-medium text-neutral-500 mb-2">Invoices</div>
+              <div className="text-sm text-neutral-400 mb-3">Total invoices created</div>
+              {revenueLoading ? (
+                <Skeleton className="h-10 w-16" />
+              ) : (
+                <div className="text-3xl font-bold text-neutral-900">{revenue?.count ?? 0}</div>
+              )}
+            </div>
           </div>
 
           <RevenueChart data={revenueData} />
@@ -95,16 +87,16 @@ export default function ReportsPage() {
         <TabsContent value="performance" className="space-y-6">
           <TechnicianPerformance data={technicianData} />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Individual Performance</CardTitle>
-              <CardDescription>
+          <div className="bg-white border border-neutral-200 rounded-lg">
+            <div className="p-5 border-b border-neutral-200">
+              <h3 className="font-semibold text-neutral-900">Individual Performance</h3>
+              <p className="text-sm text-neutral-500 mt-1">
                 Select an employee to view their productivity
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </p>
+            </div>
+            <div className="p-5 space-y-4">
               <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-                <SelectTrigger className="w-[300px]">
+                <SelectTrigger className="w-[300px] border-neutral-200">
                   <SelectValue placeholder="Select an employee" />
                 </SelectTrigger>
                 <SelectContent>
@@ -118,37 +110,33 @@ export default function ReportsPage() {
 
               {selectedEmployee && (
                 <div className="grid gap-4 md:grid-cols-2">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Total Hours</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {productivityLoading ? (
-                        <Skeleton className="h-8 w-20" />
-                      ) : (
-                        <div className="text-2xl font-bold">
-                          {productivity?.totalHours?.toFixed(1) ?? 0}h
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                  <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                    <div className="text-sm font-medium text-neutral-500 mb-2">Total Hours</div>
+                    {productivityLoading ? (
+                      <Skeleton className="h-8 w-20" />
+                    ) : (
+                      <div className="text-2xl font-semibold text-neutral-900">
+                        {productivity?.totalHours?.toFixed(1) ?? 0}h
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="payroll" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payroll Calculator</CardTitle>
-              <CardDescription>
+          <div className="bg-white border border-neutral-200 rounded-lg">
+            <div className="p-5 border-b border-neutral-200">
+              <h3 className="font-semibold text-neutral-900">Payroll Calculator</h3>
+              <p className="text-sm text-neutral-500 mt-1">
                 Calculate employee payroll based on hours worked
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </p>
+            </div>
+            <div className="p-5 space-y-4">
               <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-                <SelectTrigger className="w-[300px]">
+                <SelectTrigger className="w-[300px] border-neutral-200">
                   <SelectValue placeholder="Select an employee" />
                 </SelectTrigger>
                 <SelectContent>
@@ -162,52 +150,40 @@ export default function ReportsPage() {
 
               {selectedEmployee && (
                 <div className="grid gap-4 md:grid-cols-3">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Hours Worked</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {payrollLoading ? (
-                        <Skeleton className="h-8 w-20" />
-                      ) : (
-                        <div className="text-2xl font-bold">
-                          {payroll?.hours?.toFixed(1) ?? 0}h
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Hourly Rate</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {payrollLoading ? (
-                        <Skeleton className="h-8 w-20" />
-                      ) : (
-                        <div className="text-2xl font-bold">
-                          {formatCurrency(payroll?.rate ?? 0)}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Gross Pay</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {payrollLoading ? (
-                        <Skeleton className="h-8 w-24" />
-                      ) : (
-                        <div className="text-2xl font-bold text-green-600">
-                          {formatCurrency(payroll?.grossPay ?? 0)}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                  <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                    <div className="text-sm font-medium text-neutral-500 mb-2">Hours Worked</div>
+                    {payrollLoading ? (
+                      <Skeleton className="h-8 w-20" />
+                    ) : (
+                      <div className="text-2xl font-semibold text-neutral-900">
+                        {payroll?.hours?.toFixed(1) ?? 0}h
+                      </div>
+                    )}
+                  </div>
+                  <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                    <div className="text-sm font-medium text-neutral-500 mb-2">Hourly Rate</div>
+                    {payrollLoading ? (
+                      <Skeleton className="h-8 w-20" />
+                    ) : (
+                      <div className="text-2xl font-semibold text-neutral-900">
+                        {formatCurrency(payroll?.rate ?? 0)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                    <div className="text-sm font-medium text-emerald-600 mb-2">Gross Pay</div>
+                    {payrollLoading ? (
+                      <Skeleton className="h-8 w-24" />
+                    ) : (
+                      <div className="text-2xl font-semibold text-emerald-700">
+                        {formatCurrency(payroll?.grossPay ?? 0)}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
