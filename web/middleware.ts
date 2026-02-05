@@ -22,6 +22,7 @@ const publicRoutes = [
   "/register",
   "/pay",     // Customer payment portal
   "/contact", // Contact form
+  "/blog",    // Blog
   "/",        // Landing page
 ]
 
@@ -31,6 +32,18 @@ const publicApiRoutes = [
   "/api/health",
   "/api/fmcsa",
   "/api/contact",
+  "/api/mobile/auth", // Mobile login endpoint
+]
+
+// API routes that handle their own auth (support Bearer tokens)
+const selfAuthApiRoutes = [
+  "/api/vehicles/search",
+  "/api/vehicles/", // For /api/vehicles/[id] routes
+  "/api/vin/decode",
+  "/api/mobile",
+  "/api/work-orders",
+  "/api/customers",
+  "/api/time-entries",
 ]
 
 // In-memory rate limiter store
@@ -99,7 +112,13 @@ export async function middleware(request: NextRequest) {
       route => pathname === route || pathname.startsWith(route + "/")
     )
 
-    if (!isPublicApiRoute) {
+    // Check if API route handles its own auth (supports Bearer token)
+    const isSelfAuthRoute = selfAuthApiRoutes.some(
+      route => pathname === route || pathname.startsWith(route + "/")
+    )
+
+    // Skip middleware auth check for public routes and self-auth routes
+    if (!isPublicApiRoute && !isSelfAuthRoute) {
       const token = await getToken({
         req: request,
         secret: process.env.NEXTAUTH_SECRET

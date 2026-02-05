@@ -13,11 +13,11 @@ export async function GET(request: Request) {
   const customerId = searchParams.get("customerId")
 
   const vehicles = await prisma.vehicle.findMany({
-    where: {
-      shopId: session.user.shopId,
-      ...(customerId && { customerId }),
-    },
+    where: customerId ? { customerId } : undefined,
     orderBy: { vin: "asc" },
+    include: {
+      Customer: true,
+    },
   })
 
   return NextResponse.json(vehicles)

@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { z } from "zod"
+import { verifyMobileAuth } from "@/lib/mobile-auth"
 
 const createCustomerSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
@@ -12,12 +11,11 @@ const createCustomerSchema = z.object({
   billingAddress: z.string().max(500).optional().nullable(),
 })
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    console.log("GET /api/customers - session:", session ? "exists" : "null")
-
-    if (!session) {
+    // Verify authentication (supports both session and Bearer token)
+    const authResult = await verifyMobileAuth(request)
+    if (!authResult.authenticated) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -60,11 +58,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    console.log("POST /api/customers - session:", session ? "exists" : "null")
-
-    if (!session) {
-      console.log("POST /api/customers - Unauthorized, no session")
+    // Verify authentication (supports both session and Bearer token)
+    const authResult = await verifyMobileAuth(request)
+    if (!authResult.authenticated) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

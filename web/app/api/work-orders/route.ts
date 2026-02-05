@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { z } from "zod"
 import { isValidId } from "@/lib/security"
+import { verifyMobileAuth } from "@/lib/mobile-auth"
 
 const createWorkOrderSchema = z.object({
   vehicleId: z.string().min(1, "Vehicle ID is required"),
@@ -14,9 +13,9 @@ const createWorkOrderSchema = z.object({
 
 export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    console.log("GET /api/work-orders - session:", session ? "exists" : "null")
-    if (!session) {
+    // Verify authentication (supports both session and Bearer token)
+    const authResult = await verifyMobileAuth(request)
+    if (!authResult.authenticated) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -25,6 +24,7 @@ export async function GET(request: Request) {
     const fieldsParam = searchParams.get("fields")
     const limitParam = searchParams.get("limit")
     const offsetParam = searchParams.get("offset")
+    const vehicleId = searchParams.get("vehicleId")
     // Only apply limit/offset if explicitly provided (not null)
     const take = limitParam !== null ? Math.max(1, Math.min(100, parseInt(limitParam, 10) || 100)) : undefined
     const skip = offsetParam !== null ? Math.max(0, parseInt(offsetParam, 10) || 0) : undefined
@@ -165,8 +165,12 @@ export async function GET(request: Request) {
       ? selectedFields.has("vehicle") && !hasVehicleFields
       : false
 
+    // Build where clause for filtering
+    const whereClause = vehicleId ? { vehicleId } : undefined
+
     const workOrders = selectedFields && selectedFields.size > 0
       ? await prisma.workOrder.findMany({
+          where: whereClause,
           orderBy: { createdAt: "desc" },
           take,
           skip,
@@ -210,6 +214,7 @@ export async function GET(request: Request) {
           },
         })
       : await prisma.workOrder.findMany({
+          where: whereClause,
           orderBy: { createdAt: "desc" },
           take,
           skip,
@@ -398,8 +403,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    // Verify authentication (supports both session and Bearer token)
+    const authResult = await verifyMobileAuth(request)
+    if (!authResult.authenticated) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

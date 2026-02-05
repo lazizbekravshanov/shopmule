@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { verifyMobileAuth } from "@/lib/mobile-auth"
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
   try {
     const authResult = await verifyMobileAuth(request)
     if (!authResult.authenticated || !authResult.user) {
@@ -18,29 +18,35 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Employee profile not found" }, { status: 404 })
     }
 
-    // Find current open time entry (clocked in but not out)
-    const entry = await prisma.timeEntry.findFirst({
+    // Check if already clocked in
+    const existingEntry = await prisma.timeEntry.findFirst({
       where: {
         employeeId: employee.id,
         clockOut: null,
       },
-      orderBy: { clockIn: "desc" },
     })
 
-    if (!entry) {
-      return NextResponse.json({ error: "Not clocked in" }, { status: 404 })
+    if (existingEntry) {
+      return NextResponse.json({ error: "Already clocked in" }, { status: 400 })
     }
+
+    // Create new time entry
+    const entry = await prisma.timeEntry.create({
+      data: {
+        employeeId: employee.id,
+        clockIn: new Date(),
+      },
+    })
 
     return NextResponse.json({
       id: entry.id,
       clockIn: entry.clockIn.toISOString(),
-      clockOut: entry.clockOut?.toISOString() || null,
-      jobId: entry.jobId,
-    })
+      message: "Clocked in successfully",
+    }, { status: 201 })
   } catch (error) {
-    console.error("Error fetching current time entry:", error)
+    console.error("Error clocking in:", error)
     return NextResponse.json(
-      { error: "Failed to fetch time entry" },
+      { error: "Failed to clock in" },
       { status: 500 }
     )
   }

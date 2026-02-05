@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { z } from "zod"
 import { isValidId } from "@/lib/security"
+import { verifyMobileAuth } from "@/lib/mobile-auth"
 
 const createVehicleSchema = z.object({
   vin: z.string().min(1, "VIN is required").max(17),
@@ -20,8 +19,9 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    // Verify authentication (supports both session and Bearer token)
+    const authResult = await verifyMobileAuth(request)
+    if (!authResult.authenticated) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
