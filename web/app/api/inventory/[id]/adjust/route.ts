@@ -10,13 +10,15 @@ const adjustStockSchema = z.object({
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    const { id } = await params
 
     const body = await request.json()
     const parsed = adjustStockSchema.safeParse(body)
@@ -32,7 +34,7 @@ export async function PATCH(
 
     // Check part exists
     const existingPart = await prisma.part.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!existingPart) {
@@ -40,7 +42,7 @@ export async function PATCH(
     }
 
     const part = await prisma.part.update({
-      where: { id: params.id },
+      where: { id },
       data: { stock: quantity },
     })
 

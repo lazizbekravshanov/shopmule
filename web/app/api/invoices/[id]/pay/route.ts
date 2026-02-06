@@ -11,13 +11,15 @@ const paymentSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    const { id } = await params
 
     const body = await request.json()
     const parsed = paymentSchema.safeParse(body)
@@ -33,7 +35,7 @@ export async function POST(
 
     // Get invoice with existing payments
     const invoice = await prisma.invoice.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         Payment: true,
         Customer: true,

@@ -13,8 +13,14 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { RevenueChart } from '@/components/charts/revenue-chart';
-import { JobsChart } from '@/components/charts/jobs-chart';
 import { StatusDistribution } from '@/components/charts/status-distribution';
+import {
+  AIInsights,
+  LiveBayBoard,
+  ProfitPulse,
+  SmartActions,
+  CustomerHealth,
+} from '@/components/dashboard';
 import { useRevenueReport } from '@/lib/queries/reports';
 import { useWorkOrdersSummary } from '@/lib/queries/work-orders';
 import { useLowStockCount } from '@/lib/queries/inventory';
@@ -27,15 +33,6 @@ const revenueData = [
   { month: 'Apr', revenue: 61000 },
   { month: 'May', revenue: 55000 },
   { month: 'Jun', revenue: 67000 },
-];
-
-const jobsData = [
-  { month: 'Jan', completed: 45, inProgress: 12 },
-  { month: 'Feb', completed: 52, inProgress: 15 },
-  { month: 'Mar', completed: 48, inProgress: 8 },
-  { month: 'Apr', completed: 61, inProgress: 20 },
-  { month: 'May', completed: 55, inProgress: 14 },
-  { month: 'Jun', completed: 67, inProgress: 18 },
 ];
 
 export default function DashboardPage() {
@@ -72,7 +69,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -99,7 +96,7 @@ export default function DashboardPage() {
         {/* Revenue */}
         <Link
           href="/invoices"
-          className="bg-white border border-neutral-200 rounded-lg p-5 transition-all hover:border-neutral-300 hover:shadow-sm"
+          className="bg-white border border-neutral-200 rounded-xl p-5 transition-all hover:border-neutral-300 hover:shadow-sm"
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-neutral-500">
@@ -122,7 +119,7 @@ export default function DashboardPage() {
         {/* Work Orders */}
         <Link
           href="/work-orders"
-          className="bg-white border border-neutral-200 rounded-lg p-5 transition-all hover:border-neutral-300 hover:shadow-sm"
+          className="bg-white border border-neutral-200 rounded-xl p-5 transition-all hover:border-neutral-300 hover:shadow-sm"
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-neutral-500">
@@ -143,7 +140,7 @@ export default function DashboardPage() {
         {/* Customers */}
         <Link
           href="/customers"
-          className="bg-white border border-neutral-200 rounded-lg p-5 transition-all hover:border-neutral-300 hover:shadow-sm"
+          className="bg-white border border-neutral-200 rounded-xl p-5 transition-all hover:border-neutral-300 hover:shadow-sm"
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-neutral-500">
@@ -160,7 +157,7 @@ export default function DashboardPage() {
         {/* Low Stock */}
         <Link
           href="/inventory"
-          className={`bg-white border rounded-lg p-5 transition-all hover:shadow-sm ${
+          className={`bg-white border rounded-xl p-5 transition-all hover:shadow-sm ${
             (lowStockCount?.count ?? 0) > 0
               ? 'border-red-200 hover:border-red-300 bg-red-50'
               : 'border-neutral-200 hover:border-neutral-300'
@@ -186,7 +183,22 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* Charts Row */}
+      {/* AI-Powered Row: Smart Actions + AI Insights */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SmartActions />
+        <AIInsights />
+      </div>
+
+      {/* Live Bay Board - Full Width */}
+      <LiveBayBoard />
+
+      {/* Profit + Customer Health Row */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ProfitPulse />
+        <CustomerHealth />
+      </div>
+
+      {/* Charts + Recent Orders Row */}
       <div className="grid gap-6 lg:grid-cols-7">
         <div className="lg:col-span-4">
           <RevenueChart data={revenueData} />
@@ -196,70 +208,65 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Bottom Row */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <JobsChart data={jobsData} />
-
-        {/* Recent Work Orders */}
-        <div className="bg-white rounded-lg border border-neutral-200">
-          <div className="flex items-center justify-between p-5 border-b border-neutral-200">
-            <h3 className="font-semibold text-neutral-900">Recent Work Orders</h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="text-neutral-500 hover:text-neutral-900"
-            >
-              <Link href="/work-orders">
-                View all
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-          <div className="p-5">
-            {workOrdersLoading ? (
-              <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Skeleton key={i} className="h-12" />
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-1">
-                {workOrderSummary?.recent.map((wo) => (
-                  <Link
-                    key={wo.id}
-                    href={`/work-orders/${wo.id}`}
-                    className="flex items-center justify-between py-3 px-3 -mx-3 rounded-lg transition-colors hover:bg-neutral-50"
+      {/* Recent Work Orders */}
+      <div className="bg-white rounded-xl border border-neutral-200">
+        <div className="flex items-center justify-between p-5 border-b border-neutral-100">
+          <h3 className="font-semibold text-neutral-900">Recent Work Orders</h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="text-neutral-500 hover:text-neutral-900"
+          >
+            <Link href="/work-orders">
+              View all
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+        <div className="p-5">
+          {workOrdersLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-12" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {workOrderSummary?.recent.map((wo) => (
+                <Link
+                  key={wo.id}
+                  href={`/work-orders/${wo.id}`}
+                  className="flex items-center justify-between py-3 px-3 -mx-3 rounded-lg transition-colors hover:bg-neutral-50"
+                >
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-neutral-900">
+                      {wo.vehicle?.make} {wo.vehicle?.model}
+                    </p>
+                    <p className="text-sm text-neutral-500">
+                      {wo.description.slice(0, 50)}...
+                    </p>
+                  </div>
+                  <Badge
+                    variant={
+                      wo.status === 'COMPLETED'
+                        ? 'success'
+                        : wo.status === 'IN_PROGRESS'
+                        ? 'warning'
+                        : 'secondary'
+                    }
                   >
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-neutral-900">
-                        {wo.vehicle?.make} {wo.vehicle?.model}
-                      </p>
-                      <p className="text-sm text-neutral-500">
-                        {wo.description.slice(0, 50)}...
-                      </p>
-                    </div>
-                    <Badge
-                      variant={
-                        wo.status === 'COMPLETED'
-                          ? 'success'
-                          : wo.status === 'IN_PROGRESS'
-                          ? 'warning'
-                          : 'secondary'
-                      }
-                    >
-                      {wo.status.replace('_', ' ')}
-                    </Badge>
-                  </Link>
-                ))}
-                {(!workOrderSummary || workOrderSummary.recent.length === 0) && (
-                  <p className="text-center text-neutral-400 py-8">
-                    No work orders yet
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
+                    {wo.status.replace('_', ' ')}
+                  </Badge>
+                </Link>
+              ))}
+              {(!workOrderSummary || workOrderSummary.recent.length === 0) && (
+                <p className="text-center text-neutral-400 py-8">
+                  No work orders yet
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

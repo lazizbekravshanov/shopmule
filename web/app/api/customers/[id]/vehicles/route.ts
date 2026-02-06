@@ -16,7 +16,7 @@ const createVehicleSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify authentication (supports both session and Bearer token)
@@ -25,7 +25,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const customerId = params.id
+    const { id: customerId } = await params
 
     if (!isValidId(customerId)) {
       return NextResponse.json({ error: "Invalid customer ID" }, { status: 400 })

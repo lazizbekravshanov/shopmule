@@ -6,7 +6,7 @@ import { isValidId } from "@/lib/security"
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -14,7 +14,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     if (!isValidId(id)) {
       return NextResponse.json({ error: "Invalid ID format" }, { status: 400 })
