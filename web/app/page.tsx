@@ -14,6 +14,10 @@ import {
   StatusSection,
   FinalCTA,
   Footer,
+  BlogPreview,
+  StatsCounter,
+  ROICalculator,
+  Integrations,
 } from '@/components/landing';
 
 export default function LandingPage() {
@@ -23,9 +27,13 @@ export default function LandingPage() {
       <main>
         <Hero />
         <SocialProof />
+        <BlogPreview />
+        <StatsCounter />
         <ProblemSolution />
         <FeaturesBento />
+        <Integrations />
         <HowItWorks />
+        <ROICalculator />
         <Testimonials />
         <PricingSection />
         <SecuritySection />
