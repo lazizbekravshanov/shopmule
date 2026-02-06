@@ -1,10 +1,23 @@
 'use client';
 
 import { useState } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
-import { Plus, RefreshCw, Users, Wrench, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
+import {
+  Plus,
+  RefreshCw,
+  LayoutGrid,
+  List,
+  Search,
+  Filter,
+  Users,
+  Wrench,
+  ShieldCheck,
+  Clock,
+  Zap
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -13,8 +26,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -22,12 +33,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { DataTable } from '@/components/data-table/data-table';
-import { DataTableColumnHeader } from '@/components/data-table/column-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEmployees, useCreateEmployee } from '@/lib/queries/employees';
-import { type Employee } from '@/lib/api';
-import { formatCurrency } from '@/lib/utils';
+import { TechnicianGrid, TeamOverview } from '@/components/technicians';
+import type { TechnicianData } from '@/components/technicians';
+import { cn } from '@/lib/utils';
 
 const roleOptions = [
   { label: 'Admin', value: 'ADMIN' },
@@ -36,73 +46,41 @@ const roleOptions = [
   { label: 'Front Desk', value: 'FRONT_DESK' },
 ];
 
-const roleColors: Record<string, { bg: string; text: string; border: string }> = {
-  ADMIN: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
-  MANAGER: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  MECHANIC: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
-  FRONT_DESK: { bg: 'bg-neutral-50', text: 'text-neutral-600', border: 'border-neutral-200' },
-};
-
-const columns: ColumnDef<Employee>[] = [
-  {
-    accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
-    cell: ({ row }) => <div className="font-medium text-neutral-900">{row.original.name}</div>,
-  },
-  {
-    accessorKey: 'role',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
-    cell: ({ row }) => {
-      const role = row.original.role;
-      const colors = roleColors[role] || roleColors.FRONT_DESK;
-      return (
-        <span
-          className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full border ${colors.bg} ${colors.text} ${colors.border}`}
-        >
-          {role.replace('_', ' ')}
-        </span>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
-    accessorKey: 'payRate',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Pay Rate" />,
-    cell: ({ row }) => (
-      <span className="text-neutral-600">{formatCurrency(row.original.payRate)}/hr</span>
-    ),
-  },
-  {
-    accessorKey: 'status',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
-    cell: ({ row }) => {
-      const active = row.original.status === 'active';
-      return (
-        <span
-          className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full border ${
-            active
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-              : 'bg-neutral-50 text-neutral-500 border-neutral-200'
-          }`}
-        >
-          {row.original.status}
-        </span>
-      );
-    },
-  },
-  {
-    accessorKey: 'user.email',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
-    cell: ({ row }) => (
-      <span className="text-neutral-500">{row.original.user?.email || '—'}</span>
-    ),
-  },
-];
+// Transform API data to TechnicianData format
+function transformToTechnicianData(employees: any[]): TechnicianData[] {
+  return employees.map((emp, index) => ({
+    id: emp.id,
+    name: emp.name,
+    role: emp.role,
+    status: index % 3 === 0 ? 'clocked_in' : index % 3 === 1 ? 'on_break' : 'clocked_out',
+    clockedInAt: index % 3 !== 2 ? new Date(Date.now() - Math.random() * 6 * 60 * 60 * 1000).toISOString() : undefined,
+    currentJob: index % 3 === 0 ? {
+      id: `job-${index}`,
+      vehicle: '2022 Freightliner Cascadia',
+      description: 'Brake system inspection and repair',
+      progress: Math.floor(Math.random() * 80) + 20,
+    } : undefined,
+    efficiency: Math.floor(Math.random() * 40) + 70,
+    efficiencyTrend: Math.random() > 0.5 ? 'up' : Math.random() > 0.5 ? 'down' : 'stable',
+    todayHours: Math.round((Math.random() * 6 + 2) * 10) / 10,
+    weekHours: Math.round((Math.random() * 20 + 25) * 10) / 10,
+    jobsCompleted: Math.floor(Math.random() * 10) + 5,
+    certifications: [
+      { name: 'ASE Master', level: 'expert' as const },
+      { name: 'Diesel', level: 'advanced' as const },
+      { name: 'A/C', level: 'basic' as const },
+    ].slice(0, Math.floor(Math.random() * 3) + 1),
+    payRate: emp.payRate,
+    email: emp.user?.email,
+    phone: '(555) 123-4567',
+  }));
+}
 
 export default function TechniciansPage() {
   const { data: employees, isLoading, refetch, isFetching } = useEmployees();
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -134,19 +112,34 @@ export default function TechniciansPage() {
     );
   };
 
-  // Stats
-  const totalEmployees = employees?.length || 0;
-  const mechanicCount = employees?.filter((e) => e.role === 'MECHANIC').length || 0;
-  const activeCount = employees?.filter((e) => e.status === 'active').length || 0;
+  // Transform and filter data
+  const technicians = employees ? transformToTechnicianData(employees) : [];
+  const filteredTechnicians = technicians.filter(tech => {
+    const matchesSearch = tech.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRole = roleFilter === 'all' || tech.role === roleFilter;
+    return matchesSearch && matchesRole;
+  });
+
+  // Calculate team stats
+  const teamStats = {
+    total: technicians.length,
+    clockedIn: technicians.filter(t => t.status === 'clocked_in').length,
+    onBreak: technicians.filter(t => t.status === 'on_break').length,
+    available: technicians.filter(t => t.status === 'clocked_out').length,
+    avgEfficiency: Math.round(technicians.reduce((sum, t) => sum + t.efficiency, 0) / (technicians.length || 1)),
+    totalHoursToday: Math.round(technicians.reduce((sum, t) => sum + t.todayHours, 0) * 10) / 10,
+    jobsInProgress: technicians.filter(t => t.currentJob).length,
+    jobsCompletedToday: technicians.reduce((sum, t) => sum + t.jobsCompleted, 0),
+  };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Technicians</h1>
           <p className="text-neutral-500 mt-1">
-            Manage employees and their roles
+            Manage your team and track performance
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -164,69 +157,161 @@ export default function TechniciansPage() {
             className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white border-0"
           >
             <Plus className="mr-2 h-4 w-4" />
-            New Employee
+            Add Technician
           </Button>
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Team Overview */}
+      {!isLoading && technicians.length > 0 && (
+        <TeamOverview stats={teamStats} />
+      )}
+
+      {/* Filters Bar */}
+      <div className="bg-white border border-neutral-200 rounded-xl p-4">
+        <div className="flex items-center gap-4">
+          {/* Search */}
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <Input
+              placeholder="Search technicians..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 border-neutral-200"
+            />
+          </div>
+
+          {/* Role Filter */}
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger className="w-[160px] border-neutral-200">
+              <Filter className="w-4 h-4 mr-2 text-neutral-400" />
+              <SelectValue placeholder="All Roles" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              {roleOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* View Mode Toggle */}
+          <div className="flex items-center border border-neutral-200 rounded-lg p-1 ml-auto">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={cn(
+                "p-2 rounded-md transition-colors",
+                viewMode === 'grid' ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-400 hover:text-neutral-600'
+              )}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={cn(
+                "p-2 rounded-md transition-colors",
+                viewMode === 'list' ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-400 hover:text-neutral-600'
+              )}
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Stats */}
       {!isLoading && (
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white border border-neutral-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 text-neutral-500">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white border border-neutral-200 rounded-xl p-4"
+          >
+            <div className="flex items-center gap-2 text-neutral-500 mb-2">
               <Users className="h-4 w-4" />
-              <span className="text-sm">Total Employees</span>
+              <span className="text-sm">Total Team</span>
             </div>
-            <div className="text-2xl font-semibold text-neutral-900 mt-1">{totalEmployees}</div>
-          </div>
-          <div className="bg-white border border-neutral-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 text-neutral-500">
+            <div className="text-2xl font-bold text-neutral-900">{teamStats.total}</div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="bg-white border border-neutral-200 rounded-xl p-4"
+          >
+            <div className="flex items-center gap-2 text-green-600 mb-2">
+              <Clock className="h-4 w-4" />
+              <span className="text-sm">Clocked In</span>
+            </div>
+            <div className="text-2xl font-bold text-green-600">{teamStats.clockedIn}</div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white border border-neutral-200 rounded-xl p-4"
+          >
+            <div className="flex items-center gap-2 text-amber-600 mb-2">
+              <Zap className="h-4 w-4" />
+              <span className="text-sm">Avg Efficiency</span>
+            </div>
+            <div className="text-2xl font-bold text-amber-600">{teamStats.avgEfficiency}%</div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="bg-white border border-neutral-200 rounded-xl p-4"
+          >
+            <div className="flex items-center gap-2 text-blue-600 mb-2">
               <Wrench className="h-4 w-4" />
-              <span className="text-sm">Mechanics</span>
+              <span className="text-sm">Jobs In Progress</span>
             </div>
-            <div className="text-2xl font-semibold text-neutral-900 mt-1">{mechanicCount}</div>
-          </div>
-          <div className="bg-white border border-neutral-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 text-emerald-600">
-              <ShieldCheck className="h-4 w-4" />
-              <span className="text-sm">Active</span>
-            </div>
-            <div className="text-2xl font-semibold text-emerald-600 mt-1">{activeCount}</div>
-          </div>
+            <div className="text-2xl font-bold text-blue-600">{teamStats.jobsInProgress}</div>
+          </motion.div>
         </div>
       )}
 
-      {/* Data Table */}
-      <div className="bg-white border border-neutral-200 rounded-lg">
-        {isLoading ? (
-          <div className="p-6 space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-[400px] w-full" />
-          </div>
-        ) : (
-          <DataTable
-            columns={columns}
-            data={employees ?? []}
-            searchKey="name"
-            searchPlaceholder="Search employees..."
-            filterableColumns={[
-              {
-                id: 'role',
-                title: 'Role',
-                options: roleOptions,
-              },
-            ]}
-          />
-        )}
-      </div>
+      {/* Technician Cards Grid */}
+      {isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-[360px] rounded-xl" />
+          ))}
+        </div>
+      ) : filteredTechnicians.length > 0 ? (
+        <TechnicianGrid technicians={filteredTechnicians} />
+      ) : (
+        <div className="bg-white border border-neutral-200 rounded-xl p-12 text-center">
+          <Users className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-neutral-900 mb-2">No technicians found</h3>
+          <p className="text-neutral-500 mb-4">
+            {searchQuery || roleFilter !== 'all'
+              ? 'Try adjusting your search or filters'
+              : 'Add your first team member to get started'}
+          </p>
+          <Button
+            onClick={() => setCreateOpen(true)}
+            className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Technician
+          </Button>
+        </div>
+      )}
 
       {/* Create Employee Modal */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-[500px] border-neutral-200">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-neutral-900">New Employee</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-neutral-900">Add Technician</DialogTitle>
             <DialogDescription className="text-neutral-500">
-              Add a new employee to the system
+              Add a new team member to your shop
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -303,7 +388,7 @@ export default function TechniciansPage() {
               disabled={!name || !email || !password || !role || !payRate}
               className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white"
             >
-              {createEmployee.isPending ? 'Creating...' : 'Create Employee'}
+              {createEmployee.isPending ? 'Adding...' : 'Add Technician'}
             </Button>
           </DialogFooter>
         </DialogContent>

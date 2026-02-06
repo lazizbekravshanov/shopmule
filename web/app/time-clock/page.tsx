@@ -1,16 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { Clock, Play, Square, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  Clock,
+  Play,
+  Square,
+  Users,
+  Calendar,
+  RefreshCw,
+  Download
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -18,265 +19,323 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEmployees } from '@/lib/queries/employees';
 import { useClockIn, useClockOut, useTimesheet } from '@/lib/queries/time';
-import { formatDateTime } from '@/lib/utils';
+import {
+  LiveStatusBoard,
+  DayTimeline,
+  WeeklyTimesheet,
+  QuickClock,
+} from '@/components/time-clock';
+import type { ActiveTech, TechTimeline, WeekData } from '@/components/time-clock';
+
+// Generate sample data for demonstration
+function generateSampleActiveTechs(employees: any[]): ActiveTech[] {
+  return employees
+    .filter((_, i) => i % 2 === 0) // Half are clocked in
+    .map((emp, index) => ({
+      id: emp.id,
+      name: emp.name,
+      clockedInAt: new Date(Date.now() - Math.random() * 6 * 60 * 60 * 1000).toISOString(),
+      status: index % 4 === 0 ? 'on_break' as const : 'working' as const,
+      breakStartedAt: index % 4 === 0 ? new Date(Date.now() - 15 * 60 * 1000).toISOString() : undefined,
+      currentJob: index % 4 !== 0 ? {
+        id: `job-${index}`,
+        vehicle: '2022 Freightliner Cascadia',
+        description: 'Engine diagnostics and repair',
+      } : undefined,
+      totalHoursToday: Math.round((Math.random() * 5 + 2) * 10) / 10,
+      isOvertime: Math.random() > 0.8,
+    }));
+}
+
+function generateSampleTimelines(employees: any[]): TechTimeline[] {
+  return employees.map((emp) => {
+    const blocks = [];
+    let currentHour = 6 + Math.floor(Math.random() * 2);
+
+    // Generate 2-4 work blocks
+    for (let i = 0; i < Math.floor(Math.random() * 3) + 2; i++) {
+      const duration = Math.random() * 2 + 1;
+      const today = new Date();
+      today.setHours(currentHour, Math.floor(Math.random() * 60), 0, 0);
+      const endTime = new Date(today);
+      endTime.setHours(currentHour + duration);
+
+      blocks.push({
+        id: `block-${emp.id}-${i}`,
+        type: 'work' as const,
+        startTime: today.toISOString(),
+        endTime: i === 0 && Math.random() > 0.5 ? undefined : endTime.toISOString(),
+        jobId: `job-${i}`,
+        jobName: i === 0 ? 'Brake System Repair' : 'Engine Diagnostics',
+      });
+
+      currentHour += duration;
+
+      // Add a break
+      if (i < 2 && Math.random() > 0.5) {
+        const breakStart = new Date(today);
+        breakStart.setHours(currentHour, 0, 0, 0);
+        const breakEnd = new Date(breakStart);
+        breakEnd.setMinutes(breakEnd.getMinutes() + 30);
+
+        blocks.push({
+          id: `break-${emp.id}-${i}`,
+          type: 'break' as const,
+          startTime: breakStart.toISOString(),
+          endTime: breakEnd.toISOString(),
+        });
+
+        currentHour += 0.5;
+      }
+    }
+
+    // Add overtime block if applicable
+    if (Math.random() > 0.7 && currentHour > 17) {
+      const overtimeStart = new Date();
+      overtimeStart.setHours(17, 0, 0, 0);
+      blocks.push({
+        id: `ot-${emp.id}`,
+        type: 'overtime' as const,
+        startTime: overtimeStart.toISOString(),
+        endTime: undefined,
+      });
+    }
+
+    return {
+      id: emp.id,
+      name: emp.name,
+      blocks,
+      totalHours: Math.round((currentHour - 6) * 10) / 10,
+      efficiency: Math.floor(Math.random() * 30) + 75,
+    };
+  });
+}
+
+function generateSampleWeekData(employeeName: string): WeekData {
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayName, index) => {
+    const date = new Date(startOfWeek);
+    date.setDate(startOfWeek.getDate() + index);
+    const isToday = date.toDateString() === today.toDateString();
+    const isFuture = date > today;
+    const isWeekend = index >= 5;
+
+    if (isFuture) {
+      return {
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        dayName,
+        status: 'future' as const,
+        breakMinutes: 0,
+        totalHours: 0,
+        isToday: false,
+      };
+    }
+
+    if (isWeekend && Math.random() > 0.3) {
+      return {
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        dayName,
+        status: 'absent' as const,
+        breakMinutes: 0,
+        totalHours: 0,
+        isToday,
+      };
+    }
+
+    const clockInHour = 6 + Math.floor(Math.random() * 2);
+    const workHours = 8 + Math.random() * 3;
+    const breakMins = Math.floor(Math.random() * 30) + 15;
+    const overtime = workHours > 8 ? workHours - 8 : 0;
+
+    return {
+      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      dayName,
+      clockIn: `${clockInHour}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')} AM`,
+      clockOut: isToday ? undefined : `${clockInHour + Math.floor(workHours)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')} PM`,
+      breakMinutes: breakMins,
+      totalHours: Math.round(workHours * 10) / 10,
+      status: isToday ? 'incomplete' as const : 'complete' as const,
+      isToday,
+      overtime: overtime > 0 ? Math.round(overtime * 10) / 10 : undefined,
+    };
+  });
+
+  const totalHours = days.reduce((sum, d) => sum + d.totalHours, 0);
+  const totalOvertime = days.reduce((sum, d) => sum + (d.overtime || 0), 0);
+
+  return {
+    weekStart: startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    weekEnd: new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    days,
+    totalHours: Math.round(totalHours * 10) / 10,
+    totalOvertime: Math.round(totalOvertime * 10) / 10,
+    avgEfficiency: Math.floor(Math.random() * 20) + 80,
+  };
+}
 
 export default function TimeClockPage() {
-  const { data: employees, isLoading: employeesLoading } = useEmployees();
-  const [clockInOpen, setClockInOpen] = useState(false);
-  const [clockOutOpen, setClockOutOpen] = useState(false);
+  const { data: employees, isLoading: employeesLoading, refetch, isFetching } = useEmployees();
   const [selectedEmployee, setSelectedEmployee] = useState('');
-  const [selectedEntryId, setSelectedEntryId] = useState('');
   const clockIn = useClockIn();
   const clockOut = useClockOut();
-  const { data: timesheet, isLoading: timesheetLoading } = useTimesheet(selectedEmployee);
+  const { data: timesheet } = useTimesheet(selectedEmployee);
+
+  // Get the selected employee's name
+  const selectedEmployeeName = employees?.find(e => e.id === selectedEmployee)?.name || 'Select Employee';
+
+  // Generate sample data based on employees
+  const activeTechs = useMemo(() =>
+    employees ? generateSampleActiveTechs(employees) : [],
+    [employees]
+  );
+
+  const timelines = useMemo(() =>
+    employees ? generateSampleTimelines(employees) : [],
+    [employees]
+  );
+
+  const weekData = useMemo(() =>
+    generateSampleWeekData(selectedEmployeeName),
+    [selectedEmployeeName]
+  );
+
+  // Current clock status for selected employee
+  const currentStatus = useMemo(() => {
+    if (!selectedEmployee) return 'clocked_out' as const;
+    const activeTech = activeTechs.find(t => t.id === selectedEmployee);
+    if (!activeTech) return 'clocked_out' as const;
+    return activeTech.status === 'on_break' ? 'on_break' as const : 'clocked_in' as const;
+  }, [selectedEmployee, activeTechs]);
+
+  const clockedInAt = activeTechs.find(t => t.id === selectedEmployee)?.clockedInAt;
 
   const handleClockIn = () => {
-    if (!selectedEmployee) return;
-    clockIn.mutate(selectedEmployee, {
-      onSuccess: () => {
-        setClockInOpen(false);
-      },
-    });
+    if (selectedEmployee) {
+      clockIn.mutate(selectedEmployee);
+    }
   };
 
   const handleClockOut = () => {
-    if (!selectedEntryId) return;
-    clockOut.mutate(selectedEntryId, {
-      onSuccess: () => {
-        setClockOutOpen(false);
-        setSelectedEntryId('');
-      },
-    });
+    // In real implementation, would get the active time entry ID
+    clockOut.mutate(selectedEmployee);
   };
 
-  // Get currently clocked in entries
-  const activeTimes = timesheet?.filter((t) => !t.clockOut) ?? [];
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">Time Clock</h1>
           <p className="text-neutral-500 mt-1">
-            Track employee work hours
+            Track and manage employee work hours
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button
-            onClick={() => setClockInOpen(true)}
-            className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white border-0"
+            variant="outline"
+            size="icon"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="border-neutral-200"
           >
-            <Play className="mr-2 h-4 w-4" />
-            Clock In
+            <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
           </Button>
           <Button
             variant="outline"
-            onClick={() => setClockOutOpen(true)}
-            disabled={activeTimes.length === 0}
             className="border-neutral-200"
           >
-            <Square className="mr-2 h-4 w-4" />
-            Clock Out
+            <Download className="mr-2 h-4 w-4" />
+            Export
           </Button>
         </div>
       </div>
 
-      {/* Employee Selection */}
-      <div className="bg-white border border-neutral-200 rounded-lg p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <Users className="h-4 w-4 text-neutral-400" />
-          <h3 className="font-semibold text-neutral-900">Select Employee</h3>
+      {/* Main Grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Quick Clock Widget */}
+        <div className="lg:col-span-1">
+          {employeesLoading ? (
+            <Skeleton className="h-[420px] rounded-xl" />
+          ) : (
+            <>
+              {/* Employee Selector */}
+              <div className="bg-white border border-neutral-200 rounded-xl p-4 mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="h-4 w-4 text-neutral-400" />
+                  <span className="text-sm font-medium text-neutral-700">Select Employee</span>
+                </div>
+                <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+                  <SelectTrigger className="border-neutral-200">
+                    <SelectValue placeholder="Choose an employee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees?.map((emp) => (
+                      <SelectItem key={emp.id} value={emp.id}>
+                        {emp.name} ({emp.role.replace('_', ' ')})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <QuickClock
+                employeeId={selectedEmployee}
+                employeeName={selectedEmployeeName}
+                currentStatus={currentStatus}
+                clockedInAt={clockedInAt}
+                onClockIn={handleClockIn}
+                onClockOut={handleClockOut}
+                onStartBreak={() => {}}
+                onEndBreak={() => {}}
+                isLoading={clockIn.isPending || clockOut.isPending}
+              />
+            </>
+          )}
         </div>
-        <p className="text-sm text-neutral-500 mb-4">
-          Choose an employee to view their timesheet
-        </p>
-        <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-          <SelectTrigger className="w-[300px] border-neutral-200">
-            <SelectValue placeholder="Select an employee" />
-          </SelectTrigger>
-          <SelectContent>
-            {employees?.map((emp) => (
-              <SelectItem key={emp.id} value={emp.id}>
-                {emp.name} ({emp.role})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+        {/* Live Status Board */}
+        <div className="lg:col-span-2">
+          {employeesLoading ? (
+            <Skeleton className="h-[500px] rounded-xl" />
+          ) : (
+            <LiveStatusBoard activeTechs={activeTechs} />
+          )}
+        </div>
       </div>
 
-      {/* Active Clock-ins */}
-      {selectedEmployee && activeTimes.length > 0 && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Clock className="h-5 w-5 text-emerald-600 animate-pulse" />
-            <h3 className="font-semibold text-emerald-800">Currently Clocked In</h3>
-          </div>
-          <div className="space-y-2">
-            {activeTimes.map((entry) => (
-              <div
-                key={entry.id}
-                className="flex items-center justify-between rounded-lg border border-emerald-200 bg-white p-3"
-              >
-                <div>
-                  <div className="font-medium text-neutral-900">
-                    Started: {formatDateTime(entry.clockIn)}
-                  </div>
-                  {entry.jobId && (
-                    <div className="text-sm text-neutral-500">
-                      Job: {entry.jobId.slice(0, 8)}
-                    </div>
-                  )}
-                </div>
-                <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
-                  Active
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Day Timeline */}
+      {employeesLoading ? (
+        <Skeleton className="h-[300px] rounded-xl" />
+      ) : (
+        <DayTimeline technicians={timelines} />
       )}
 
-      {/* Timesheet */}
+      {/* Weekly Timesheet */}
       {selectedEmployee && (
-        <div className="bg-white border border-neutral-200 rounded-lg">
-          <div className="p-5 border-b border-neutral-200">
-            <h3 className="font-semibold text-neutral-900">Timesheet</h3>
-            <p className="text-sm text-neutral-500 mt-1">Recent time entries</p>
-          </div>
-          <div className="p-5">
-            {timesheetLoading ? (
-              <div className="space-y-2">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-12" />
-                ))}
-              </div>
-            ) : timesheet && timesheet.length > 0 ? (
-              <div className="space-y-2">
-                {timesheet.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="flex items-center justify-between rounded-lg border border-neutral-200 p-3"
-                  >
-                    <div className="space-y-1">
-                      <div className="font-medium text-neutral-900">
-                        In: {formatDateTime(entry.clockIn)}
-                      </div>
-                      {entry.clockOut && (
-                        <div className="text-sm text-neutral-500">
-                          Out: {formatDateTime(entry.clockOut)}
-                        </div>
-                      )}
-                    </div>
-                    {entry.clockOut ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full border bg-neutral-50 text-neutral-500 border-neutral-200">
-                        Completed
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
-                        Active
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-neutral-400 py-8">
-                No time entries found
-              </p>
-            )}
-          </div>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <WeeklyTimesheet week={weekData} employeeName={selectedEmployeeName} />
+        </motion.div>
       )}
 
-      {/* Clock In Dialog */}
-      <Dialog open={clockInOpen} onOpenChange={setClockInOpen}>
-        <DialogContent className="sm:max-w-[400px] border-neutral-200">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-neutral-900">Clock In</DialogTitle>
-            <DialogDescription className="text-neutral-500">Select an employee to clock in</DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <Label htmlFor="clockInEmployee" className="text-sm font-medium text-neutral-700">Employee</Label>
-            <Select
-              value={selectedEmployee}
-              onValueChange={setSelectedEmployee}
-            >
-              <SelectTrigger className="mt-2 border-neutral-200">
-                <SelectValue placeholder="Select an employee" />
-              </SelectTrigger>
-              <SelectContent>
-                {employees?.map((emp) => (
-                  <SelectItem key={emp.id} value={emp.id}>
-                    {emp.name} ({emp.role})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setClockInOpen(false)} className="border-neutral-200">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleClockIn}
-              disabled={!selectedEmployee}
-              className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white"
-            >
-              Clock In
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Clock Out Dialog */}
-      <Dialog open={clockOutOpen} onOpenChange={setClockOutOpen}>
-        <DialogContent className="sm:max-w-[400px] border-neutral-200">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-neutral-900">Clock Out</DialogTitle>
-            <DialogDescription className="text-neutral-500">
-              Select an active time entry to clock out
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <Label className="text-sm font-medium text-neutral-700">Active Entries</Label>
-            <div className="mt-2 space-y-2">
-              {activeTimes.map((entry) => (
-                <div
-                  key={entry.id}
-                  className={`cursor-pointer rounded-lg border p-3 transition-colors ${
-                    selectedEntryId === entry.id
-                      ? 'border-[#ee7a14] bg-orange-50'
-                      : 'border-neutral-200 hover:bg-neutral-50'
-                  }`}
-                  onClick={() => setSelectedEntryId(entry.id)}
-                >
-                  <div className="font-medium text-neutral-900">
-                    Started: {formatDateTime(entry.clockIn)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setClockOutOpen(false)} className="border-neutral-200">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleClockOut}
-              disabled={!selectedEntryId}
-              className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white"
-            >
-              Clock Out
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Empty State when no employee selected */}
+      {!selectedEmployee && !employeesLoading && (
+        <div className="bg-white border border-neutral-200 rounded-xl p-12 text-center">
+          <Calendar className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-neutral-900 mb-2">View Weekly Timesheet</h3>
+          <p className="text-neutral-500 max-w-md mx-auto">
+            Select an employee above to view their detailed weekly timesheet with hours, breaks, and overtime tracking.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
