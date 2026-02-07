@@ -44,6 +44,10 @@ const selfAuthApiRoutes = [
   "/api/work-orders",
   "/api/customers",
   "/api/time-entries",
+  "/api/attendance", // Time clock endpoints for mobile
+  "/api/shops",      // Shop management
+  "/api/geofences",  // Geofence management
+  "/api/timesheets", // Timesheet data
 ]
 
 // In-memory rate limiter store

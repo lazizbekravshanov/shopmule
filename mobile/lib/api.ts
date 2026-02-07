@@ -10,6 +10,14 @@ import type {
   CreateVehicleInput,
   Customer,
   APIError,
+  AttendanceStatusResponse,
+  ClockInRequest,
+  ClockInResponse,
+  ClockOutRequest,
+  ClockOutResponse,
+  BreakRequest,
+  BreakStartResponse,
+  BreakEndResponse,
 } from '@/types';
 
 // Configure base URL - update this for production
@@ -123,6 +131,41 @@ class ApiClient {
 
   async getCustomer(id: string): Promise<Customer> {
     return this.request<Customer>(`/api/customers/${id}`);
+  }
+
+  // Time Clock / Attendance
+  async getAttendanceStatus(employeeId: string): Promise<AttendanceStatusResponse> {
+    return this.request<AttendanceStatusResponse>(
+      `/api/attendance/status?employeeId=${encodeURIComponent(employeeId)}`
+    );
+  }
+
+  async clockIn(data: ClockInRequest): Promise<ClockInResponse> {
+    return this.request<ClockInResponse>('/api/attendance/clock-in', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async clockOut(data: ClockOutRequest): Promise<ClockOutResponse> {
+    return this.request<ClockOutResponse>('/api/attendance/clock-out', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async startBreak(data: BreakRequest): Promise<BreakStartResponse> {
+    return this.request<BreakStartResponse>('/api/attendance/break-start', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async endBreak(data: BreakRequest): Promise<BreakEndResponse> {
+    return this.request<BreakEndResponse>('/api/attendance/break-end', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 }
 

@@ -9,7 +9,8 @@ import {
   Users,
   Calendar,
   RefreshCw,
-  Download
+  Download,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,6 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEmployees } from '@/lib/queries/employees';
 import { useClockIn, useClockOut, useTimesheet } from '@/lib/queries/time';
@@ -27,8 +34,10 @@ import {
   DayTimeline,
   WeeklyTimesheet,
   QuickClock,
+  PunchReviewDashboard,
 } from '@/components/time-clock';
-import type { ActiveTech, TechTimeline, WeekData } from '@/components/time-clock';
+import type { ActiveTech, TechTimeline, WeekData, PunchForReview } from '@/components/time-clock';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Generate sample data for demonstration
 function generateSampleActiveTechs(employees: any[]): ActiveTech[] {
@@ -182,9 +191,58 @@ function generateSampleWeekData(employeeName: string): WeekData {
 export default function TimeClockPage() {
   const { data: employees, isLoading: employeesLoading, refetch, isFetching } = useEmployees();
   const [selectedEmployee, setSelectedEmployee] = useState('');
+  const [activeTab, setActiveTab] = useState('overview');
   const clockIn = useClockIn();
   const clockOut = useClockOut();
   const { data: timesheet } = useTimesheet(selectedEmployee);
+  const queryClient = useQueryClient();
+
+  // Fetch punches for review
+  const { data: reviewData, isLoading: reviewLoading } = useQuery({
+    queryKey: ['punchesForReview'],
+    queryFn: async () => {
+      const response = await fetch('/api/attendance/review?daysBack=7');
+      if (!response.ok) throw new Error('Failed to fetch');
+      return response.json();
+    },
+    refetchInterval: 60000, // Refetch every minute
+  });
+
+  // Mutation for approving/rejecting punches
+  const reviewMutation = useMutation({
+    mutationFn: async ({ action, punchId, reason, newTimestamp, notes }: {
+      action: 'approve' | 'reject' | 'edit';
+      punchId: string;
+      reason?: string;
+      newTimestamp?: string;
+      notes?: string;
+    }) => {
+      const response = await fetch('/api/attendance/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, punchId, reason, newTimestamp, notes }),
+      });
+      if (!response.ok) throw new Error('Failed to process');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['punchesForReview'] });
+    },
+  });
+
+  const handleApprovePunch = (punchId: string) => {
+    reviewMutation.mutate({ action: 'approve', punchId });
+  };
+
+  const handleRejectPunch = (punchId: string, reason: string) => {
+    reviewMutation.mutate({ action: 'reject', punchId, reason });
+  };
+
+  const handleEditPunch = (punchId: string, newTimestamp: string, notes: string) => {
+    reviewMutation.mutate({ action: 'edit', punchId, newTimestamp, notes });
+  };
+
+  const punchesForReview: PunchForReview[] = reviewData?.punches || [];
 
   // Get the selected employee's name
   const selectedEmployeeName = employees?.find(e => e.id === selectedEmployee)?.name || 'Select Employee';
@@ -226,6 +284,8 @@ export default function TimeClockPage() {
     clockOut.mutate(selectedEmployee);
   };
 
+  const flaggedCount = reviewData?.summary?.flagged || 0;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -240,7 +300,10 @@ export default function TimeClockPage() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => refetch()}
+            onClick={() => {
+              refetch();
+              queryClient.invalidateQueries({ queryKey: ['punchesForReview'] });
+            }}
             disabled={isFetching}
             className="border-neutral-200"
           >
@@ -256,86 +319,117 @@ export default function TimeClockPage() {
         </div>
       </div>
 
-      {/* Main Grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Quick Clock Widget */}
-        <div className="lg:col-span-1">
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="bg-neutral-100">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-white">
+            <Clock className="w-4 h-4 mr-2" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="review" className="data-[state=active]:bg-white relative">
+            <AlertTriangle className="w-4 h-4 mr-2" />
+            Review Punches
+            {flaggedCount > 0 && (
+              <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-amber-500 text-white rounded-full">
+                {flaggedCount}
+              </span>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6 mt-6">
+          {/* Main Grid */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Quick Clock Widget */}
+            <div className="lg:col-span-1">
+              {employeesLoading ? (
+                <Skeleton className="h-[420px] rounded-xl" />
+              ) : (
+                <>
+                  {/* Employee Selector */}
+                  <div className="bg-white border border-neutral-200 rounded-xl p-4 mb-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users className="h-4 w-4 text-neutral-400" />
+                      <span className="text-sm font-medium text-neutral-700">Select Employee</span>
+                    </div>
+                    <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+                      <SelectTrigger className="border-neutral-200">
+                        <SelectValue placeholder="Choose an employee" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {employees?.map((emp) => (
+                          <SelectItem key={emp.id} value={emp.id}>
+                            {emp.name} ({emp.role.replace('_', ' ')})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <QuickClock
+                    employeeId={selectedEmployee}
+                    employeeName={selectedEmployeeName}
+                    currentStatus={currentStatus}
+                    clockedInAt={clockedInAt}
+                    onClockIn={handleClockIn}
+                    onClockOut={handleClockOut}
+                    onStartBreak={() => {}}
+                    onEndBreak={() => {}}
+                    isLoading={clockIn.isPending || clockOut.isPending}
+                  />
+                </>
+              )}
+            </div>
+
+            {/* Live Status Board */}
+            <div className="lg:col-span-2">
+              {employeesLoading ? (
+                <Skeleton className="h-[500px] rounded-xl" />
+              ) : (
+                <LiveStatusBoard activeTechs={activeTechs} />
+              )}
+            </div>
+          </div>
+
+          {/* Day Timeline */}
           {employeesLoading ? (
-            <Skeleton className="h-[420px] rounded-xl" />
+            <Skeleton className="h-[300px] rounded-xl" />
           ) : (
-            <>
-              {/* Employee Selector */}
-              <div className="bg-white border border-neutral-200 rounded-xl p-4 mb-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Users className="h-4 w-4 text-neutral-400" />
-                  <span className="text-sm font-medium text-neutral-700">Select Employee</span>
-                </div>
-                <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-                  <SelectTrigger className="border-neutral-200">
-                    <SelectValue placeholder="Choose an employee" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {employees?.map((emp) => (
-                      <SelectItem key={emp.id} value={emp.id}>
-                        {emp.name} ({emp.role.replace('_', ' ')})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <QuickClock
-                employeeId={selectedEmployee}
-                employeeName={selectedEmployeeName}
-                currentStatus={currentStatus}
-                clockedInAt={clockedInAt}
-                onClockIn={handleClockIn}
-                onClockOut={handleClockOut}
-                onStartBreak={() => {}}
-                onEndBreak={() => {}}
-                isLoading={clockIn.isPending || clockOut.isPending}
-              />
-            </>
+            <DayTimeline technicians={timelines} />
           )}
-        </div>
 
-        {/* Live Status Board */}
-        <div className="lg:col-span-2">
-          {employeesLoading ? (
-            <Skeleton className="h-[500px] rounded-xl" />
-          ) : (
-            <LiveStatusBoard activeTechs={activeTechs} />
+          {/* Weekly Timesheet */}
+          {selectedEmployee && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <WeeklyTimesheet week={weekData} employeeName={selectedEmployeeName} />
+            </motion.div>
           )}
-        </div>
-      </div>
 
-      {/* Day Timeline */}
-      {employeesLoading ? (
-        <Skeleton className="h-[300px] rounded-xl" />
-      ) : (
-        <DayTimeline technicians={timelines} />
-      )}
+          {/* Empty State when no employee selected */}
+          {!selectedEmployee && !employeesLoading && (
+            <div className="bg-white border border-neutral-200 rounded-xl p-12 text-center">
+              <Calendar className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-neutral-900 mb-2">View Weekly Timesheet</h3>
+              <p className="text-neutral-500 max-w-md mx-auto">
+                Select an employee above to view their detailed weekly timesheet with hours, breaks, and overtime tracking.
+              </p>
+            </div>
+          )}
+        </TabsContent>
 
-      {/* Weekly Timesheet */}
-      {selectedEmployee && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <WeeklyTimesheet week={weekData} employeeName={selectedEmployeeName} />
-        </motion.div>
-      )}
-
-      {/* Empty State when no employee selected */}
-      {!selectedEmployee && !employeesLoading && (
-        <div className="bg-white border border-neutral-200 rounded-xl p-12 text-center">
-          <Calendar className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-neutral-900 mb-2">View Weekly Timesheet</h3>
-          <p className="text-neutral-500 max-w-md mx-auto">
-            Select an employee above to view their detailed weekly timesheet with hours, breaks, and overtime tracking.
-          </p>
-        </div>
-      )}
+        <TabsContent value="review" className="mt-6">
+          <PunchReviewDashboard
+            punches={punchesForReview}
+            onApprove={handleApprovePunch}
+            onReject={handleRejectPunch}
+            onEdit={handleEditPunch}
+            isLoading={reviewLoading}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -29,9 +29,17 @@ export async function POST(request: Request) {
 
     const normalizedEmail = email.trim().toLowerCase()
 
-    // Find user
+    // Find user with employee profile
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
+      include: {
+        EmployeeProfile: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     })
 
     if (!user) {
@@ -56,6 +64,7 @@ export async function POST(request: Request) {
         id: user.id,
         email: user.email,
         role: user.role,
+        employeeId: user.EmployeeProfile?.id,
       },
       JWT_SECRET,
       {
@@ -63,13 +72,15 @@ export async function POST(request: Request) {
       }
     )
 
-    // Return token and user info
+    // Return token and user info (use employeeId for time clock)
     return NextResponse.json({
       token,
       user: {
-        id: user.id,
+        id: user.EmployeeProfile?.id || user.id, // Use employeeId for attendance APIs
+        odid: user.id,
         email: user.email,
         role: user.role,
+        name: user.EmployeeProfile?.name,
       },
     })
   } catch (error) {

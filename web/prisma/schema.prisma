@@ -27,12 +27,19 @@ model EmployeeProfile {
   payRate             Float
   status              String                @default("active")
   userId              String                @unique
+  pin                 String? // 4-digit PIN for quick clock-in
+  photoUrl            String?
+  phoneNumber         String?
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   User                User                  @relation(fields: [userId], references: [id])
   TimeEntry           TimeEntry[]
   WorkOrderAssignment WorkOrderAssignment[]
   WorkOrderLabor      WorkOrderLabor[]
+  PunchRecord         PunchRecord[]
+  Timesheet           Timesheet[]
+  GeofenceAssignment  GeofenceAssignment[]
+  ShopAssignment      ShopAssignment[]
 }
 
 model Invoice {
@@ -92,14 +99,235 @@ model TimeEntry {
   EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id])
 }
 
-model User {
+// ==========================================
+// TIME TRACKING & ATTENDANCE MODELS
+// ==========================================
+
+model Shop {
   id              String           @id @default(cuid())
-  email           String           @unique
-  passwordHash    String
-  role            Role
+  name            String
+  address         String?
+  city            String?
+  state           String?
+  zipCode         String?
+  latitude        Float?
+  longitude       Float?
+  timezone        String           @default("America/New_York")
+  geofenceRadius  Int              @default(150) // meters
+  geofenceEnabled Boolean          @default(true)
+  photoOnPunch    Boolean          @default(false)
+  qrCodeEnabled   Boolean          @default(false)
+  pinEnabled      Boolean          @default(true)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  EmployeeProfile EmployeeProfile?
+  Geofence        Geofence[]
+  PunchRecord     PunchRecord[]
+  ShopAssignment  ShopAssignment[]
+}
+
+model Geofence {
+  id                 String               @id @default(cuid())
+  shopId             String
+  name               String
+  latitude           Float
+  longitude          Float
+  radiusMeters       Int                  @default(150)
+  isRequired         Boolean              @default(true)
+  isActive           Boolean              @default(true)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  Shop               Shop                 @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  PunchRecord        PunchRecord[]
+  GeofenceAssignment GeofenceAssignment[]
+
+  @@index([shopId])
+}
+
+model GeofenceAssignment {
+  id              String          @id @default(cuid())
+  geofenceId      String
+  employeeId      String
+  assignedAt      DateTime        @default(now())
+  Geofence        Geofence        @relation(fields: [geofenceId], references: [id], onDelete: Cascade)
+  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([geofenceId, employeeId])
+}
+
+model ShopAssignment {
+  id              String          @id @default(cuid())
+  shopId          String
+  employeeId      String
+  isPrimary       Boolean         @default(false)
+  assignedAt      DateTime        @default(now())
+  Shop            Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, employeeId])
+}
+
+model PunchRecord {
+  id                   String          @id @default(cuid())
+  employeeId           String
+  type                 PunchType
+  timestamp            DateTime        @default(now())
+  latitude             Float?
+  longitude            Float?
+  accuracy             Float? // GPS accuracy in meters
+  photoUrl             String?
+  geofenceId           String?
+  shopId               String?
+  isWithinGeofence     Boolean?
+  distanceFromGeofence Float? // meters from geofence center
+  workOrderId          String?
+  punchMethod          PunchMethod     @default(APP)
+  deviceInfo           String?
+  ipAddress            String?
+  isOfflinePunch       Boolean         @default(false)
+  offlineSyncedAt      DateTime?
+  notes                String?
+  createdAt            DateTime        @default(now())
+  EmployeeProfile      EmployeeProfile @relation(fields: [employeeId], references: [id])
+  Geofence             Geofence?       @relation(fields: [geofenceId], references: [id])
+  Shop                 Shop?           @relation(fields: [shopId], references: [id])
+  WorkOrder            WorkOrder?      @relation(fields: [workOrderId], references: [id])
+
+  @@index([employeeId])
+  @@index([timestamp])
+  @@index([shopId])
+}
+
+model Timesheet {
+  id                 String          @id @default(cuid())
+  employeeId         String
+  periodStart        DateTime
+  periodEnd          DateTime
+  totalRegularHours  Float           @default(0)
+  totalOvertimeHours Float           @default(0)
+  totalBreakHours    Float           @default(0)
+  totalPaidHours     Float           @default(0)
+  status             TimesheetStatus @default(PENDING)
+  submittedAt        DateTime?
+  approvedBy         String?
+  approvedAt         DateTime?
+  rejectedReason     String?
+  notes              String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  EmployeeProfile    EmployeeProfile @relation(fields: [employeeId], references: [id])
+  ApprovedByUser     User?           @relation("TimesheetApprover", fields: [approvedBy], references: [id])
+
+  @@unique([employeeId, periodStart, periodEnd])
+  @@index([employeeId])
+  @@index([status])
+}
+
+model AttendanceNotification {
+  id          String           @id @default(cuid())
+  recipientId String
+  type        NotificationType
+  title       String
+  message     String
+  data        Json?
+  isRead      Boolean          @default(false)
+  readAt      DateTime?
+  createdAt   DateTime         @default(now())
+  Recipient   User             @relation(fields: [recipientId], references: [id])
+
+  @@index([recipientId])
+  @@index([isRead])
+}
+
+model AttendanceAuditLog {
+  id            String   @id @default(cuid())
+  actorId       String
+  action        String
+  entityType    String
+  entityId      String
+  changesBefore Json?
+  changesAfter  Json?
+  ipAddress     String?
+  userAgent     String?
+  timestamp     DateTime @default(now())
+  Actor         User     @relation(fields: [actorId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([timestamp])
+}
+
+model OvertimeRule {
+  id                   String   @id @default(cuid())
+  name                 String
+  dailyThresholdHours  Float    @default(8)
+  weeklyThresholdHours Float    @default(40)
+  overtimeMultiplier   Float    @default(1.5)
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model BreakRule {
+  id                   String   @id @default(cuid())
+  name                 String
+  autoDeductMinutes    Int      @default(0)
+  afterHoursWorked     Float    @default(6)
+  reminderAfterMinutes Int?
+  isPaid               Boolean  @default(false)
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+enum PunchType {
+  CLOCK_IN
+  CLOCK_OUT
+  BREAK_START
+  BREAK_END
+}
+
+enum PunchMethod {
+  APP
+  PIN
+  QR_CODE
+  FACIAL
+  MANUAL
+  KIOSK
+}
+
+enum TimesheetStatus {
+  PENDING
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum NotificationType {
+  LATE_ARRIVAL
+  EARLY_DEPARTURE
+  MISSED_SHIFT
+  FORGOT_CLOCK_OUT
+  OVERTIME_APPROACHING
+  OVERTIME_EXCEEDED
+  GEOFENCE_VIOLATION
+  SHIFT_REMINDER
+  BREAK_REMINDER
+  TIMESHEET_PENDING
+  TIMESHEET_APPROVED
+  TIMESHEET_REJECTED
+}
+
+model User {
+  id                     String                   @id @default(cuid())
+  email                  String                   @unique
+  passwordHash           String
+  role                   Role
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  EmployeeProfile        EmployeeProfile?
+  AttendanceNotification AttendanceNotification[]
+  AttendanceAuditLog     AttendanceAuditLog[]
+  TimesheetApprovals     Timesheet[]              @relation("TimesheetApprover")
 }
 
 model Vehicle {
@@ -146,6 +374,7 @@ model WorkOrder {
   WorkOrderAssignment WorkOrderAssignment[]
   WorkOrderLabor      WorkOrderLabor[]
   WorkOrderPart       WorkOrderPart[]
+  PunchRecord         PunchRecord[]
 }
 
 model WorkOrderAssignment {

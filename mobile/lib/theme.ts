@@ -1,5 +1,10 @@
 // ShopMule iOS Theme - Dark mode optimized
 export const colors = {
+  // Brand
+  brand: '#ee7a14',
+  brandLight: 'rgba(238, 122, 20, 0.15)',
+  brandDark: '#d16a0f',
+
   // Primary
   primary: '#3b82f6',
   primaryLight: 'rgba(59, 130, 246, 0.15)',
