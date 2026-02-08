@@ -11,3 +11,7 @@ export function hashToken(token: string): string {
 export function generatePaymentLink(baseUrl: string, token: string): string {
   return `${baseUrl}/pay/${token}`;
 }
+
+export function generatePortalLink(baseUrl: string, token: string): string {
+  return `${baseUrl}/portal/${token}`;
+}

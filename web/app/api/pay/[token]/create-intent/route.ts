@@ -9,6 +9,7 @@ import {
   notFoundResponse,
   errorResponse,
 } from '@/lib/api/response';
+import { logAudit } from '@/lib/security/audit';
 
 const createIntentSchema = z.object({
   amount: z.number().positive().optional(),
@@ -82,6 +83,21 @@ export async function POST(
       },
       description: `Payment for Invoice #${invoice.id.slice(0, 8)}`,
       receipt_email: invoice.Customer?.email || undefined,
+    });
+
+    // Audit log: Payment intent created
+    await logAudit({
+      action: 'PAYMENT',
+      entityType: 'Invoice',
+      entityId: invoice.id,
+      metadata: {
+        paymentIntentId: paymentIntent.id,
+        amount: paymentAmount,
+        remainingBalance,
+        customerId: invoice.customerId,
+        customerEmail: invoice.Customer?.email,
+        source: 'customer_portal',
+      },
     });
 
     return successResponse({

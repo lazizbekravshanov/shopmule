@@ -1,11 +1,13 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { Bell, Menu, Search, User } from 'lucide-react';
+import { Bell, Menu, Search, User, Settings } from 'lucide-react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -17,13 +19,14 @@ import { useUIStore } from '@/lib/stores/ui-store';
 import { Breadcrumbs } from './breadcrumbs';
 import { MuleIcon } from '@/components/ui/mule-logo';
 import { LogoutButton } from '@/components/logout-button';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export function Header() {
   const { data: session } = useSession();
   const { sidebarOpen, setSidebarOpen, setCommandOpen } = useUIStore();
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-neutral-200 bg-white px-4 lg:px-6">
+    <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-4 lg:px-6">
       {/* Mobile menu */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetTrigger asChild>
@@ -68,11 +71,14 @@ export function Header() {
         </kbd>
       </Button>
 
+      {/* Theme Toggle */}
+      <ThemeToggle />
+
       {/* Notifications */}
       <Button
         variant="ghost"
         size="icon"
-        className="text-neutral-500 hover:text-neutral-900"
+        className="text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100"
       >
         <Bell className="h-5 w-5" strokeWidth={1.5} />
         <span className="sr-only">Notifications</span>
@@ -103,6 +109,13 @@ export function Header() {
               </p>
             </div>
           </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/settings" className="flex items-center cursor-pointer">
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <LogoutButton />
         </DropdownMenuContent>

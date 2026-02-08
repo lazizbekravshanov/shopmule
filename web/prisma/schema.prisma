@@ -8,16 +8,21 @@ datasource db {
 }
 
 model Customer {
-  id             String    @id @default(cuid())
-  name           String
-  contactName    String?
-  phone          String?
-  email          String?
-  billingAddress String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  Invoice        Invoice[]
-  Vehicle        Vehicle[]
+  id                     String                   @id @default(cuid())
+  name                   String
+  contactName            String?
+  phone                  String?
+  email                  String?
+  billingAddress         String?
+  portalTokenHash        String?
+  portalTokenExpiresAt   DateTime?
+  portalLastAccessedAt   DateTime?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  Invoice                Invoice[]
+  Vehicle                Vehicle[]
+  Notifications          CustomerNotification[]
+  NotificationPreference NotificationPreference?
 }
 
 model EmployeeProfile {
@@ -426,4 +431,214 @@ enum WorkOrderStatus {
   APPROVED
   IN_PROGRESS
   COMPLETED
+}
+
+// ==========================================
+// CUSTOMER NOTIFICATION SYSTEM
+// ==========================================
+
+model CustomerNotification {
+  id           String                     @id @default(cuid())
+  customerId   String
+  type         CustomerNotificationType
+  channel      NotificationChannel
+  subject      String
+  content      String
+  metadata     Json?
+  status       NotificationStatus         @default(PENDING)
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  failedAt     DateTime?
+  failureReason String?
+  externalId   String?                    // Resend/Twilio message ID
+  createdAt    DateTime                   @default(now())
+  updatedAt    DateTime                   @updatedAt
+  Customer     Customer                   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model NotificationPreference {
+  id                   String   @id @default(cuid())
+  customerId           String   @unique
+  emailEnabled         Boolean  @default(true)
+  smsEnabled           Boolean  @default(false)
+  pushEnabled          Boolean  @default(true)
+  workOrderUpdates     Boolean  @default(true)
+  estimateAlerts       Boolean  @default(true)
+  invoiceReminders     Boolean  @default(true)
+  marketingEmails      Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  Customer             Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+}
+
+enum CustomerNotificationType {
+  WORK_ORDER_CREATED
+  WORK_ORDER_STATUS_UPDATE
+  ESTIMATE_READY
+  ESTIMATE_APPROVED
+  INVOICE_CREATED
+  INVOICE_REMINDER
+  PAYMENT_RECEIVED
+  PAYMENT_FAILED
+  PORTAL_LINK
+  APPOINTMENT_REMINDER
+  SERVICE_COMPLETE
+  MARKETING
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationStatus {
+  PENDING
+  SENDING
+  SENT
+  DELIVERED
+  FAILED
+  BOUNCED
+}
+
+// ==========================================
+// DEMO REQUESTS / LEADS
+// ==========================================
+
+model DemoRequest {
+  id           String          @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String
+  phone        String?
+  company      String?
+  shopSize     String?         // "1-5", "6-15", "16-50", "50+"
+  message      String?
+  source       String?         // "website", "referral", "google", etc.
+  status       LeadStatus      @default(NEW)
+  assignedTo   String?
+  notes        String?
+  followUpAt   DateTime?
+  convertedAt  DateTime?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  DEMO_SCHEDULED
+  DEMO_COMPLETED
+  NEGOTIATING
+  CONVERTED
+  LOST
+}
+
+// ==========================================
+// SECURITY & AUDIT LOGGING
+// ==========================================
+
+model AuditLog {
+  id            String      @id @default(cuid())
+  userId        String?
+  userEmail     String?
+  action        AuditAction
+  entityType    String
+  entityId      String?
+  oldValues     Json?
+  newValues     Json?
+  ipAddress     String?
+  userAgent     String?
+  requestId     String?
+  duration      Int?        // milliseconds
+  success       Boolean     @default(true)
+  errorMessage  String?
+  metadata      Json?
+  createdAt     DateTime    @default(now())
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model RateLimitRecord {
+  id          String   @id @default(cuid())
+  identifier  String   // IP address or user ID
+  endpoint    String
+  count       Int      @default(1)
+  windowStart DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@unique([identifier, endpoint, windowStart])
+  @@index([identifier])
+  @@index([windowStart])
+}
+
+model SecurityEvent {
+  id          String            @id @default(cuid())
+  type        SecurityEventType
+  severity    SecuritySeverity
+  userId      String?
+  ipAddress   String?
+  userAgent   String?
+  description String
+  metadata    Json?
+  resolved    Boolean           @default(false)
+  resolvedAt  DateTime?
+  resolvedBy  String?
+  createdAt   DateTime          @default(now())
+
+  @@index([type])
+  @@index([severity])
+  @@index([createdAt])
+  @@index([resolved])
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  LOGIN_FAILED
+  PASSWORD_CHANGE
+  PERMISSION_CHANGE
+  EXPORT
+  IMPORT
+  PAYMENT_PROCESSED
+  INVOICE_SENT
+  NOTIFICATION_SENT
+}
+
+enum SecurityEventType {
+  BRUTE_FORCE_ATTEMPT
+  INVALID_TOKEN
+  RATE_LIMIT_EXCEEDED
+  SUSPICIOUS_ACTIVITY
+  UNAUTHORIZED_ACCESS
+  DATA_EXPORT
+  ADMIN_ACTION
+  API_KEY_CREATED
+  API_KEY_REVOKED
+}
+
+enum SecuritySeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }

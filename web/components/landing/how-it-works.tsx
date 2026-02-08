@@ -22,7 +22,10 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-24 bg-neutral-50 border-y border-neutral-200">
+    <section id="how-it-works" className="py-24 bg-neutral-50 relative">
+      {/* Top gradient divider */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-300 to-transparent" />
+
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
         <motion.div
@@ -32,10 +35,13 @@ export function HowItWorks() {
           transition={{ duration: 0.5 }}
           className="mb-16"
         >
-          <span className="text-sm font-medium text-neutral-500 uppercase tracking-wide">
-            Getting Started
-          </span>
-          <h2 className="mt-2 text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-px w-8 bg-amber-500" />
+            <span className="text-sm font-medium text-amber-600 uppercase tracking-widest">
+              Getting Started
+            </span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
             Up and running in minutes.
           </h2>
         </motion.div>

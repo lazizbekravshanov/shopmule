@@ -20,6 +20,9 @@ import {
   ProfitPulse,
   SmartActions,
   CustomerHealth,
+  TodaysSchedule,
+  TechnicianStatusBoard,
+  UnpaidInvoicesAlert,
 } from '@/components/dashboard';
 import { useRevenueReport } from '@/lib/queries/reports';
 import { useWorkOrdersSummary } from '@/lib/queries/work-orders';
@@ -71,18 +74,18 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-neutral-900 tracking-tight">
+          <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100 tracking-tight">
             Dashboard
           </h1>
-          <p className="text-neutral-500 mt-1">
+          <p className="text-neutral-500 dark:text-neutral-400 mt-1">
             Overview of your shop performance
           </p>
         </div>
         <Button
           asChild
-          className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white border-0"
+          className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white border-0 w-full sm:w-auto"
         >
           <Link href="/work-orders/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -96,22 +99,22 @@ export default function DashboardPage() {
         {/* Revenue */}
         <Link
           href="/invoices"
-          className="bg-white border border-neutral-200 rounded-xl p-5 transition-all hover:border-neutral-300 hover:shadow-sm"
+          className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-5 transition-all hover:border-neutral-300 dark:hover:border-neutral-600 hover:shadow-sm"
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-neutral-500">
+            <span className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
               Total Revenue
             </span>
-            <DollarSign className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
+            <DollarSign className="h-4 w-4 text-neutral-400 dark:text-neutral-500" strokeWidth={1.5} />
           </div>
           {revenueLoading ? (
             <Skeleton className="h-8 w-24" />
           ) : (
-            <div className="text-2xl font-bold text-neutral-900 tracking-tight">
+            <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">
               {formatCurrency(revenue?.total ?? 0)}
             </div>
           )}
-          <p className="text-xs text-neutral-400 mt-1">
+          <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1">
             {revenue?.count ?? 0} invoices
           </p>
         </Link>
@@ -119,39 +122,39 @@ export default function DashboardPage() {
         {/* Work Orders */}
         <Link
           href="/work-orders"
-          className="bg-white border border-neutral-200 rounded-xl p-5 transition-all hover:border-neutral-300 hover:shadow-sm"
+          className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-5 transition-all hover:border-neutral-300 dark:hover:border-neutral-600 hover:shadow-sm"
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-neutral-500">
+            <span className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
               Open Work Orders
             </span>
-            <Wrench className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
+            <Wrench className="h-4 w-4 text-neutral-400 dark:text-neutral-500" strokeWidth={1.5} />
           </div>
           {workOrdersLoading ? (
             <Skeleton className="h-8 w-16" />
           ) : (
-            <div className="text-2xl font-bold text-neutral-900 tracking-tight">
+            <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">
               {openWorkOrders}
             </div>
           )}
-          <p className="text-xs text-neutral-400 mt-1">{totalWorkOrders} total</p>
+          <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1">{totalWorkOrders} total</p>
         </Link>
 
         {/* Customers */}
         <Link
           href="/customers"
-          className="bg-white border border-neutral-200 rounded-xl p-5 transition-all hover:border-neutral-300 hover:shadow-sm"
+          className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl p-5 transition-all hover:border-neutral-300 dark:hover:border-neutral-600 hover:shadow-sm"
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-neutral-500">
+            <span className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
               Active Customers
             </span>
-            <Users className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
+            <Users className="h-4 w-4 text-neutral-400 dark:text-neutral-500" strokeWidth={1.5} />
           </div>
-          <div className="text-2xl font-bold text-neutral-900 tracking-tight">
+          <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 tracking-tight">
             {activeCustomers}
           </div>
-          <p className="text-xs text-neutral-400 mt-1">With open orders</p>
+          <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1">With open orders</p>
         </Link>
 
         {/* Low Stock */}
@@ -183,6 +186,15 @@ export default function DashboardPage() {
         </Link>
       </div>
 
+      {/* Today's Operations Row */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <TodaysSchedule />
+        <TechnicianStatusBoard />
+      </div>
+
+      {/* Unpaid Invoices Alert */}
+      <UnpaidInvoicesAlert />
+
       {/* AI-Powered Row: Smart Actions + AI Insights */}
       <div className="grid gap-6 lg:grid-cols-2">
         <SmartActions />
@@ -209,14 +221,14 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Work Orders */}
-      <div className="bg-white rounded-xl border border-neutral-200">
-        <div className="flex items-center justify-between p-5 border-b border-neutral-100">
-          <h3 className="font-semibold text-neutral-900">Recent Work Orders</h3>
+      <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-5 border-b border-neutral-100 dark:border-neutral-700">
+          <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">Recent Work Orders</h3>
           <Button
             variant="ghost"
             size="sm"
             asChild
-            className="text-neutral-500 hover:text-neutral-900"
+            className="text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 w-full sm:w-auto"
           >
             <Link href="/work-orders">
               View all
@@ -237,13 +249,13 @@ export default function DashboardPage() {
                 <Link
                   key={wo.id}
                   href={`/work-orders/${wo.id}`}
-                  className="flex items-center justify-between py-3 px-3 -mx-3 rounded-lg transition-colors hover:bg-neutral-50"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between py-3 px-3 -mx-3 gap-2 rounded-lg transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-700/50"
                 >
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-neutral-900">
+                  <div className="space-y-1 min-w-0">
+                    <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100 truncate">
                       {wo.vehicle?.make} {wo.vehicle?.model}
                     </p>
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400 truncate">
                       {wo.description.slice(0, 50)}...
                     </p>
                   </div>
@@ -255,13 +267,14 @@ export default function DashboardPage() {
                         ? 'warning'
                         : 'secondary'
                     }
+                    className="self-start sm:self-center shrink-0"
                   >
                     {wo.status.replace('_', ' ')}
                   </Badge>
                 </Link>
               ))}
               {(!workOrderSummary || workOrderSummary.recent.length === 0) && (
-                <p className="text-center text-neutral-400 py-8">
+                <p className="text-center text-neutral-400 dark:text-neutral-500 py-8">
                   No work orders yet
                 </p>
               )}

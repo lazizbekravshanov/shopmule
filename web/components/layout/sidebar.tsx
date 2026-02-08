@@ -14,14 +14,14 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'relative hidden h-screen border-r border-neutral-200 bg-neutral-50 transition-all duration-200 lg:flex lg:flex-col',
+        'relative hidden h-screen border-r border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 transition-all duration-200 lg:flex lg:flex-col',
         sidebarCollapsed ? 'w-16' : 'w-56'
       )}
     >
       {/* Logo */}
       <div
         className={cn(
-          'flex h-14 items-center border-b border-neutral-200 px-4',
+          'flex h-14 items-center border-b border-neutral-200 dark:border-neutral-800 px-4',
           sidebarCollapsed && 'justify-center px-2'
         )}
       >
@@ -30,7 +30,7 @@ export function Sidebar() {
             <MuleIcon className="h-4 w-4 text-white" />
           </div>
           {!sidebarCollapsed && (
-            <span className="font-semibold text-neutral-900">ShopMule</span>
+            <span className="font-semibold text-neutral-900 dark:text-neutral-100">ShopMule</span>
           )}
         </Link>
       </div>
@@ -41,11 +41,11 @@ export function Sidebar() {
       </nav>
 
       {/* Collapse toggle */}
-      <div className="border-t border-neutral-200 p-2">
+      <div className="border-t border-neutral-200 dark:border-neutral-800 p-2">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-center text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100"
+          className="w-full justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800"
           onClick={toggleSidebar}
         >
           {sidebarCollapsed ? (

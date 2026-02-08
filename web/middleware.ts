@@ -21,6 +21,7 @@ const publicRoutes = [
   "/login",
   "/register",
   "/pay",     // Customer payment portal
+  "/portal",  // Customer portal
   "/contact", // Contact form
   "/blog",    // Blog
   "/",        // Landing page
@@ -33,6 +34,8 @@ const publicApiRoutes = [
   "/api/fmcsa",
   "/api/contact",
   "/api/mobile/auth", // Mobile login endpoint
+  "/api/portal",      // Customer portal API (token-based auth)
+  "/api/pay",         // Customer payment API (token-based auth)
 ]
 
 // API routes that handle their own auth (support Bearer tokens)

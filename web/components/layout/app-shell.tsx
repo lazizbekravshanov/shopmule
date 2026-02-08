@@ -8,6 +8,7 @@ import { Sidebar } from './sidebar';
 import { Header } from './header';
 import { CommandPalette } from './command-palette';
 import { Notifications } from './notifications';
+import { KeyboardShortcutsProvider } from './keyboard-shortcuts-provider';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -25,17 +26,18 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen overflow-hidden bg-white dark:bg-neutral-950">
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Header />
-          <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <main className="flex-1 overflow-y-auto bg-neutral-50 dark:bg-neutral-900 p-4 lg:p-6">
             {children}
           </main>
         </div>
       </div>
       <CommandPalette />
       <Notifications />
+      <KeyboardShortcutsProvider />
     </TooltipProvider>
   );
 }

@@ -18,19 +18,27 @@ import {
   StatsCounter,
   ROICalculator,
   Integrations,
+  ScrollProgress,
+  BackToTop,
+  SmoothScroll,
+  VideoDemo,
+  ExitIntentPopup,
 } from '@/components/landing';
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
+      <ScrollProgress />
+      <SmoothScroll />
       <Navigation />
-      <main>
+      <main id="main-content" role="main">
         <Hero />
         <SocialProof />
         <BlogPreview />
         <StatsCounter />
         <ProblemSolution />
         <FeaturesBento />
+        <VideoDemo />
         <Integrations />
         <HowItWorks />
         <ROICalculator />
@@ -42,6 +50,8 @@ export default function LandingPage() {
         <FinalCTA />
       </main>
       <Footer />
+      <BackToTop />
+      <ExitIntentPopup />
     </div>
   );
 }

@@ -161,4 +161,30 @@
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-500;
   }
+
+  /* Floating animation for background icons */
+  .animate-float {
+    animation: float 4s ease-in-out infinite, fadeIn 0.5s ease-out forwards;
+  }
+}
+
+/* Floating keyframes */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

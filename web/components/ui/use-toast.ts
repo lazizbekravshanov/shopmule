@@ -1,8 +1,8 @@
 import * as React from "react"
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 5
+const TOAST_REMOVE_DELAY = 5000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -182,4 +182,37 @@ function useToast() {
   }
 }
 
-export { useToast, toast }
+// Helper functions for common toast types
+function success(message: string, description?: string) {
+  return toast({
+    title: message,
+    description,
+    variant: 'default',
+  });
+}
+
+function error(message: string, description?: string) {
+  return toast({
+    title: message,
+    description,
+    variant: 'destructive',
+  });
+}
+
+function warning(message: string, description?: string) {
+  return toast({
+    title: message,
+    description,
+    variant: 'default',
+  });
+}
+
+function info(message: string, description?: string) {
+  return toast({
+    title: message,
+    description,
+    variant: 'default',
+  });
+}
+
+export { useToast, toast, success, error, warning, info }

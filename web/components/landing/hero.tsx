@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -14,21 +14,27 @@ import {
   Clock,
   Package,
   Bot,
+  Truck,
+  Cog,
+  Gauge,
+  Fuel,
+  Settings,
+  ClipboardList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-};
-
-const stagger = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
+// Floating background icons - using CSS animations for performance
+const floatingIcons = [
+  { Icon: Wrench, className: 'top-20 left-[8%] w-12 h-12 -rotate-12', delay: '0s' },
+  { Icon: Truck, className: 'top-32 right-[10%] w-14 h-14 rotate-6', delay: '0.5s' },
+  { Icon: Cog, className: 'top-48 left-[15%] w-10 h-10', delay: '1s' },
+  { Icon: Gauge, className: 'top-24 right-[20%] w-8 h-8 -rotate-6', delay: '0.3s' },
+  { Icon: Fuel, className: 'top-56 right-[8%] w-9 h-9 rotate-12', delay: '0.7s' },
+  { Icon: Settings, className: 'top-16 left-[22%] w-7 h-7 rotate-12', delay: '0.2s' },
+  { Icon: ClipboardList, className: 'top-60 left-[12%] w-8 h-8 -rotate-6', delay: '0.8s' },
+  { Icon: Wrench, className: 'top-36 right-[15%] w-6 h-6 rotate-45', delay: '0.4s' },
+  { Icon: Cog, className: 'top-52 right-[22%] w-10 h-10 -rotate-12', delay: '0.9s' },
+];
 
 // Mock data for the dashboard preview
 const sidebarItems = [
@@ -54,7 +60,42 @@ const recentOrders = [
   { id: 'WO-1021', vehicle: 'Volvo VNL 760', status: 'In Progress', statusColor: 'bg-primary-500' },
 ];
 
+const heroVariants = [
+  {
+    headline: ["Your Shop's New", "Hardest Worker"],
+    subheadline: "Load it up. Let it run. Watch profits climb.",
+    description: "ShopMule is the tireless AI that manages your jobs, invoices, and customers while you focus on what matters—growing your business.",
+  },
+  {
+    headline: ["Stop Chasing Paper.", "Start Making Money."],
+    subheadline: "Automate the busywork. Dominate the competition.",
+    description: "ShopMule handles the invoices, scheduling, and follow-ups so you can focus on turning wrenches and growing revenue.",
+  },
+  {
+    headline: ["Run Your Shop.", "Not Your Inbox."],
+    subheadline: "AI that works nights, weekends, and holidays.",
+    description: "From work orders to customer updates, ShopMule automates the tasks that steal your time—so you can reclaim your day.",
+  },
+  {
+    headline: ["Built for Shops", "That Never Stop"],
+    subheadline: "The workhorse your business deserves.",
+    description: "ShopMule keeps your operation running smooth—managing jobs, tracking parts, and getting invoices paid while you sleep.",
+  },
+  {
+    headline: ["More Repairs.", "Less Paperwork."],
+    subheadline: "Finally, software that pulls its weight.",
+    description: "Let ShopMule handle the admin grind. You focus on what you do best—fixing trucks and building your business.",
+  },
+];
+
 export function Hero() {
+  const [variant, setVariant] = useState(heroVariants[0]);
+
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * heroVariants.length);
+    setVariant(heroVariants[randomIndex]);
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
       {/* Subtle Background Gradient */}
@@ -63,55 +104,54 @@ export function Hero() {
       {/* Refined Grid Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-30" />
 
-      <div className="relative max-w-7xl mx-auto px-6 py-24">
-        <motion.div
-          variants={stagger}
-          initial="initial"
-          animate="animate"
-          className="max-w-4xl mx-auto text-center"
-        >
-          {/* Badge */}
-          <motion.div
-            variants={fadeInUp}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 border border-amber-300 mb-8"
+      {/* Floating Background Icons */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {floatingIcons.map((item, index) => (
+          <div
+            key={index}
+            className={`absolute hidden md:block ${item.className} animate-float opacity-0`}
+            style={{
+              animationDelay: item.delay,
+              animationFillMode: 'forwards'
+            }}
           >
+            <item.Icon className="w-full h-full text-amber-500/10 stroke-[1.5]" />
+          </div>
+        ))}
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-6 py-24">
+        <div className="max-w-4xl mx-auto text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 border border-amber-300 mb-8">
             <Bot className="w-4 h-4 text-amber-700" />
             <span className="text-sm font-medium text-amber-800">AI-Powered Shop Management</span>
-          </motion.div>
+          </div>
 
           {/* Headline */}
-          <motion.h1
-            variants={fadeInUp}
-            className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-neutral-900 leading-[1.1] mb-6"
-          >
-            Your Shop's New
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-neutral-900 leading-[1.1] mb-6">
+            {variant.headline[0]}
             <br />
             <span className="bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 bg-clip-text text-transparent">
-              Hardest Worker
+              {variant.headline[1]}
             </span>
-          </motion.h1>
+          </h1>
 
           {/* Subheadline */}
-          <motion.p
-            variants={fadeInUp}
-            className="text-xl md:text-2xl text-neutral-600 max-w-2xl mx-auto mb-4 leading-relaxed"
-          >
-            Load it up. Let it run. Watch profits climb.
-          </motion.p>
+          <p className="text-xl md:text-2xl text-neutral-600 max-w-2xl mx-auto mb-4 leading-relaxed">
+            {variant.subheadline}
+          </p>
 
-          <motion.p
-            variants={fadeInUp}
-            className="text-lg text-neutral-500 max-w-xl mx-auto mb-10"
-          >
-            ShopMule is the tireless AI that manages your jobs, invoices, and customers while you focus on what matters—growing your business.
-          </motion.p>
+          <p className="text-lg text-neutral-500 max-w-xl mx-auto mb-10">
+            {variant.description}
+          </p>
 
           {/* CTAs */}
-          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
             <Button
               asChild
               size="lg"
-              className="bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl h-14 px-8 text-base font-semibold shadow-lg shadow-neutral-900/20 hover:shadow-xl hover:shadow-neutral-900/30 transition-all duration-300"
+              className="bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl h-14 px-8 text-base font-semibold shadow-lg shadow-neutral-900/20 hover:shadow-xl hover:shadow-neutral-900/30 transition-all duration-200"
             >
               <Link href="/login">
                 Start Free — No Card Needed
@@ -129,10 +169,10 @@ export function Hero() {
                 See It Work
               </a>
             </Button>
-          </motion.div>
+          </div>
 
           {/* Trust Indicators */}
-          <motion.div variants={fadeInUp} className="flex flex-wrap items-center justify-center gap-8 text-sm text-neutral-500">
+          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-neutral-500">
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-amber-500" />
               <span>Set up in 5 minutes</span>
@@ -145,16 +185,11 @@ export function Hero() {
               <Check className="w-4 h-4 text-green-500" />
               <span>Cancel anytime</span>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Dashboard Preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-20 relative"
-        >
+        <div className="mt-20 relative animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
           <div className="relative mx-auto max-w-5xl">
             {/* Browser Chrome */}
             <div className="bg-neutral-900 rounded-t-xl p-3 flex items-center gap-2">
@@ -174,7 +209,7 @@ export function Hero() {
             <div className="bg-white rounded-b-xl border border-t-0 border-neutral-200 overflow-hidden">
               <div className="flex" style={{ height: '420px' }}>
                 {/* Sidebar */}
-                <div className="w-52 bg-neutral-900 p-4 flex flex-col">
+                <div className="w-52 bg-neutral-900 p-4 flex flex-col hidden md:flex">
                   {/* Logo */}
                   <div className="flex items-center gap-2 mb-6 px-2">
                     <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">
@@ -218,7 +253,7 @@ export function Hero() {
                   </div>
 
                   {/* Stats Cards */}
-                  <div className="grid grid-cols-4 gap-3 mb-5">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
                     {statsCards.map((stat) => (
                       <div key={stat.label} className="bg-white rounded-xl p-3 border border-neutral-100 shadow-sm">
                         <p className="text-[10px] text-neutral-500 mb-1">{stat.label}</p>
@@ -231,9 +266,9 @@ export function Hero() {
                   </div>
 
                   {/* Bottom Section */}
-                  <div className="grid grid-cols-5 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                     {/* Chart */}
-                    <div className="col-span-3 bg-white rounded-xl p-4 border border-neutral-100 shadow-sm">
+                    <div className="md:col-span-3 bg-white rounded-xl p-4 border border-neutral-100 shadow-sm">
                       <div className="flex items-center justify-between mb-3">
                         <p className="text-xs font-medium text-neutral-700">Revenue Overview</p>
                         <p className="text-[10px] text-neutral-400">Last 7 days</p>
@@ -255,7 +290,7 @@ export function Hero() {
                     </div>
 
                     {/* Recent Orders */}
-                    <div className="col-span-2 bg-white rounded-xl p-4 border border-neutral-100 shadow-sm">
+                    <div className="md:col-span-2 bg-white rounded-xl p-4 border border-neutral-100 shadow-sm">
                       <p className="text-xs font-medium text-neutral-700 mb-3">Recent Work Orders</p>
                       <div className="space-y-2">
                         {recentOrders.map((order) => (
@@ -279,7 +314,7 @@ export function Hero() {
             {/* Subtle Glow Effect */}
             <div className="absolute -inset-4 bg-gradient-to-r from-amber-500/10 via-orange-400/10 to-amber-500/10 rounded-2xl blur-3xl -z-10 opacity-60" />
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

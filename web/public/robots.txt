@@ -1,0 +1,24 @@
+# robots.txt for ShopMule
+User-agent: *
+Allow: /
+
+# Disallow admin/dashboard areas from indexing
+Disallow: /dashboard
+Disallow: /customers
+Disallow: /work-orders
+Disallow: /invoices
+Disallow: /inventory
+Disallow: /settings
+Disallow: /technicians
+Disallow: /reports
+Disallow: /api/
+Disallow: /portal/
+Disallow: /pay/
+
+# Allow specific public pages
+Allow: /blog
+Allow: /contact
+Allow: /login
+
+# Sitemap location
+Sitemap: https://shopmuleai.vercel.app/sitemap.xml

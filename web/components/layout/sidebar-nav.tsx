@@ -56,8 +56,8 @@ export function SidebarNav({ collapsed = false }: SidebarNavProps) {
             className={cn(
               'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
               isActive
-                ? 'bg-white text-neutral-900 shadow-sm border border-neutral-200'
-                : 'text-neutral-600 hover:text-neutral-900 hover:bg-white/50',
+                ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 shadow-sm border border-neutral-200 dark:border-neutral-700'
+                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-white/50 dark:hover:bg-neutral-800/50',
               collapsed && 'justify-center px-2'
             )}
           >

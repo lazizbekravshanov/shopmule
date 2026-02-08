@@ -13,7 +13,7 @@ const comparisons = [
 
 export function ProblemSolution() {
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-white relative">
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
         <motion.div
@@ -23,10 +23,13 @@ export function ProblemSolution() {
           transition={{ duration: 0.5 }}
           className="mb-16"
         >
-          <span className="text-sm font-medium text-neutral-500 uppercase tracking-wide">
-            The Difference
-          </span>
-          <h2 className="mt-2 text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-px w-8 bg-amber-500" />
+            <span className="text-sm font-medium text-amber-600 uppercase tracking-widest">
+              The Difference
+            </span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
             Stop the chaos.
           </h2>
         </motion.div>

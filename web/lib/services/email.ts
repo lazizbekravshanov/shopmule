@@ -1,6 +1,17 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization to prevent build-time errors
+let resendInstance: Resend | null = null;
+
+function getResend(): Resend | null {
+  if (!process.env.RESEND_API_KEY) {
+    return null;
+  }
+  if (!resendInstance) {
+    resendInstance = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendInstance;
+}
 
 export interface SendEmailOptions {
   to: string;
@@ -21,7 +32,8 @@ const DEFAULT_FROM = process.env.EMAIL_FROM || 'ShopMule <noreply@shopmule.com>'
 export async function sendEmail(options: SendEmailOptions): Promise<EmailResult> {
   const { to, subject, html, text, from = DEFAULT_FROM } = options;
 
-  if (!process.env.RESEND_API_KEY) {
+  const resend = getResend();
+  if (!resend) {
     console.warn('RESEND_API_KEY not configured, skipping email');
     return {
       success: false,
