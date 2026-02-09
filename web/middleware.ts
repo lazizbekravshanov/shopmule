@@ -31,6 +31,7 @@ const publicRoutes = [
 const publicApiRoutes = [
   "/api/auth",
   "/api/health",
+  "/api/debug",       // Debug endpoint (temporary)
   "/api/fmcsa",
   "/api/contact",
   "/api/mobile/auth", // Mobile login endpoint
