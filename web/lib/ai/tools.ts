@@ -1,6 +1,7 @@
 import { tool } from 'ai'
 import { z } from 'zod'
 import { prisma } from '@/lib/db'
+import { WorkOrderStatus, PaymentStatus } from '@prisma/client'
 
 // Tool definitions for the AI copilot
 export const aiTools = {
@@ -10,7 +11,7 @@ export const aiTools = {
     parameters: z.object({
       query: z.string().describe('Search query - name, email, or phone number'),
     }),
-    execute: async ({ query }: { query: string }) => {
+    execute: async ({ query }) => {
       const customers = await prisma.customer.findMany({
         where: {
           OR: [
@@ -41,7 +42,7 @@ export const aiTools = {
     parameters: z.object({
       query: z.string().describe('Search query - VIN, make, model, or license plate'),
     }),
-    execute: async ({ query }: { query: string }) => {
+    execute: async ({ query }) => {
       const vehicles = await prisma.vehicle.findMany({
         where: {
           OR: [
@@ -82,19 +83,19 @@ export const aiTools = {
         unpaidInvoices,
       ] = await Promise.all([
         prisma.workOrder.count(),
-        prisma.workOrder.count({ where: { status: 'PENDING' } }),
-        prisma.workOrder.count({ where: { status: 'IN_PROGRESS' } }),
+        prisma.workOrder.count({ where: { status: WorkOrderStatus.PENDING } }),
+        prisma.workOrder.count({ where: { status: WorkOrderStatus.IN_PROGRESS } }),
         prisma.workOrder.count({
           where: {
-            status: 'COMPLETED',
+            status: WorkOrderStatus.COMPLETED,
             updatedAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
           },
         }),
         prisma.customer.count(),
-        prisma.invoice.count({ where: { status: 'PENDING' } }),
+        prisma.invoice.count({ where: { status: PaymentStatus.PENDING } }),
       ])
 
-      // Get low stock count separately with raw query
+      // Get low stock count
       const lowStockResult = await prisma.$queryRaw<[{count: bigint}]>`
         SELECT COUNT(*) as count FROM "Part" WHERE stock <= "reorderPoint"
       `
@@ -120,11 +121,11 @@ export const aiTools = {
         .describe('Filter by status'),
       limit: z.number().optional().describe('Number of results to return'),
     }),
-    execute: async ({ status, limit }: { status?: string; limit?: number }) => {
+    execute: async ({ status, limit }) => {
       const workOrders = await prisma.workOrder.findMany({
-        where: status ? { status: status as 'PENDING' | 'DIAGNOSED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' } : undefined,
+        where: status ? { status: status as WorkOrderStatus } : undefined,
         include: {
-          vehicle: { include: { Customer: true } },
+          Vehicle: { include: { Customer: true } },
         },
         orderBy: { createdAt: 'desc' },
         take: limit || 10,
@@ -133,10 +134,10 @@ export const aiTools = {
         id: wo.id,
         status: wo.status,
         description: wo.description,
-        vehicleMake: wo.vehicle.make,
-        vehicleModel: wo.vehicle.model,
-        vehicleYear: wo.vehicle.year,
-        customerName: wo.vehicle.Customer?.name || 'Unknown',
+        vehicleMake: wo.Vehicle.make,
+        vehicleModel: wo.Vehicle.model,
+        vehicleYear: wo.Vehicle.year,
+        customerName: wo.Vehicle.Customer?.name || 'Unknown',
         createdAt: wo.createdAt.toISOString(),
       }))
     },
@@ -149,23 +150,23 @@ export const aiTools = {
       vehicleId: z.string().describe('The vehicle ID'),
       description: z.string().describe('Description of the work to be done'),
     }),
-    execute: async ({ vehicleId, description }: { vehicleId: string; description: string }) => {
+    execute: async ({ vehicleId, description }) => {
       const workOrder = await prisma.workOrder.create({
         data: {
           vehicleId,
           description,
-          status: 'PENDING',
+          status: WorkOrderStatus.PENDING,
         },
         include: {
-          vehicle: { include: { Customer: true } },
+          Vehicle: { include: { Customer: true } },
         },
       })
       return {
         id: workOrder.id,
         status: workOrder.status,
         description: workOrder.description,
-        vehicle: `${workOrder.vehicle.year} ${workOrder.vehicle.make} ${workOrder.vehicle.model}`,
-        customer: workOrder.vehicle.Customer?.name || 'Unknown',
+        vehicle: `${workOrder.Vehicle.year} ${workOrder.Vehicle.make} ${workOrder.Vehicle.model}`,
+        customer: workOrder.Vehicle.Customer?.name || 'Unknown',
         message: `Work order created successfully`,
       }
     },
@@ -179,11 +180,11 @@ export const aiTools = {
       status: z.enum(['PENDING', 'DIAGNOSED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
         .describe('New status'),
     }),
-    execute: async ({ workOrderId, status }: { workOrderId: string; status: string }) => {
+    execute: async ({ workOrderId, status }) => {
       const workOrder = await prisma.workOrder.update({
         where: { id: workOrderId },
-        data: { status: status as 'PENDING' | 'DIAGNOSED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' },
-        include: { vehicle: true },
+        data: { status: status as WorkOrderStatus },
+        include: { Vehicle: true },
       })
       return {
         id: workOrder.id,
@@ -200,7 +201,7 @@ export const aiTools = {
       query: z.string().optional().describe('Search by part name or SKU'),
       lowStockOnly: z.boolean().optional().describe('Only show low stock items'),
     }),
-    execute: async ({ query, lowStockOnly }: { query?: string; lowStockOnly?: boolean }) => {
+    execute: async ({ query, lowStockOnly }) => {
       const parts = await prisma.part.findMany({
         where: query ? {
           OR: [
@@ -235,11 +236,11 @@ export const aiTools = {
       type: z.enum(['priorities', 'inventory', 'scheduling', 'general']).optional()
         .describe('Type of recommendations to get'),
     }),
-    execute: async ({ type }: { type?: string }) => {
+    execute: async ({ type }) => {
       const [pendingWOs, lowStockParts, unpaidInvoices] = await Promise.all([
         prisma.workOrder.findMany({
-          where: { status: { in: ['PENDING', 'DIAGNOSED'] } },
-          include: { vehicle: { include: { Customer: true } } },
+          where: { status: { in: [WorkOrderStatus.PENDING, WorkOrderStatus.DIAGNOSED] } },
+          include: { Vehicle: { include: { Customer: true } } },
           orderBy: { createdAt: 'asc' },
           take: 5,
         }),
@@ -248,8 +249,8 @@ export const aiTools = {
           take: 5,
         }),
         prisma.invoice.findMany({
-          where: { status: 'PENDING' },
-          include: { workOrder: { include: { vehicle: { include: { Customer: true } } } } },
+          where: { status: PaymentStatus.PENDING },
+          include: { workOrder: { include: { Vehicle: { include: { Customer: true } } } } },
           take: 5,
         }),
       ])
@@ -272,8 +273,8 @@ export const aiTools = {
             items: pendingWOs.map(wo => ({
               id: wo.id,
               description: wo.description,
-              customer: wo.vehicle.Customer?.name || 'Unknown',
-              vehicle: `${wo.vehicle.make} ${wo.vehicle.model}`,
+              customer: wo.Vehicle.Customer?.name || 'Unknown',
+              vehicle: `${wo.Vehicle.make} ${wo.Vehicle.model}`,
               waitingDays: Math.floor((Date.now() - wo.createdAt.getTime()) / (1000 * 60 * 60 * 24)),
             })),
           })
@@ -307,7 +308,7 @@ export const aiTools = {
             action: 'Follow up with customers on payment',
             items: unpaidInvoices.map(inv => ({
               id: inv.id,
-              customer: inv.workOrder?.vehicle?.Customer?.name || 'Unknown',
+              customer: inv.workOrder?.Vehicle?.Customer?.name || 'Unknown',
               amount: Number(inv.total),
             })),
           })

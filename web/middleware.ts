@@ -40,6 +40,7 @@ const publicApiRoutes = [
 
 // API routes that handle their own auth (support Bearer tokens)
 const selfAuthApiRoutes = [
+  "/api/ai",            // AI copilot (handles its own session auth)
   "/api/vehicles/search",
   "/api/vehicles/", // For /api/vehicles/[id] routes
   "/api/vin/decode",

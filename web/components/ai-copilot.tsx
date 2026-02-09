@@ -37,6 +37,7 @@ export function AICopilot() {
   const { messages, sendMessage, status } = useChat({
     chatId: 'shopmule-copilot',
     api: '/api/ai/chat',
+    fetch: (url, options) => fetch(url, { ...options, credentials: 'include' }),
   })
 
   const isLoading = status === 'streaming' || status === 'submitted'
