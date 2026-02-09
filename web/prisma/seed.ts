@@ -6,9 +6,9 @@ const prisma = new PrismaClient()
 async function main() {
   console.log("Starting seed...")
 
-  // Get admin credentials from environment variables
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@example.com"
-  const adminPassword = process.env.ADMIN_PASSWORD || "admin123"
+  // Get admin credentials from environment variables (trim to remove any whitespace/newlines)
+  const adminEmail = (process.env.ADMIN_EMAIL || "admin@example.com").trim()
+  const adminPassword = (process.env.ADMIN_PASSWORD || "admin123").trim()
 
   // Create admin user
   const passwordHash = await bcrypt.hash(adminPassword, 12)
