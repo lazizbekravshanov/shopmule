@@ -6,17 +6,21 @@ const prisma = new PrismaClient()
 async function main() {
   console.log("Starting seed...")
 
+  // Get admin credentials from environment variables
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@example.com"
+  const adminPassword = process.env.ADMIN_PASSWORD || "admin123"
+
   // Create admin user
-  const passwordHash = await bcrypt.hash("admin123", 12)
+  const passwordHash = await bcrypt.hash(adminPassword, 12)
 
   let admin = await prisma.user.findUnique({
-    where: { email: "admin@example.com" },
+    where: { email: adminEmail },
   })
 
   if (!admin) {
     admin = await prisma.user.create({
       data: {
-        email: "admin@example.com",
+        email: adminEmail,
         passwordHash,
         role: Role.ADMIN,
       },
@@ -32,6 +36,15 @@ async function main() {
         payRate: 0,
       },
     })
+  } else {
+    // Update existing admin password if environment variable is set
+    if (process.env.ADMIN_PASSWORD) {
+      await prisma.user.update({
+        where: { email: adminEmail },
+        data: { passwordHash },
+      })
+      console.log("Updated admin user password:", admin.email)
+    }
   }
 
   // Create mechanic user
@@ -167,9 +180,10 @@ async function main() {
     }
   }
 
+  const adminEmailDisplay = process.env.ADMIN_EMAIL || "admin@example.com"
   console.log("\n✅ Seed completed!")
-  console.log("\nDefault login credentials:")
-  console.log("  Admin: admin@example.com / admin123")
+  console.log("\nLogin credentials:")
+  console.log(`  Admin: ${adminEmailDisplay} / [from ADMIN_PASSWORD env var]`)
   console.log("  Mechanic: mechanic@example.com / mechanic123")
 }
 
