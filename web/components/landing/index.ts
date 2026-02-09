@@ -21,3 +21,8 @@ export { SmoothScroll } from './smooth-scroll';
 export { SectionDivider } from './section-divider';
 export { VideoDemo } from './video-demo';
 export { ExitIntentPopup } from './exit-intent-popup';
+export { MetricsBanner, MetricsFloating } from './metrics-banner';
+export { CaseStudies } from './case-studies';
+export { MarketOpportunity } from './market-opportunity';
+export { TeamSection } from './team-section';
+export { CompetitorComparison } from './competitor-comparison';

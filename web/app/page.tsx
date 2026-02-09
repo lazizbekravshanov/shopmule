@@ -23,6 +23,11 @@ import {
   SmoothScroll,
   VideoDemo,
   ExitIntentPopup,
+  MetricsBanner,
+  CaseStudies,
+  MarketOpportunity,
+  TeamSection,
+  CompetitorComparison,
 } from '@/components/landing';
 
 export default function LandingPage() {
@@ -33,6 +38,7 @@ export default function LandingPage() {
       <Navigation />
       <main id="main-content" role="main">
         <Hero />
+        <MetricsBanner />
         <SocialProof />
         <BlogPreview />
         <StatsCounter />
@@ -43,7 +49,10 @@ export default function LandingPage() {
         <HowItWorks />
         <ROICalculator />
         <Testimonials />
+        <CaseStudies />
+        <CompetitorComparison />
         <PricingSection />
+        <TeamSection />
         <SecuritySection />
         <FAQSection />
         <StatusSection />

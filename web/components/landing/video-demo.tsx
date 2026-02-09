@@ -129,7 +129,7 @@ export function VideoDemo() {
 
               {/* Duration Badge */}
               <div className="absolute bottom-4 right-4 bg-black/70 px-3 py-1 rounded-full text-white text-sm">
-                2:30
+                0:12
               </div>
 
               {/* Hover Overlay */}
@@ -191,13 +191,11 @@ export function VideoDemo() {
             <video
               ref={videoRef}
               className="w-full h-full object-cover"
-              poster="/video-poster.jpg"
               muted={isMuted}
               playsInline
               onEnded={() => setIsPlaying(false)}
             >
-              {/* Replace with actual video URL */}
-              <source src="/demo-video.mp4" type="video/mp4" />
+              <source src="/videos/demo.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
 
