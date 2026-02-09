@@ -83,5 +83,5 @@ export const authOptions: NextAuthOptions = {
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: true, // Temporarily enable for debugging
+  debug: process.env.NODE_ENV === 'development',
 }
