@@ -1,6 +1,8 @@
 export { AIInsights } from './ai-insights'
+export { AICommandCenter } from './ai-command-center'
 export { LiveBayBoard } from './live-bay-board'
 export { ProfitPulse } from './profit-pulse'
+export { ShopPulse } from './shop-pulse'
 export { SmartActions } from './smart-actions'
 export { CustomerHealth } from './customer-health'
 export { BackButton } from './back-button'
