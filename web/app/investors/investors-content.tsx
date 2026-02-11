@@ -50,13 +50,10 @@ const highlights = [
 ];
 
 const milestones = [
-  { year: '2022 Q1', event: 'Founded in Austin, TX' },
-  { year: '2022 Q3', event: 'Seed round: $4.2M led by Lead Venture Partner' },
-  { year: '2023 Q1', event: 'Product launch, 50 beta shops' },
-  { year: '2023 Q4', event: '200 active shops, $800K ARR' },
-  { year: '2024 Q2', event: '400 shops, $1.5M ARR' },
-  { year: '2024 Q4', event: '527 shops, $2.4M ARR' },
-  { year: '2025', event: 'Series A (raising now)' },
+  { year: '2026 Q1', event: 'Founded in Cincinnati, OH' },
+  { year: '2026 Q2', event: 'Seed round led by Lead Venture Partner' },
+  { year: '2026 Q3', event: 'Product launch, first beta shops' },
+  { year: '2026 Q4', event: 'Relocated HQ to San Francisco, CA' },
 ];
 
 const useOfFunds = [
@@ -399,7 +396,7 @@ export function InvestorsContent() {
             <p className="text-neutral-500 text-sm mt-8">
               Or schedule a call directly with our CEO at{' '}
               <a href="#" className="text-neutral-400 hover:text-neutral-300">
-                calendly.com/shopmule-alex
+                calendly.com/shopmule-lazizbek
               </a>
             </p>
           </motion.div>

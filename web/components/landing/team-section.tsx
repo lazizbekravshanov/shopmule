@@ -5,59 +5,43 @@ import { Linkedin, Twitter, Mail } from 'lucide-react';
 
 const team = [
   {
-    name: 'Alex Chen',
+    name: 'Lazizbek Ravshanov',
     role: 'CEO & Co-Founder',
-    bio: 'Former GM at CCC Intelligent Solutions. 15+ years in auto industry tech. Built and sold AutoFlow to Cox Automotive.',
-    image: '/team/alex.jpg',
-    initials: 'AC',
+    bio: 'Visionary entrepreneur passionate about modernizing the auto repair industry with AI-powered solutions.',
+    image: '/team/lazizbek.jpg',
+    initials: 'LR',
     linkedin: '#',
-    twitter: '#',
   },
   {
-    name: 'Sarah Martinez',
+    name: 'Sherzod Norkobilov',
     role: 'CTO & Co-Founder',
-    bio: 'Ex-Google, Ex-Stripe. Led infrastructure teams scaling to millions of transactions. Stanford CS.',
-    image: '/team/sarah.jpg',
-    initials: 'SM',
-    linkedin: '#',
-    twitter: '#',
-  },
-  {
-    name: 'James Park',
-    role: 'COO',
-    bio: 'Former VP Operations at ServiceTitan. Scaled from 50 to 500 employees. Harvard MBA.',
-    image: '/team/james.jpg',
-    initials: 'JP',
+    bio: 'Technical leader with expertise in building scalable platforms and AI/ML systems.',
+    image: '/team/sherzod.jpg',
+    initials: 'SN',
     linkedin: '#',
   },
   {
-    name: 'Emily Rodriguez',
+    name: 'Sadrijakhon',
     role: 'VP of Product',
-    bio: '10 years in B2B SaaS product. Previously led product at Shopify for SMB vertical.',
-    image: '/team/emily.jpg',
-    initials: 'ER',
+    bio: 'Product strategist focused on creating intuitive experiences for repair shop owners.',
+    image: '/team/sadrijakhon.jpg',
+    initials: 'SA',
     linkedin: '#',
   },
 ];
 
 const advisors = [
   {
-    name: 'Michael Thompson',
+    name: 'Industry Advisor',
     role: 'Advisor',
-    company: 'Partner, a16z',
-    initials: 'MT',
+    company: 'Auto Industry Executive',
+    initials: 'IA',
   },
   {
-    name: 'Lisa Wang',
+    name: 'Technical Advisor',
     role: 'Advisor',
-    company: 'Former CEO, Mitchell International',
-    initials: 'LW',
-  },
-  {
-    name: 'David Kim',
-    role: 'Advisor',
-    company: 'Founder, Tekion',
-    initials: 'DK',
+    company: 'Software Engineering Leader',
+    initials: 'TA',
   },
 ];
 
@@ -71,7 +55,7 @@ export function TeamSection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-block px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-sm font-medium mb-4"
+            className="inline-block px-4 py-1.5 bg-neutral-100 text-neutral-700 rounded-full text-sm font-medium mb-4"
           >
             Our Team
           </motion.span>
@@ -91,12 +75,12 @@ export function TeamSection() {
             transition={{ delay: 0.2 }}
             className="text-lg text-neutral-600 max-w-2xl mx-auto"
           >
-            Our team combines deep auto industry expertise with world-class technical talent from Google, Stripe, and Shopify.
+            A passionate team building the future of shop management software.
           </motion.p>
         </div>
 
         {/* Team Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid md:grid-cols-3 gap-8 mb-16 max-w-4xl mx-auto">
           {team.map((member, index) => (
             <motion.div
               key={member.name}
@@ -108,7 +92,7 @@ export function TeamSection() {
             >
               <div className="relative mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-neutral-100 to-neutral-200">
                 {/* Placeholder avatar with initials */}
-                <div className="aspect-square flex items-center justify-center bg-gradient-to-br from-orange-400 to-orange-600">
+                <div className="aspect-square flex items-center justify-center bg-gradient-to-br from-neutral-600 to-neutral-800">
                   <span className="text-4xl font-bold text-white">{member.initials}</span>
                 </div>
 
@@ -134,7 +118,7 @@ export function TeamSection() {
               </div>
 
               <h3 className="text-lg font-semibold text-neutral-900">{member.name}</h3>
-              <p className="text-sm text-orange-600 font-medium mb-2">{member.role}</p>
+              <p className="text-sm text-neutral-600 font-medium mb-2">{member.role}</p>
               <p className="text-sm text-neutral-600">{member.bio}</p>
             </motion.div>
           ))}
@@ -178,19 +162,19 @@ export function TeamSection() {
           className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 bg-neutral-50 rounded-2xl p-8"
         >
           <div className="text-center">
-            <div className="text-3xl font-bold text-neutral-900">$4.2M</div>
-            <div className="text-sm text-neutral-600">Seed Raised</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-neutral-900">2022</div>
+            <div className="text-3xl font-bold text-neutral-900">2026</div>
             <div className="text-sm text-neutral-600">Founded</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-neutral-900">32</div>
+            <div className="text-3xl font-bold text-neutral-900">Cincinnati</div>
+            <div className="text-sm text-neutral-600">Origin</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-neutral-900">5</div>
             <div className="text-sm text-neutral-600">Team Members</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-neutral-900">Austin, TX</div>
+            <div className="text-3xl font-bold text-neutral-900">San Francisco</div>
             <div className="text-sm text-neutral-600">Headquarters</div>
           </div>
         </motion.div>
