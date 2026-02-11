@@ -45,20 +45,30 @@ export async function GET() {
     });
 
     const schedule = workOrders.map((wo: WorkOrderWithRelations, index: number) => {
-      // Simulate time slots based on order
-      const baseHour = 8 + Math.floor(index / 2);
-      const minutes = (index % 2) * 30;
-      const time = `${baseHour > 12 ? baseHour - 12 : baseHour}:${minutes === 0 ? '00' : '30'} ${baseHour >= 12 ? 'PM' : 'AM'}`;
+      // Use actual createdAt time, formatted for display
+      const createdDate = new Date(wo.createdAt);
+      const hours = createdDate.getHours();
+      const minutes = createdDate.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHour = hours % 12 || 12;
+      const time = `${displayHour}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+
+      // Safely build vehicle string with fallbacks
+      const vehicleYear = wo.Vehicle?.year ?? '';
+      const vehicleMake = wo.Vehicle?.make ?? '';
+      const vehicleModel = wo.Vehicle?.model ?? '';
+      const vehicleStr = [vehicleYear, vehicleMake, vehicleModel].filter(Boolean).join(' ') || 'Unknown Vehicle';
 
       return {
         id: wo.id,
         time,
-        customer: wo.Vehicle.Customer?.name || 'Unknown Customer',
-        vehicle: `${wo.Vehicle.year || ''} ${wo.Vehicle.make} ${wo.Vehicle.model}`.trim(),
-        type: wo.description.split(' ').slice(0, 3).join(' '),
+        customer: wo.Vehicle?.Customer?.name || 'Unknown Customer',
+        vehicle: vehicleStr,
+        type: wo.description?.split(' ').slice(0, 3).join(' ') || 'Service',
         status: wo.status,
         technician: wo.WorkOrderAssignment[0]?.EmployeeProfile?.name || 'Unassigned',
         bay: `Bay ${(index % 4) + 1}`,
+        createdAt: wo.createdAt,
       };
     });
 

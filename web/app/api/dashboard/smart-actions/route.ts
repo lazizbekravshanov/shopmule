@@ -43,20 +43,25 @@ export async function GET() {
       });
     }
 
-    // 2. Low stock items
-    const lowStockItems = await prisma.part.count({
-      where: {
-        stock: {
-          lte: prisma.part.fields.reorderPoint,
-        },
-      },
-    });
-
-    // Fallback query if the above doesn't work due to Prisma limitations
-    const lowStockCount = await prisma.$queryRaw<[{ count: bigint }]>`
-      SELECT COUNT(*) as count FROM "Part" WHERE stock <= "reorderPoint"
-    `;
-    const actualLowStock = Number(lowStockCount[0]?.count || 0);
+    // 2. Low stock items - use raw SQL for column comparison
+    let actualLowStock = 0;
+    try {
+      const lowStockCount = await prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(*) as count FROM "Part" WHERE stock <= "reorderPoint"
+      `;
+      actualLowStock = Number(lowStockCount[0]?.count ?? 0);
+    } catch (sqlError) {
+      // Log but don't fail the entire request if this query fails
+      console.warn('Low stock query failed:', sqlError);
+      // Fallback: try simpler count
+      try {
+        actualLowStock = await prisma.part.count({
+          where: { stock: { lte: 5 } }, // Fallback to a fixed threshold
+        });
+      } catch {
+        actualLowStock = 0;
+      }
+    }
 
     if (actualLowStock > 0) {
       actions.push({

@@ -10,8 +10,11 @@ import {
   CheckCircle2,
   ChevronRight,
   Circle,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface TechnicianStatus {
@@ -65,14 +68,22 @@ function formatTime(isoString: string): string {
 }
 
 export function TechnicianStatusBoard() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['dashboard', 'technicians'],
     queryFn: async () => {
       const res = await fetch('/api/dashboard/technicians');
+      if (!res.ok) {
+        throw new Error(`Failed to fetch technicians: ${res.status}`);
+      }
       const json = await res.json();
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to fetch technicians');
+      }
       return json.data as TechnicianStatus[];
     },
     refetchInterval: 30000, // Refresh every 30 seconds
+    staleTime: 15000, // Consider data fresh for 15 seconds
+    retry: 2,
   });
 
   const technicians = data || [];
@@ -119,6 +130,22 @@ export function TechnicianStatusBoard() {
                 </div>
               </div>
             ))}
+          </div>
+        ) : isError ? (
+          <div className="py-8 text-center">
+            <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
+              Failed to load technicians
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="gap-2"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Retry
+            </Button>
           </div>
         ) : technicians.length === 0 ? (
           <div className="py-8 text-center">
@@ -185,9 +212,10 @@ export function TechnicianStatusBoard() {
                         <Link
                           href={tech.workOrderId ? `/work-orders/${tech.workOrderId}` : '#'}
                           className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-[#ee7a14] flex items-center gap-1 mt-0.5 truncate"
+                          title={tech.currentJob}
                         >
-                          <Wrench className="w-3 h-3 flex-shrink-0" />
-                          {tech.currentJob}
+                          <Wrench className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                          <span className="truncate">{tech.currentJob}</span>
                         </Link>
                       ) : tech.status === 'clocked-out' ? (
                         <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5">

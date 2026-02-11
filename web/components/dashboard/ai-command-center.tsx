@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -15,6 +16,8 @@ import {
   Users,
   TrendingUp,
   Zap,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -30,6 +33,33 @@ interface CommandItem {
   metric?: string;
 }
 
+interface SmartAction {
+  id: string;
+  type: string;
+  label: string;
+  description: string;
+  urgency: 'high' | 'medium' | 'low';
+  href: string;
+  badge?: string;
+}
+
+interface UnpaidInvoice {
+  id: string;
+  balance: number;
+  daysOverdue: number;
+}
+
+interface DashboardData {
+  smartActions: SmartAction[];
+  unpaid: {
+    invoices: UnpaidInvoice[];
+    summary: {
+      totalOverdue: number;
+      overdueCount: number;
+    };
+  };
+}
+
 // Get greeting based on time of day
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -38,27 +68,37 @@ function getGreeting(): string {
   return 'Good evening';
 }
 
-// Get current user's first name (would come from session in production)
-function getUserName(): string {
-  return 'there'; // Replace with actual user name from session
+// Get first name from full name
+function getFirstName(fullName: string | null | undefined): string {
+  if (!fullName) return 'there';
+  const firstName = fullName.split(' ')[0];
+  return firstName || 'there';
 }
 
 export function AICommandCenter() {
+  const { data: session } = useSession();
   const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
     setGreeting(getGreeting());
   }, []);
 
-  // Fetch dashboard data
-  const { data, isLoading } = useQuery({
+  const userName = getFirstName(session?.user?.name);
+
+  // Fetch dashboard data with proper error handling
+  const { data, isLoading, isError, refetch } = useQuery<DashboardData>({
     queryKey: ['dashboard', 'command-center'],
     queryFn: async () => {
-      // Fetch multiple data points in parallel
+      // Fetch multiple data points in parallel with error handling
       const [smartActionsRes, unpaidRes] = await Promise.all([
         fetch('/api/dashboard/smart-actions'),
         fetch('/api/dashboard/unpaid-invoices'),
       ]);
+
+      // Check for HTTP errors
+      if (!smartActionsRes.ok || !unpaidRes.ok) {
+        throw new Error('Failed to fetch dashboard data');
+      }
 
       const [smartActions, unpaid] = await Promise.all([
         smartActionsRes.json(),
@@ -67,18 +107,20 @@ export function AICommandCenter() {
 
       return {
         smartActions: smartActions.data || [],
-        unpaid: unpaid.data || { overdue: [], upcoming: [] },
+        unpaid: unpaid.data || { invoices: [], summary: { totalOverdue: 0, overdueCount: 0 } },
       };
     },
     refetchInterval: 60000,
+    staleTime: 30000,
+    retry: 2,
   });
 
   // Build command items from data
   const commandItems: CommandItem[] = [];
 
-  if (data) {
+  if (data && !isError) {
     // Add urgent smart actions
-    const urgentActions = data.smartActions.filter((a: any) => a.urgency === 'high');
+    const urgentActions = data.smartActions.filter((a) => a.urgency === 'high');
     if (urgentActions.length > 0) {
       commandItems.push({
         id: 'urgent-actions',
@@ -91,22 +133,23 @@ export function AICommandCenter() {
       });
     }
 
-    // Add overdue invoices
-    if (data.unpaid.overdue?.length > 0) {
-      const overdueTotal = data.unpaid.overdue.reduce((sum: number, inv: any) => sum + (inv.total || 0), 0);
+    // Add overdue invoices from summary
+    const overdueCount = data.unpaid.summary?.overdueCount || 0;
+    const overdueTotal = data.unpaid.summary?.totalOverdue || 0;
+    if (overdueCount > 0) {
       commandItems.push({
         id: 'overdue-invoices',
         type: 'attention',
         icon: DollarSign,
         title: `$${overdueTotal.toLocaleString()} in overdue invoices`,
-        description: `${data.unpaid.overdue.length} invoice${data.unpaid.overdue.length > 1 ? 's' : ''} past due`,
+        description: `${overdueCount} invoice${overdueCount > 1 ? 's' : ''} past due`,
         href: '/invoices?filter=overdue',
-        metric: data.unpaid.overdue.length.toString(),
+        metric: overdueCount.toString(),
       });
     }
 
     // Add medium priority items
-    const mediumActions = data.smartActions.filter((a: any) => a.urgency === 'medium');
+    const mediumActions = data.smartActions.filter((a) => a.urgency === 'medium');
     if (mediumActions.length > 0 && commandItems.length < 3) {
       commandItems.push({
         id: 'medium-actions',
@@ -119,8 +162,8 @@ export function AICommandCenter() {
     }
   }
 
-  // If no items, show success state
-  const isAllClear = !isLoading && commandItems.length === 0;
+  // If no items and not loading/error, show success state
+  const isAllClear = !isLoading && !isError && commandItems.length === 0;
 
   const typeConfig = {
     urgent: {
@@ -171,10 +214,12 @@ export function AICommandCenter() {
               </div>
             </div>
             <h2 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
-              {greeting}, {getUserName()}.
+              {greeting}, {userName}.
             </h2>
             <p className="text-neutral-400 mt-2 text-lg">
-              {isAllClear
+              {isError
+                ? "We couldn't load your dashboard data."
+                : isAllClear
                 ? "You're all caught up. Great work!"
                 : "Here's what needs your attention today."
               }
@@ -197,6 +242,31 @@ export function AICommandCenter() {
               <Skeleton key={i} className="h-20 bg-white/5" />
             ))}
           </div>
+        ) : isError ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-4 p-6 rounded-xl bg-red-500/10 border border-red-500/20"
+          >
+            <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+              <AlertCircle className="w-6 h-6 text-red-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-white">Unable to load data</h3>
+              <p className="text-neutral-400 text-sm">
+                Check your connection and try again.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="border-white/20 text-white hover:bg-white/10 gap-2"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Retry
+            </Button>
+          </motion.div>
         ) : isAllClear ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}

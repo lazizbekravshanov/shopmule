@@ -71,6 +71,10 @@ export async function GET() {
 
       if (punches.length > 0) {
         const lastPunch = punches[0];
+
+        // Find the most recent clock in (to calculate hours accurately)
+        const clockIn = punches.find((p: typeof lastPunch) => p.type === PunchType.CLOCK_IN);
+
         if (lastPunch.type === PunchType.CLOCK_IN) {
           status = 'clocked-in';
           clockInTime = lastPunch.timestamp.toISOString();
@@ -78,16 +82,34 @@ export async function GET() {
           hoursToday = (Date.now() - lastPunch.timestamp.getTime()) / (1000 * 60 * 60);
         } else if (lastPunch.type === PunchType.BREAK_START) {
           status = 'on-break';
-          // Find clock in time
-          const clockIn = punches.find((p: typeof lastPunch) => p.type === PunchType.CLOCK_IN);
           if (clockIn) {
             clockInTime = clockIn.timestamp.toISOString();
+            // Hours worked = time from clock in to break start
+            hoursToday = (lastPunch.timestamp.getTime() - clockIn.timestamp.getTime()) / (1000 * 60 * 60);
+          }
+        } else if (lastPunch.type === PunchType.BREAK_END) {
+          // Back from break = clocked in
+          status = 'clocked-in';
+          if (clockIn) {
+            clockInTime = clockIn.timestamp.toISOString();
+            // Find break start to calculate break duration
+            const breakStart = punches.find((p: typeof lastPunch) => p.type === PunchType.BREAK_START);
+            const breakDuration = breakStart
+              ? (lastPunch.timestamp.getTime() - breakStart.timestamp.getTime()) / (1000 * 60 * 60)
+              : 0;
+            // Total hours = now - clock in - break duration
+            hoursToday = (Date.now() - clockIn.timestamp.getTime()) / (1000 * 60 * 60) - breakDuration;
           }
         } else if (lastPunch.type === PunchType.CLOCK_OUT) {
-          // Find total hours from clock in to clock out
-          const clockIn = punches.find((p: typeof lastPunch) => p.type === PunchType.CLOCK_IN);
+          status = 'clocked-out';
           if (clockIn) {
-            hoursToday = (lastPunch.timestamp.getTime() - clockIn.timestamp.getTime()) / (1000 * 60 * 60);
+            // Find any breaks to subtract
+            const breakStart = punches.find((p: typeof lastPunch) => p.type === PunchType.BREAK_START);
+            const breakEnd = punches.find((p: typeof lastPunch) => p.type === PunchType.BREAK_END);
+            const breakDuration = (breakStart && breakEnd)
+              ? (breakEnd.timestamp.getTime() - breakStart.timestamp.getTime()) / (1000 * 60 * 60)
+              : 0;
+            hoursToday = (lastPunch.timestamp.getTime() - clockIn.timestamp.getTime()) / (1000 * 60 * 60) - breakDuration;
           }
         }
       }
@@ -97,6 +119,16 @@ export async function GET() {
         (a: (typeof tech.WorkOrderAssignment)[0]) => a.WorkOrder?.status === WorkOrderStatus.IN_PROGRESS
       );
 
+      // Build current job display string with safe fallbacks
+      let currentJobDisplay: string | null = null;
+      if (currentJob?.WorkOrder?.Vehicle) {
+        const make = currentJob.WorkOrder.Vehicle.make || '';
+        const model = currentJob.WorkOrder.Vehicle.model || '';
+        currentJobDisplay = [make, model].filter(Boolean).join(' ') || 'Unknown Vehicle';
+      } else if (status === 'clocked-in') {
+        currentJobDisplay = 'Available';
+      }
+
       // Count completed jobs today
       const jobsCompleted = tech.WorkOrderLabor.length;
 
@@ -105,11 +137,9 @@ export async function GET() {
         name: tech.name,
         photoUrl: tech.photoUrl,
         status,
-        currentJob: currentJob
-          ? `${currentJob.WorkOrder?.Vehicle?.make} ${currentJob.WorkOrder?.Vehicle?.model}`
-          : status === 'clocked-in' ? 'Available' : null,
+        currentJob: currentJobDisplay,
         workOrderId: currentJob?.WorkOrder?.id || null,
-        hoursToday: Math.round(hoursToday * 10) / 10,
+        hoursToday: Math.round(hoursToday * 100) / 100, // 2 decimal places for accuracy
         jobsCompleted,
         clockInTime,
       };

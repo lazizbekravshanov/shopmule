@@ -55,12 +55,23 @@ export async function GET() {
       },
     });
 
+    // Default payment terms in days (could be made configurable per shop in settings)
+    const DEFAULT_PAYMENT_TERMS_DAYS = 30;
+
     const unpaidInvoices: UnpaidInvoice[] = invoices.map((inv: InvoiceWithRelations) => {
-      // Calculate days overdue (assume 30 day terms)
+      // Calculate due date from creation date + payment terms
+      // Note: When a dueDate field is added to the schema, use it instead
       const dueDate = new Date(inv.createdAt);
-      dueDate.setDate(dueDate.getDate() + 30);
+      dueDate.setDate(dueDate.getDate() + DEFAULT_PAYMENT_TERMS_DAYS);
+
+      // Normalize times to midnight for accurate day calculations
       const now = new Date();
-      const daysOverdue = Math.floor((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+      now.setHours(0, 0, 0, 0);
+      dueDate.setHours(0, 0, 0, 0);
+
+      // Calculate days overdue (positive = overdue, negative = days until due)
+      const diffMs = now.getTime() - dueDate.getTime();
+      const daysOverdue = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
       // Calculate remaining balance
       const paidAmount = inv.Payment.reduce((sum: number, p: { amount: number }) => sum + p.amount, 0);

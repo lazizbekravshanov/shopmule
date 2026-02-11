@@ -9,9 +9,12 @@ import {
   Car,
   MapPin,
   ChevronRight,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface ScheduleItem {
@@ -32,14 +35,22 @@ const statusConfig = {
 };
 
 export function TodaysSchedule() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['dashboard', 'schedule'],
     queryFn: async () => {
       const res = await fetch('/api/dashboard/schedule');
+      if (!res.ok) {
+        throw new Error(`Failed to fetch schedule: ${res.status}`);
+      }
       const json = await res.json();
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to fetch schedule');
+      }
       return json.data as ScheduleItem[];
     },
     refetchInterval: 60000, // Refresh every minute
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    retry: 2,
   });
 
   const schedule = data || [];
@@ -89,6 +100,22 @@ export function TodaysSchedule() {
               </div>
             </div>
           ))
+        ) : isError ? (
+          <div className="px-5 py-10 text-center">
+            <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">
+              Failed to load schedule
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="gap-2"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Retry
+            </Button>
+          </div>
         ) : schedule.length === 0 ? (
           <div className="px-5 py-10 text-center">
             <Calendar className="w-10 h-10 text-neutral-300 dark:text-neutral-600 mx-auto mb-3" />
