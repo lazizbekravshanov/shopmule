@@ -95,67 +95,60 @@ export function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
-      {/* Subtle Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-orange-50/30 via-white to-white" />
+    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+      {/* Clean Background - Apple style */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-50/40 via-white to-white" />
 
-      {/* Refined Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-20" />
-
-      {/* Floating Background Icons */}
+      {/* Subtle Floating Background Icons */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {floatingIcons.map((item, index) => (
           <div
             key={index}
-            className={`absolute hidden md:block ${item.className}`}
+            className={`absolute hidden lg:block ${item.className}`}
           >
-            <item.Icon className="w-full h-full text-orange-500/[0.07] stroke-[1]" />
+            <item.Icon className="w-full h-full text-orange-500/[0.05] stroke-[1]" />
           </div>
         ))}
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-6 py-24">
-        <div className="max-w-4xl mx-auto text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-50 border border-orange-200 mb-8">
-            <Wrench className="w-4 h-4 text-orange-600" />
-            <span className="text-sm font-medium text-orange-700">AI-Powered Shop Management</span>
+      <div className="relative max-w-7xl mx-auto px-6 py-32">
+        <div className="max-w-4xl mx-auto text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+          {/* Minimal Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-100 mb-10">
+            <span className="text-sm font-medium text-neutral-600">AI-Powered Shop Management</span>
           </div>
 
-          {/* Headline */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-neutral-900 leading-[1.1] mb-6">
+          {/* Large Apple-style Headline */}
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-tight text-neutral-900 leading-[1.05] mb-8">
             {variant.headline[0]}
             <br />
-            <span className="bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 bg-clip-text text-transparent">
               {variant.headline[1]}
             </span>
           </h1>
 
-          {/* Subheadline */}
-          <p className="text-xl md:text-2xl text-neutral-600 max-w-2xl mx-auto mb-4 leading-relaxed">
+          {/* Subheadline - Apple style: clean and impactful */}
+          <p className="text-xl md:text-2xl lg:text-3xl text-neutral-500 max-w-3xl mx-auto mb-12 leading-relaxed font-light">
             {variant.subheadline}
           </p>
 
-          <p className="text-lg text-neutral-500 max-w-xl mx-auto mb-10">
-            {variant.description}
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+          {/* CTAs - Apple style: prominent primary, subtle secondary */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-5 mb-16">
             <Button
               asChild
               size="lg"
-              className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-14 px-8 text-base font-semibold shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-200"
+              className="bg-orange-500 hover:bg-orange-600 text-white rounded-full h-14 px-10 text-lg font-medium shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/25 transition-all duration-300"
             >
               <Link href="/login">
-                Start Free Trial →
+                Start Free Trial
+                <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
             </Button>
             <Button
               asChild
-              variant="outline"
+              variant="ghost"
               size="lg"
-              className="rounded-xl h-14 px-8 text-base font-medium border-neutral-300 hover:bg-neutral-50 transition-all duration-200"
+              className="rounded-full h-14 px-10 text-lg font-medium text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-all duration-300"
             >
               <a href="#demo">
                 <Play className="mr-2 w-5 h-5" />
@@ -164,20 +157,13 @@ export function Hero() {
             </Button>
           </div>
 
-          {/* Trust Indicators */}
-          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-neutral-500">
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-orange-500" />
-              <span>Set up in 5 minutes</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-orange-500" />
-              <span>14-day free trial</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-orange-500" />
-              <span>No credit card required</span>
-            </div>
+          {/* Trust Indicators - More subtle */}
+          <div className="flex flex-wrap items-center justify-center gap-10 text-sm text-neutral-400">
+            <span>5-minute setup</span>
+            <span className="w-1 h-1 rounded-full bg-neutral-300" />
+            <span>14-day free trial</span>
+            <span className="w-1 h-1 rounded-full bg-neutral-300" />
+            <span>No credit card required</span>
           </div>
         </div>
 

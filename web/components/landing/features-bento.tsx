@@ -45,51 +45,44 @@ const features = [
 
 export function FeaturesBento() {
   return (
-    <section id="features" className="py-24 bg-white">
+    <section id="features" className="py-32 bg-white">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Section Header */}
+        {/* Section Header - Apple style: centered, large */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-16"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-20"
         >
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-px w-8 bg-orange-400" />
-            <span className="text-sm font-medium text-orange-600 uppercase tracking-widest">
-              Features
-            </span>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
-            Built for repair shops.
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-neutral-900 tracking-tight">
+            Everything you need.
+            <br />
+            <span className="text-neutral-400">Nothing you don&apos;t.</span>
           </h2>
-          <p className="mt-4 text-lg text-neutral-600 max-w-2xl">
-            The tools you need to run efficiently. Nothing more, nothing less.
-          </p>
         </motion.div>
 
-        {/* Feature Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-neutral-200 rounded-2xl overflow-hidden">
+        {/* Feature Grid - Apple style: clean cards with generous spacing */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
-              className="bg-white p-8 group hover:bg-orange-50/50 transition-colors duration-300"
+              transition={{ duration: 0.5, delay: index * 0.08 }}
+              className="bg-neutral-50 rounded-3xl p-8 group hover:bg-neutral-100/80 transition-all duration-500"
             >
               {/* Icon */}
-              <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-neutral-100 text-neutral-600 group-hover:bg-orange-100 group-hover:text-orange-600 transition-all duration-300">
-                <feature.icon className="w-5 h-5" strokeWidth={1.5} />
+              <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white text-neutral-700 shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all duration-500">
+                <feature.icon className="w-6 h-6" strokeWidth={1.5} />
               </div>
 
               {/* Content */}
-              <h3 className="mt-5 text-lg font-semibold text-neutral-900 transition-colors duration-300">
+              <h3 className="mt-6 text-xl font-semibold text-neutral-900">
                 {feature.title}
               </h3>
-              <p className="mt-2 text-neutral-600 leading-relaxed">
+              <p className="mt-3 text-neutral-500 leading-relaxed">
                 {feature.description}
               </p>
             </motion.div>

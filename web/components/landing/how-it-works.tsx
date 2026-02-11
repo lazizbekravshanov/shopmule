@@ -22,59 +22,47 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-24 bg-neutral-50 relative">
-      {/* Top gradient divider */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-300 to-transparent" />
-
+    <section id="how-it-works" className="py-32 bg-neutral-50 relative">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Section Header */}
+        {/* Section Header - Apple style: centered */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-16"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-20"
         >
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-px w-8 bg-orange-400" />
-            <span className="text-sm font-medium text-orange-600 uppercase tracking-widest">
-              Getting Started
-            </span>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
-            Up and running in minutes.
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-neutral-900 tracking-tight">
+            Get started in minutes.
           </h2>
+          <p className="mt-6 text-xl text-neutral-500 max-w-2xl mx-auto">
+            No complicated setup. No training required.
+          </p>
         </motion.div>
 
-        {/* Steps */}
-        <div className="grid md:grid-cols-3 gap-12">
+        {/* Steps - Apple style: clean, spacious cards */}
+        <div className="grid md:grid-cols-3 gap-8">
           {steps.map((step, index) => (
             <motion.div
               key={step.number}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="relative"
+              transition={{ duration: 0.5, delay: index * 0.15 }}
+              className="relative text-center"
             >
-              {/* Step Number */}
-              <span className="text-6xl font-bold text-neutral-200">
+              {/* Step Number - Large, gradient */}
+              <span className="inline-block text-8xl font-bold bg-gradient-to-b from-neutral-200 to-neutral-100 bg-clip-text text-transparent">
                 {step.number}
               </span>
 
               {/* Content */}
-              <h3 className="mt-4 text-xl font-semibold text-neutral-900">
+              <h3 className="mt-2 text-2xl font-semibold text-neutral-900">
                 {step.title}
               </h3>
-              <p className="mt-2 text-neutral-600 leading-relaxed">
+              <p className="mt-4 text-neutral-500 leading-relaxed max-w-xs mx-auto">
                 {step.description}
               </p>
-
-              {/* Connector Line */}
-              {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-8 left-full w-full h-px bg-neutral-200"
-                     style={{ width: 'calc(100% - 3rem)', left: '3rem' }} />
-              )}
             </motion.div>
           ))}
         </div>

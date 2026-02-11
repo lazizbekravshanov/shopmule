@@ -140,44 +140,40 @@ export function Testimonials() {
   }, [checkScroll]);
 
   return (
-    <section className="py-24 bg-neutral-50 border-y border-neutral-200">
+    <section className="py-32 bg-neutral-50">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Section Header */}
-        <div className="flex items-end justify-between mb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <span className="text-sm font-medium text-neutral-500 uppercase tracking-wide">
-              Testimonials
-            </span>
-            <h2 className="mt-2 text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
-              Trusted by shops.
-            </h2>
-            <p className="mt-3 text-neutral-500 max-w-lg">
-              See what repair shop owners and managers are saying about ShopMule.
-            </p>
-          </motion.div>
+        {/* Section Header - Apple style: centered */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-neutral-900 tracking-tight">
+            Loved by repair shops.
+          </h2>
+          <p className="mt-6 text-xl text-neutral-500 max-w-2xl mx-auto">
+            Join hundreds of shops that have transformed their operations.
+          </p>
+        </motion.div>
 
-          {/* Navigation Arrows */}
-          <div className="hidden md:flex items-center gap-2">
-            <button
-              onClick={() => scroll('left')}
-              disabled={!canScrollLeft}
-              className="w-10 h-10 rounded-full border border-neutral-200 bg-white flex items-center justify-center text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => scroll('right')}
-              disabled={!canScrollRight}
-              className="w-10 h-10 rounded-full border border-neutral-200 bg-white flex items-center justify-center text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
+        {/* Navigation Arrows */}
+        <div className="flex justify-center gap-3 mb-10">
+          <button
+            onClick={() => scroll('left')}
+            disabled={!canScrollLeft}
+            className="w-12 h-12 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 shadow-sm"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            disabled={!canScrollRight}
+            className="w-12 h-12 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 shadow-sm"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Carousel */}
@@ -208,36 +204,35 @@ export function Testimonials() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="flex-shrink-0 w-[340px] md:w-[360px] snap-start"
+                className="flex-shrink-0 w-[340px] md:w-[380px] snap-start"
               >
-                <div className="bg-white border border-neutral-200 rounded-2xl p-6 h-full flex flex-col hover:border-neutral-300 hover:shadow-sm transition-all">
+                <div className="bg-white rounded-3xl p-8 h-full flex flex-col shadow-sm hover:shadow-md transition-all duration-500">
                   {/* Stars */}
                   <StarRating rating={testimonial.rating} />
 
                   {/* Quote */}
-                  <p className="mt-4 text-neutral-700 leading-relaxed flex-1">
+                  <p className="mt-6 text-neutral-700 leading-relaxed flex-1 text-lg">
                     &ldquo;{testimonial.quote}&rdquo;
                   </p>
 
                   {/* Author */}
-                  <div className="mt-6 pt-4 border-t border-neutral-100">
-                    <div className="flex items-center gap-3">
+                  <div className="mt-8 pt-6 border-t border-neutral-100">
+                    <div className="flex items-center gap-4">
                       {/* Avatar */}
-                      <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center">
-                        <span className="text-sm font-bold text-neutral-500">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center">
+                        <span className="text-sm font-semibold text-orange-600">
                           {testimonial.author.split(' ').map(n => n[0]).join('')}
                         </span>
                       </div>
                       <div>
-                        <p className="font-semibold text-neutral-900 text-sm">
+                        <p className="font-semibold text-neutral-900">
                           {testimonial.author}
                         </p>
-                        <p className="text-xs text-neutral-500">
+                        <p className="text-sm text-neutral-500">
                           {testimonial.role}, {testimonial.company}
                         </p>
                       </div>
                     </div>
-                    <p className="text-[11px] text-neutral-400 mt-2">{testimonial.location}</p>
                   </div>
                 </div>
               </motion.div>
@@ -245,25 +240,25 @@ export function Testimonials() {
           </div>
         </div>
 
-        {/* Bottom stats */}
+        {/* Bottom stats - Apple style: large numbers */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-12 pt-8 border-t border-neutral-200 grid grid-cols-3 gap-8 text-center"
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-20 grid grid-cols-3 gap-8 text-center"
         >
           <div>
-            <div className="text-3xl font-bold text-neutral-900">500+</div>
-            <div className="text-sm text-neutral-500 mt-1">Repair shops</div>
+            <div className="text-5xl md:text-6xl font-semibold text-neutral-900">500+</div>
+            <div className="text-neutral-500 mt-3">Repair shops</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-neutral-900">4.9/5</div>
-            <div className="text-sm text-neutral-500 mt-1">Average rating</div>
+            <div className="text-5xl md:text-6xl font-semibold text-neutral-900">4.9</div>
+            <div className="text-neutral-500 mt-3">Average rating</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-neutral-900">98%</div>
-            <div className="text-sm text-neutral-500 mt-1">Renewal rate</div>
+            <div className="text-5xl md:text-6xl font-semibold text-neutral-900">98%</div>
+            <div className="text-neutral-500 mt-3">Renewal rate</div>
           </div>
         </motion.div>
       </div>

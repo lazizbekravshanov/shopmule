@@ -164,23 +164,23 @@ export function FinalCTA() {
   const isValid = form.name && form.email && form.mcNumber && form.subject && form.message;
 
   const inputClass =
-    'w-full h-11 px-4 text-sm bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all';
+    'w-full h-12 px-5 text-base bg-white border border-neutral-200 rounded-2xl text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-300 shadow-sm';
 
   return (
-    <section id="contact" className="py-24 bg-white">
+    <section id="contact" className="py-32 bg-neutral-50">
       <div className="max-w-2xl mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 tracking-tight">
-            Get in touch
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-neutral-900 tracking-tight">
+            Let&apos;s talk.
           </h2>
-          <p className="mt-3 text-neutral-500">
-            Fill out the form and we&apos;ll get back to you within a couple of hours.
+          <p className="mt-6 text-xl text-neutral-500">
+            We&apos;ll get back to you within a couple of hours.
           </p>
         </motion.div>
 
@@ -490,7 +490,7 @@ export function FinalCTA() {
               <button
                 type="submit"
                 disabled={!isValid || isSubmitting}
-                className="w-full h-11 bg-[#f97316] hover:bg-[#ea580c] disabled:bg-neutral-200 disabled:text-neutral-400 text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2 text-sm"
+                className="w-full h-14 bg-orange-500 hover:bg-orange-600 disabled:bg-neutral-200 disabled:text-neutral-400 text-white font-medium rounded-full transition-all duration-300 flex items-center justify-center gap-2 text-base shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/25"
               >
                 {isSubmitting ? (
                   <>

@@ -37,42 +37,39 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section id="faq" className="py-24 bg-white">
+    <section id="faq" className="py-32 bg-white">
       <div className="max-w-3xl mx-auto px-6">
-        {/* Section Header */}
+        {/* Section Header - Apple style: centered */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-12"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
         >
-          <span className="text-sm font-medium text-neutral-500 uppercase tracking-wide">
-            FAQ
-          </span>
-          <h2 className="mt-2 text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
-            Questions?
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-neutral-900 tracking-tight">
+            Questions? Answers.
           </h2>
         </motion.div>
 
-        {/* FAQ Accordion */}
+        {/* FAQ Accordion - Apple style: cleaner, more spacious */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" collapsible className="w-full space-y-2">
             {faqs.map((faq, index) => (
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="border-neutral-200"
+                className="border-none bg-neutral-50 rounded-2xl px-6 data-[state=open]:bg-neutral-100 transition-colors duration-300"
               >
-                <AccordionTrigger className="text-left text-neutral-900 hover:no-underline font-medium py-5">
+                <AccordionTrigger className="text-left text-neutral-900 hover:no-underline font-medium py-6 text-lg">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-neutral-600 leading-relaxed pb-5">
+                <AccordionContent className="text-neutral-500 leading-relaxed pb-6 text-base">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -80,20 +77,20 @@ export function FAQSection() {
           </Accordion>
         </motion.div>
 
-        {/* Contact Link */}
+        {/* Contact Link - Apple style: centered */}
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-12 text-neutral-500"
+          className="mt-16 text-center text-neutral-500"
         >
           Still have questions?{' '}
           <a
             href="mailto:support@shopmule.com"
-            className="text-primary-600 hover:text-primary-700 font-medium"
+            className="text-orange-600 hover:text-orange-700 font-medium"
           >
-            Contact us
+            Get in touch
           </a>
         </motion.p>
       </div>

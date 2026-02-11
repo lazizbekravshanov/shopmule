@@ -13,48 +13,44 @@ const comparisons = [
 
 export function ProblemSolution() {
   return (
-    <section className="py-24 bg-white relative">
-      <div className="max-w-6xl mx-auto px-6">
-        {/* Section Header */}
+    <section className="py-32 bg-white relative">
+      <div className="max-w-5xl mx-auto px-6">
+        {/* Section Header - Apple style: centered, impactful */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-16"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-20"
         >
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-px w-8 bg-orange-400" />
-            <span className="text-sm font-medium text-orange-600 uppercase tracking-widest">
-              The Difference
-            </span>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
-            Stop the chaos.
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-neutral-900 tracking-tight">
+            From chaos to clarity.
           </h2>
         </motion.div>
 
-        {/* Comparison Grid */}
-        <div className="grid gap-px bg-neutral-200">
+        {/* Comparison Grid - Apple style: clean, spacious */}
+        <div className="space-y-4">
           {comparisons.map((item, index) => (
             <motion.div
               key={item.before}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              className="bg-white grid md:grid-cols-[1fr,auto,1fr] items-center gap-4 py-5"
+              transition={{ duration: 0.4, delay: index * 0.08 }}
+              className="bg-neutral-50 rounded-2xl p-6 grid md:grid-cols-[1fr,auto,1fr] items-center gap-6"
             >
               {/* Before */}
-              <div className="text-neutral-400 line-through decoration-neutral-300">
+              <div className="text-neutral-400 line-through decoration-neutral-300 text-lg text-center md:text-right">
                 {item.before}
               </div>
 
               {/* Arrow */}
-              <ArrowRight className="w-4 h-4 text-primary-500 hidden md:block" />
+              <div className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-orange-100">
+                <ArrowRight className="w-5 h-5 text-orange-600" />
+              </div>
 
               {/* After */}
-              <div className="text-neutral-900 font-medium">
+              <div className="text-neutral-900 font-medium text-lg text-center md:text-left">
                 {item.after}
               </div>
             </motion.div>

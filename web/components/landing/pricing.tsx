@@ -57,107 +57,121 @@ export function PricingSection() {
   const [isYearly, setIsYearly] = useState(true);
 
   return (
-    <section id="pricing" className="py-24 bg-white">
+    <section id="pricing" className="py-32 bg-white">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Section Header */}
+        {/* Section Header - Apple style: centered, large */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-12"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
         >
-          <span className="text-sm font-medium text-neutral-500 uppercase tracking-wide">
-            Pricing
-          </span>
-          <h2 className="mt-2 text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
-            Simple pricing.
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-neutral-900 tracking-tight">
+            Simple, transparent pricing.
           </h2>
-          <p className="mt-4 text-lg text-neutral-600">
-            No hidden fees. Cancel anytime.
+          <p className="mt-6 text-xl text-neutral-500">
+            No hidden fees. No surprises. Cancel anytime.
           </p>
 
-          {/* Billing Toggle */}
-          <div className="mt-8 flex items-center gap-4">
-            <span className={cn(
-              'text-sm font-medium transition-colors',
-              !isYearly ? 'text-neutral-900' : 'text-neutral-400'
-            )}>
-              Monthly
-            </span>
+          {/* Billing Toggle - Apple style: pill design */}
+          <div className="mt-10 inline-flex items-center gap-1 p-1 bg-neutral-100 rounded-full">
             <button
-              onClick={() => setIsYearly(!isYearly)}
+              onClick={() => setIsYearly(false)}
               className={cn(
-                'relative w-12 h-6 rounded-full transition-colors',
-                isYearly ? 'bg-orange-500' : 'bg-neutral-300'
+                'px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300',
+                !isYearly ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
               )}
-              aria-label="Toggle billing period"
             >
-              <motion.div
-                initial={false}
-                animate={{ x: isYearly ? 26 : 2 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm"
-              />
+              Monthly
             </button>
-            <span className={cn(
-              'text-sm font-medium transition-colors',
-              isYearly ? 'text-neutral-900' : 'text-neutral-400'
-            )}>
+            <button
+              onClick={() => setIsYearly(true)}
+              className={cn(
+                'px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2',
+                isYearly ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
+              )}
+            >
               Yearly
-              <span className="ml-2 text-xs text-orange-600 font-semibold">
-                Save 20%
-              </span>
-            </span>
+              <span className="text-xs text-orange-600 font-semibold">-20%</span>
+            </button>
           </div>
         </motion.div>
 
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-px bg-neutral-200 rounded-xl overflow-hidden">
+        {/* Pricing Cards - Apple style: clean, floating cards */}
+        <div className="grid md:grid-cols-3 gap-6">
           {tiers.map((tier, index) => (
             <motion.div
               key={tier.name}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
               className={cn(
-                'bg-white p-8 flex flex-col',
-                tier.popular && 'bg-neutral-50'
+                'rounded-3xl p-8 flex flex-col relative',
+                tier.popular
+                  ? 'bg-neutral-900 text-white ring-2 ring-orange-500'
+                  : 'bg-neutral-50'
               )}
             >
-              {/* Header */}
-              <div className="mb-6">
-                {tier.popular && (
-                  <span className="text-xs font-semibold text-orange-600 uppercase tracking-wide">
+              {/* Popular Badge */}
+              {tier.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="bg-orange-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-lg">
                     Most Popular
                   </span>
-                )}
-                <h3 className="text-xl font-semibold text-neutral-900 mt-1">
+                </div>
+              )}
+
+              {/* Header */}
+              <div className="mb-8">
+                <h3 className={cn(
+                  'text-xl font-semibold',
+                  tier.popular ? 'text-white' : 'text-neutral-900'
+                )}>
                   {tier.name}
                 </h3>
-                <p className="text-sm text-neutral-500">{tier.description}</p>
+                <p className={cn(
+                  'text-sm mt-1',
+                  tier.popular ? 'text-neutral-400' : 'text-neutral-500'
+                )}>
+                  {tier.description}
+                </p>
               </div>
 
               {/* Price */}
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-neutral-900 tracking-tight">
+              <div className="mb-8">
+                <span className={cn(
+                  'text-5xl font-semibold tracking-tight',
+                  tier.popular ? 'text-white' : 'text-neutral-900'
+                )}>
                   ${isYearly ? tier.yearlyPrice : tier.monthlyPrice}
                 </span>
-                <span className="text-neutral-500 ml-1">/mo</span>
+                <span className={tier.popular ? 'text-neutral-400' : 'text-neutral-500'}>/mo</span>
                 {isYearly && (
-                  <p className="text-sm text-neutral-400 mt-1">
+                  <p className={cn(
+                    'text-sm mt-2',
+                    tier.popular ? 'text-neutral-500' : 'text-neutral-400'
+                  )}>
                     Billed annually
                   </p>
                 )}
               </div>
 
               {/* Features */}
-              <ul className="space-y-3 mb-8 flex-grow">
+              <ul className="space-y-4 mb-8 flex-grow">
                 {tier.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-3">
-                    <Check className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-neutral-600">{feature}</span>
+                    <Check className={cn(
+                      'w-5 h-5 flex-shrink-0',
+                      tier.popular ? 'text-orange-400' : 'text-orange-500'
+                    )} />
+                    <span className={cn(
+                      'text-sm',
+                      tier.popular ? 'text-neutral-300' : 'text-neutral-600'
+                    )}>
+                      {feature}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -166,9 +180,9 @@ export function PricingSection() {
               <Button
                 asChild
                 className={cn(
-                  'w-full h-11 font-medium rounded-lg',
+                  'w-full h-12 font-medium rounded-full transition-all duration-300',
                   tier.popular
-                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                    ? 'bg-white text-neutral-900 hover:bg-neutral-100'
                     : 'bg-neutral-900 hover:bg-neutral-800 text-white'
                 )}
               >
