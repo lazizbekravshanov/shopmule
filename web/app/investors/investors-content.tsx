@@ -51,7 +51,7 @@ const highlights = [
 
 const milestones = [
   { year: '2022 Q1', event: 'Founded in Austin, TX' },
-  { year: '2022 Q3', event: 'Seed round: $4.2M led by Founder Collective' },
+  { year: '2022 Q3', event: 'Seed round: $4.2M led by Lead Venture Partner' },
   { year: '2023 Q1', event: 'Product launch, 50 beta shops' },
   { year: '2023 Q4', event: '200 active shops, $800K ARR' },
   { year: '2024 Q2', event: '400 shops, $1.5M ARR' },
@@ -67,9 +67,9 @@ const useOfFunds = [
 ];
 
 const investors = [
-  { name: 'Founder Collective', type: 'Lead Investor' },
-  { name: 'Y Combinator', type: 'Accelerator' },
-  { name: 'Industry Angels', type: 'Strategic' },
+  { name: 'Lead Venture Partner', type: 'Lead Investor' },
+  { name: 'Growth Capital Fund', type: 'Series Seed' },
+  { name: 'Strategic Angels', type: 'Strategic' },
 ];
 
 export function InvestorsContent() {
@@ -85,7 +85,7 @@ export function InvestorsContent() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="inline-block px-4 py-1.5 bg-orange-500/20 text-orange-400 rounded-full text-sm font-medium mb-6">
+            <span className="inline-block px-4 py-1.5 bg-neutral-700 text-neutral-300 rounded-full text-sm font-medium mb-6">
               Series A
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -98,7 +98,7 @@ export function InvestorsContent() {
             <div className="flex flex-wrap justify-center gap-4">
               <a
                 href="mailto:investors@shopmule.com"
-                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 bg-neutral-700 hover:bg-neutral-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
               >
                 <Mail className="w-5 h-5" />
                 Contact Us
@@ -164,8 +164,8 @@ export function InvestorsContent() {
                 transition={{ delay: index * 0.1 }}
                 className="flex gap-4 p-6 bg-neutral-50 rounded-xl"
               >
-                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <highlight.icon className="w-6 h-6 text-orange-600" />
+                <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <highlight.icon className="w-6 h-6 text-neutral-700" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-neutral-900 mb-2">{highlight.title}</h3>
@@ -223,9 +223,9 @@ export function InvestorsContent() {
               {/* TAM/SAM/SOM circles */}
               <div className="flex justify-center">
                 <div className="relative">
-                  <div className="w-72 h-72 rounded-full bg-orange-100 border-2 border-orange-200 flex items-center justify-center">
-                    <div className="w-48 h-48 rounded-full bg-orange-200 border-2 border-orange-300 flex items-center justify-center">
-                      <div className="w-24 h-24 rounded-full bg-orange-500 flex items-center justify-center text-white">
+                  <div className="w-72 h-72 rounded-full bg-neutral-100 border-2 border-neutral-200 flex items-center justify-center">
+                    <div className="w-48 h-48 rounded-full bg-neutral-200 border-2 border-neutral-300 flex items-center justify-center">
+                      <div className="w-24 h-24 rounded-full bg-neutral-700 flex items-center justify-center text-white">
                         <div className="text-center">
                           <div className="text-lg font-bold">$850M</div>
                           <div className="text-xs">SOM</div>
@@ -234,11 +234,11 @@ export function InvestorsContent() {
                     </div>
                   </div>
                   <div className="absolute top-4 right-0 text-right">
-                    <div className="text-2xl font-bold text-orange-600">$52B</div>
+                    <div className="text-2xl font-bold text-neutral-700">$52B</div>
                     <div className="text-sm text-neutral-500">TAM</div>
                   </div>
                   <div className="absolute top-20 -right-4 text-right">
-                    <div className="text-xl font-bold text-orange-500">$8.2B</div>
+                    <div className="text-xl font-bold text-neutral-600">$8.2B</div>
                     <div className="text-sm text-neutral-500">SAM</div>
                   </div>
                 </div>
@@ -284,12 +284,12 @@ export function InvestorsContent() {
                     }`}
                   >
                     <div className="bg-white border border-neutral-200 rounded-lg p-4 shadow-sm inline-block">
-                      <div className="text-sm font-semibold text-orange-500">{milestone.year}</div>
+                      <div className="text-sm font-semibold text-neutral-600">{milestone.year}</div>
                       <div className="text-neutral-700">{milestone.event}</div>
                     </div>
                   </div>
                   {/* Dot */}
-                  <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-orange-500 rounded-full border-4 border-white shadow" />
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-neutral-700 rounded-full border-4 border-white shadow" />
                 </motion.div>
               ))}
             </div>
@@ -324,7 +324,7 @@ export function InvestorsContent() {
                 transition={{ delay: index * 0.1 }}
                 className="bg-white border border-neutral-200 rounded-xl p-6 text-center"
               >
-                <div className="text-4xl font-bold text-orange-500 mb-2">
+                <div className="text-4xl font-bold text-neutral-600 mb-2">
                   {item.percentage}%
                 </div>
                 <div className="text-lg font-semibold text-neutral-900 mb-2">
@@ -390,7 +390,7 @@ export function InvestorsContent() {
             <div className="flex flex-wrap justify-center gap-4">
               <a
                 href="mailto:investors@shopmule.com"
-                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-4 rounded-lg transition-colors text-lg"
+                className="inline-flex items-center gap-2 bg-neutral-700 hover:bg-neutral-600 text-white font-semibold px-8 py-4 rounded-lg transition-colors text-lg"
               >
                 <Mail className="w-5 h-5" />
                 investors@shopmule.com
@@ -398,7 +398,7 @@ export function InvestorsContent() {
             </div>
             <p className="text-neutral-500 text-sm mt-8">
               Or schedule a call directly with our CEO at{' '}
-              <a href="#" className="text-orange-400 hover:text-orange-300">
+              <a href="#" className="text-neutral-400 hover:text-neutral-300">
                 calendly.com/shopmule-alex
               </a>
             </p>

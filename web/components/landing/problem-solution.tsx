@@ -24,8 +24,8 @@ export function ProblemSolution() {
           className="mb-16"
         >
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-px w-8 bg-amber-500" />
-            <span className="text-sm font-medium text-amber-600 uppercase tracking-widest">
+            <div className="h-px w-8 bg-neutral-300" />
+            <span className="text-sm font-medium text-neutral-500 uppercase tracking-widest">
               The Difference
             </span>
           </div>

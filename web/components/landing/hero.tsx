@@ -14,27 +14,10 @@ import {
   Clock,
   Package,
   Bot,
-  Truck,
-  Cog,
-  Gauge,
-  Fuel,
-  Settings,
-  ClipboardList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Floating background icons - using CSS animations for performance
-const floatingIcons = [
-  { Icon: Wrench, className: 'top-20 left-[8%] w-12 h-12 -rotate-12', delay: '0s' },
-  { Icon: Truck, className: 'top-32 right-[10%] w-14 h-14 rotate-6', delay: '0.5s' },
-  { Icon: Cog, className: 'top-48 left-[15%] w-10 h-10', delay: '1s' },
-  { Icon: Gauge, className: 'top-24 right-[20%] w-8 h-8 -rotate-6', delay: '0.3s' },
-  { Icon: Fuel, className: 'top-56 right-[8%] w-9 h-9 rotate-12', delay: '0.7s' },
-  { Icon: Settings, className: 'top-16 left-[22%] w-7 h-7 rotate-12', delay: '0.2s' },
-  { Icon: ClipboardList, className: 'top-60 left-[12%] w-8 h-8 -rotate-6', delay: '0.8s' },
-  { Icon: Wrench, className: 'top-36 right-[15%] w-6 h-6 rotate-45', delay: '0.4s' },
-  { Icon: Cog, className: 'top-52 right-[22%] w-10 h-10 -rotate-12', delay: '0.9s' },
-];
+// Floating background icons removed for cleaner design
 
 // Mock data for the dashboard preview
 const sidebarItems = [
@@ -99,40 +82,24 @@ export function Hero() {
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
       {/* Subtle Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-amber-50/50 via-white to-white" />
+      <div className="absolute inset-0 bg-gradient-to-b from-neutral-50 via-white to-white" />
 
       {/* Refined Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-30" />
-
-      {/* Floating Background Icons */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {floatingIcons.map((item, index) => (
-          <div
-            key={index}
-            className={`absolute hidden md:block ${item.className} animate-float opacity-0`}
-            style={{
-              animationDelay: item.delay,
-              animationFillMode: 'forwards'
-            }}
-          >
-            <item.Icon className="w-full h-full text-amber-500/10 stroke-[1.5]" />
-          </div>
-        ))}
-      </div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-20" />
 
       <div className="relative max-w-7xl mx-auto px-6 py-24">
         <div className="max-w-4xl mx-auto text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 border border-amber-300 mb-8">
-            <Bot className="w-4 h-4 text-amber-700" />
-            <span className="text-sm font-medium text-amber-800">AI-Powered Shop Management</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-100 border border-neutral-200 mb-8">
+            <Bot className="w-4 h-4 text-neutral-600" />
+            <span className="text-sm font-medium text-neutral-700">AI-Powered Shop Management</span>
           </div>
 
           {/* Headline */}
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-neutral-900 leading-[1.1] mb-6">
             {variant.headline[0]}
             <br />
-            <span className="bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 bg-clip-text text-transparent">
+            <span className="text-neutral-900">
               {variant.headline[1]}
             </span>
           </h1>
@@ -174,15 +141,15 @@ export function Hero() {
           {/* Trust Indicators */}
           <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-neutral-500">
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-500" />
+              <Zap className="w-4 h-4 text-neutral-400" />
               <span>Set up in 5 minutes</span>
             </div>
             <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-green-500" />
+              <Check className="w-4 h-4 text-neutral-400" />
               <span>14-day free trial</span>
             </div>
             <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-green-500" />
+              <Check className="w-4 h-4 text-neutral-400" />
               <span>Cancel anytime</span>
             </div>
           </div>
@@ -212,7 +179,7 @@ export function Hero() {
                 <div className="w-52 bg-neutral-900 p-4 flex flex-col hidden md:flex">
                   {/* Logo */}
                   <div className="flex items-center gap-2 mb-6 px-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">
+                    <div className="w-8 h-8 bg-neutral-700 rounded-lg flex items-center justify-center">
                       <span className="text-white font-bold text-sm">SM</span>
                     </div>
                     <span className="text-white font-semibold text-sm">ShopMule</span>
@@ -225,7 +192,7 @@ export function Hero() {
                         key={item.label}
                         className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${
                           item.active
-                            ? 'bg-amber-500 text-white font-medium'
+                            ? 'bg-neutral-700 text-white font-medium'
                             : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
                         }`}
                       >
@@ -258,7 +225,7 @@ export function Hero() {
                       <div key={stat.label} className="bg-white rounded-xl p-3 border border-neutral-100 shadow-sm">
                         <p className="text-[10px] text-neutral-500 mb-1">{stat.label}</p>
                         <p className="text-lg font-bold text-neutral-900">{stat.value}</p>
-                        <p className={`text-[10px] ${stat.positive ? 'text-green-600' : 'text-amber-600'}`}>
+                        <p className={`text-[10px] ${stat.positive ? 'text-green-600' : 'text-neutral-500'}`}>
                           {stat.change}
                         </p>
                       </div>
@@ -278,7 +245,7 @@ export function Hero() {
                         {[40, 65, 45, 80, 55, 90, 70].map((height, i) => (
                           <div key={i} className="flex flex-col items-center gap-1">
                             <div
-                              className="w-6 bg-gradient-to-t from-amber-600 to-amber-400 rounded-t"
+                              className="w-6 bg-gradient-to-t from-neutral-700 to-neutral-500 rounded-t"
                               style={{ height: `${height}%` }}
                             />
                             <span className="text-[8px] text-neutral-400">
@@ -311,8 +278,8 @@ export function Hero() {
               </div>
             </div>
 
-            {/* Subtle Glow Effect */}
-            <div className="absolute -inset-4 bg-gradient-to-r from-amber-500/10 via-orange-400/10 to-amber-500/10 rounded-2xl blur-3xl -z-10 opacity-60" />
+            {/* Subtle Shadow Effect */}
+            <div className="absolute -inset-4 bg-neutral-200/50 rounded-2xl blur-3xl -z-10 opacity-60" />
           </div>
         </div>
       </div>

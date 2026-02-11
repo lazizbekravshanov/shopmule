@@ -44,7 +44,7 @@ export function Navigation() {
           <div className="flex items-center justify-between h-full">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200 shadow-lg shadow-amber-500/20">
+              <div className="w-9 h-9 bg-neutral-900 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200 shadow-lg shadow-neutral-900/10">
                 <span className="text-white font-bold text-sm">SM</span>
               </div>
               <span className="font-bold text-xl text-neutral-900">ShopMule</span>
@@ -57,7 +57,7 @@ export function Navigation() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-amber-600 rounded-lg hover:bg-amber-50 transition-colors duration-200"
+                    className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors duration-200"
                   >
                     {link.label}
                   </Link>
@@ -65,7 +65,7 @@ export function Navigation() {
                   <a
                     key={link.href}
                     href={link.href}
-                    className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-amber-600 rounded-lg hover:bg-amber-50 transition-colors duration-200"
+                    className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors duration-200"
                   >
                     {link.label}
                   </a>
@@ -77,7 +77,7 @@ export function Navigation() {
             <div className="hidden md:flex items-center gap-3">
               <Link
                 href="/login"
-                className="px-4 py-2 text-sm font-medium text-neutral-700 hover:text-amber-600 rounded-lg hover:bg-amber-50 transition-colors duration-200"
+                className="px-4 py-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors duration-200"
               >
                 Sign In
               </Link>
@@ -95,7 +95,7 @@ export function Navigation() {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden flex items-center justify-center w-10 h-10 text-neutral-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors duration-200"
+              className="md:hidden flex items-center justify-center w-10 h-10 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors duration-200"
               aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
               {isMobileMenuOpen ? (
@@ -126,7 +126,7 @@ export function Navigation() {
                       key={link.href}
                       href={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="px-4 py-3 text-base font-medium text-neutral-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors duration-200"
+                      className="px-4 py-3 text-base font-medium text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors duration-200"
                     >
                       {link.label}
                     </Link>
@@ -135,7 +135,7 @@ export function Navigation() {
                       key={link.href}
                       href={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="px-4 py-3 text-base font-medium text-neutral-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors duration-200"
+                      className="px-4 py-3 text-base font-medium text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors duration-200"
                     >
                       {link.label}
                     </a>
