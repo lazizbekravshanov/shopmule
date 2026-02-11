@@ -104,11 +104,11 @@ export function InvestorsContent() {
               Series A
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Modernizing the $52B Auto Body Repair Industry
+              Modernizing the $52B Commercial Repair Industry
             </h1>
             <p className="text-xl text-neutral-300 mb-8">
-              ShopMule is an AI-powered shop management platform founded in Cincinnati, OH
-              and now headquartered in San Francisco, CA. We&apos;re building the future of auto repair.
+              ShopMule is an AI-powered shop management platform for all repair shops—heavy duty trucks,
+              semi-trucks, equipment, and more. Founded in Cincinnati, OH. Headquartered in San Francisco, CA.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
@@ -205,14 +205,14 @@ export function InvestorsContent() {
                 Market Opportunity
               </h2>
               <p className="text-lg text-neutral-600 mb-6">
-                The auto body repair industry is massive, fragmented, and ripe for disruption.
+                The commercial repair industry is massive, fragmented, and ripe for disruption.
                 88% of independent shops still rely on paper-based processes or legacy software
                 built in the 1990s.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  <span className="text-neutral-700">35,000+ independent body shops in the US</span>
+                  <span className="text-neutral-700">150,000+ independent repair shops in the US</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 text-green-500" />

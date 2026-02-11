@@ -7,8 +7,8 @@ const marketStats = [
   {
     value: '$52B',
     label: 'Total Addressable Market',
-    sublabel: 'US Auto Repair Industry',
-    description: 'The auto body repair industry continues to grow with increasing vehicle complexity.',
+    sublabel: 'US Commercial Repair Industry',
+    description: 'The repair industry continues to grow with increasing vehicle complexity.',
   },
   {
     value: '$8.2B',
@@ -19,8 +19,8 @@ const marketStats = [
   {
     value: '$850M',
     label: 'Initial Target Market',
-    sublabel: 'Independent Body Shops',
-    description: '35,000+ independent shops ready for digital transformation.',
+    sublabel: 'Independent Repair Shops',
+    description: '150,000+ independent shops ready for digital transformation.',
   },
 ];
 
@@ -77,7 +77,7 @@ export function MarketOpportunity() {
             transition={{ delay: 0.2 }}
             className="text-lg text-neutral-400 max-w-2xl mx-auto"
           >
-            The auto body repair industry is ripe for disruption. Most shops still operate on paper while customers expect digital experiences.
+            The commercial repair industry is ripe for disruption. Most shops still operate on paper while customers expect digital experiences.
           </motion.p>
         </div>
 

@@ -148,7 +148,7 @@ export function ExitIntentPopup() {
                 {/* Content */}
                 <div className="px-8 py-8">
                   <p className="text-neutral-600 text-center mb-6">
-                    Join 500+ auto body shops already using ShopMule to streamline their operations. Enter your email to claim your exclusive discount.
+                    Join 500+ repair shops already using ShopMule to streamline their operations. Enter your email to claim your exclusive discount.
                   </p>
 
                   <form onSubmit={handleSubmit} className="space-y-4">

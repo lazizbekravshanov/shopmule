@@ -5,9 +5,9 @@ import { ArrowUpRight, Quote, TrendingUp, Clock, DollarSign, Users } from 'lucid
 
 const caseStudies = [
   {
-    company: "Mike's Auto Body",
+    company: "Mike's Truck Repair",
     location: 'Austin, TX',
-    logo: 'MA',
+    logo: 'MT',
     quote: "ShopMule transformed our shop. We went from chaos to clockwork in just 30 days.",
     author: 'Mike Rodriguez',
     role: 'Owner',

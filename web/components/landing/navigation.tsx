@@ -44,7 +44,7 @@ export function Navigation() {
           <div className="flex items-center justify-between h-full">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 bg-neutral-900 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200 shadow-lg shadow-neutral-900/10">
+              <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200 shadow-lg shadow-orange-500/20">
                 <span className="text-white font-bold text-sm">SM</span>
               </div>
               <span className="font-bold text-xl text-neutral-900">ShopMule</span>

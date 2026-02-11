@@ -89,7 +89,7 @@ export function PricingSection() {
               onClick={() => setIsYearly(!isYearly)}
               className={cn(
                 'relative w-12 h-6 rounded-full transition-colors',
-                isYearly ? 'bg-neutral-900' : 'bg-neutral-300'
+                isYearly ? 'bg-orange-500' : 'bg-neutral-300'
               )}
               aria-label="Toggle billing period"
             >
@@ -105,7 +105,7 @@ export function PricingSection() {
               isYearly ? 'text-neutral-900' : 'text-neutral-400'
             )}>
               Yearly
-              <span className="ml-2 text-xs text-neutral-600 font-semibold">
+              <span className="ml-2 text-xs text-orange-600 font-semibold">
                 Save 20%
               </span>
             </span>
@@ -129,7 +129,7 @@ export function PricingSection() {
               {/* Header */}
               <div className="mb-6">
                 {tier.popular && (
-                  <span className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">
+                  <span className="text-xs font-semibold text-orange-600 uppercase tracking-wide">
                     Most Popular
                   </span>
                 )}
@@ -156,7 +156,7 @@ export function PricingSection() {
               <ul className="space-y-3 mb-8 flex-grow">
                 {tier.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-3">
-                    <Check className="w-4 h-4 text-neutral-500 flex-shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
                     <span className="text-sm text-neutral-600">{feature}</span>
                   </li>
                 ))}
@@ -168,7 +168,7 @@ export function PricingSection() {
                 className={cn(
                   'w-full h-11 font-medium rounded-lg',
                   tier.popular
-                    ? 'bg-neutral-900 hover:bg-neutral-800 text-white'
+                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
                     : 'bg-neutral-900 hover:bg-neutral-800 text-white'
                 )}
               >

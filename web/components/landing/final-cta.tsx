@@ -164,7 +164,7 @@ export function FinalCTA() {
   const isValid = form.name && form.email && form.mcNumber && form.subject && form.message;
 
   const inputClass =
-    'w-full h-11 px-4 text-sm bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#404040]/20 focus:border-[#404040] transition-all';
+    'w-full h-11 px-4 text-sm bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all';
 
   return (
     <section id="contact" className="py-24 bg-white">
@@ -208,7 +208,7 @@ export function FinalCTA() {
                   setForm(initialForm);
                   clearVerification();
                 }}
-                className="mt-6 text-sm font-medium text-[#404040] hover:text-[#262626] transition-colors"
+                className="mt-6 text-sm font-medium text-[#f97316] hover:text-[#ea580c] transition-colors"
               >
                 Send another message
               </button>
@@ -311,7 +311,7 @@ export function FinalCTA() {
                     onChange={handleChange}
                     placeholder="MC-123456"
                     readOnly={carrierVerified}
-                    className={`flex-1 h-11 px-4 text-sm border rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#404040]/20 focus:border-[#404040] transition-all font-mono ${
+                    className={`flex-1 h-11 px-4 text-sm border rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all font-mono ${
                       carrierVerified ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-neutral-200'
                     }`}
                   />
@@ -399,7 +399,7 @@ export function FinalCTA() {
                         <button
                           type="button"
                           onClick={confirmCarrier}
-                          className="flex-1 h-9 bg-[#404040] hover:bg-[#262626] text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                          className="flex-1 h-9 bg-[#f97316] hover:bg-[#ea580c] text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-1.5"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           This is my company
@@ -474,7 +474,7 @@ export function FinalCTA() {
                   value={form.message}
                   onChange={handleChange}
                   placeholder="Tell us how we can help..."
-                  className="w-full px-4 py-3 text-sm bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#404040]/20 focus:border-[#404040] transition-all resize-none"
+                  className="w-full px-4 py-3 text-sm bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#f97316]/20 focus:border-[#f97316] transition-all resize-none"
                 />
               </div>
 
@@ -490,7 +490,7 @@ export function FinalCTA() {
               <button
                 type="submit"
                 disabled={!isValid || isSubmitting}
-                className="w-full h-11 bg-[#404040] hover:bg-[#262626] disabled:bg-neutral-200 disabled:text-neutral-400 text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2 text-sm"
+                className="w-full h-11 bg-[#f97316] hover:bg-[#ea580c] disabled:bg-neutral-200 disabled:text-neutral-400 text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2 text-sm"
               >
                 {isSubmitting ? (
                   <>

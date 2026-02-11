@@ -35,7 +35,7 @@ export function SocialProof() {
                 transition={{ duration: 0.3, delay: index * 0.08 }}
                 className="flex items-center gap-2 group"
               >
-                <logo.icon className="w-5 h-5 text-neutral-300 group-hover:text-neutral-500 transition-colors duration-300" />
+                <logo.icon className="w-5 h-5 text-neutral-300 group-hover:text-orange-500 transition-colors duration-300" />
                 <span className="text-lg font-semibold text-neutral-300 group-hover:text-neutral-400 transition-colors duration-300 tracking-tight">
                   {logo.name}
                 </span>

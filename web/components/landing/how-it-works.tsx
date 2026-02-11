@@ -36,8 +36,8 @@ export function HowItWorks() {
           className="mb-16"
         >
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-px w-8 bg-neutral-300" />
-            <span className="text-sm font-medium text-neutral-500 uppercase tracking-widest">
+            <div className="h-px w-8 bg-orange-400" />
+            <span className="text-sm font-medium text-orange-600 uppercase tracking-widest">
               Getting Started
             </span>
           </div>

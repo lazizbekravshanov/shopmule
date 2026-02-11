@@ -56,8 +56,8 @@ export function FeaturesBento() {
           className="mb-16"
         >
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-px w-8 bg-neutral-300" />
-            <span className="text-sm font-medium text-neutral-500 uppercase tracking-widest">
+            <div className="h-px w-8 bg-orange-400" />
+            <span className="text-sm font-medium text-orange-600 uppercase tracking-widest">
               Features
             </span>
           </div>
@@ -78,10 +78,10 @@ export function FeaturesBento() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.05 }}
-              className="bg-white p-8 group hover:bg-neutral-50 transition-colors duration-300"
+              className="bg-white p-8 group hover:bg-orange-50/50 transition-colors duration-300"
             >
               {/* Icon */}
-              <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-neutral-100 text-neutral-600 group-hover:bg-neutral-200 group-hover:text-neutral-800 transition-all duration-300">
+              <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-neutral-100 text-neutral-600 group-hover:bg-orange-100 group-hover:text-orange-600 transition-all duration-300">
                 <feature.icon className="w-5 h-5" strokeWidth={1.5} />
               </div>
 
