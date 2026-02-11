@@ -20,10 +20,28 @@ import { Navigation } from '@/components/landing/navigation';
 import { Footer } from '@/components/landing/footer';
 
 const metrics = [
-  { label: 'ARR', value: '$2.4M', growth: '+340% YoY' },
-  { label: 'Active Shops', value: '527', growth: '+127% YoY' },
-  { label: 'Net Revenue Retention', value: '142%', growth: null },
-  { label: 'Gross Margin', value: '82%', growth: null },
+  { label: 'Team Size', value: '5', growth: null },
+  { label: 'Founded', value: '2026', growth: null },
+  { label: 'HQ', value: 'San Francisco', growth: null },
+  { label: 'Origin', value: 'Cincinnati, OH', growth: null },
+];
+
+const leadership = [
+  {
+    name: 'Lazizbek Ravshanov',
+    role: 'CEO & Co-Founder',
+    initials: 'LR',
+  },
+  {
+    name: 'Sherzod Norkobilov',
+    role: 'CTO & Co-Founder',
+    initials: 'SN',
+  },
+  {
+    name: 'Sadrijakhon',
+    role: 'VP of Product',
+    initials: 'SA',
+  },
 ];
 
 const highlights = [
@@ -89,8 +107,8 @@ export function InvestorsContent() {
               Modernizing the $52B Auto Body Repair Industry
             </h1>
             <p className="text-xl text-neutral-300 mb-8">
-              ShopMule is the AI-powered shop management platform that&apos;s transforming how
-              35,000+ independent body shops operate. We&apos;re raising our Series A.
+              ShopMule is an AI-powered shop management platform founded in Cincinnati, OH
+              and now headquartered in San Francisco, CA. We&apos;re building the future of auto repair.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
@@ -307,7 +325,7 @@ export function InvestorsContent() {
               Use of Funds
             </h2>
             <p className="text-lg text-neutral-600">
-              We&apos;re raising $15M to accelerate growth and expand our AI capabilities.
+              How we plan to allocate investment to accelerate growth.
             </p>
           </motion.div>
 
@@ -334,8 +352,43 @@ export function InvestorsContent() {
         </div>
       </section>
 
-      {/* Current Investors */}
+      {/* Leadership Team */}
       <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl font-bold text-neutral-900 mb-4">
+              Leadership Team
+            </h2>
+          </motion.div>
+
+          <div className="flex flex-wrap justify-center gap-12">
+            {leadership.map((member, index) => (
+              <motion.div
+                key={member.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center"
+              >
+                <div className="w-24 h-24 bg-neutral-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-white">{member.initials}</span>
+                </div>
+                <div className="font-semibold text-neutral-900">{member.name}</div>
+                <div className="text-sm text-neutral-500">{member.role}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Current Investors */}
+      <section className="py-20 bg-neutral-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -381,7 +434,7 @@ export function InvestorsContent() {
               Let&apos;s Talk
             </h2>
             <p className="text-lg text-neutral-300 mb-8">
-              We&apos;re raising our Series A to accelerate growth and expand our AI capabilities.
+              We&apos;re building the future of shop management software.
               If you&apos;re interested in learning more, we&apos;d love to connect.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
