@@ -279,7 +279,7 @@ export default function BlogPage() {
                 placeholder="Search articles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -329,7 +329,7 @@ export default function BlogPage() {
                 transition={{ duration: 0.5, delay: 0.1 + index * 0.05 }}
               >
                 <Link href={`/blog/${post.slug}`} className="group block h-full">
-                  <div className="h-full bg-white rounded-xl overflow-hidden border border-neutral-200 hover:border-amber-300 hover:shadow-lg transition-all">
+                  <div className="h-full bg-white rounded-xl overflow-hidden border border-neutral-200 hover:border-orange-300 hover:shadow-lg transition-all">
                     {/* Image with animated icon */}
                     <div className={`aspect-[16/9] bg-gradient-to-br ${categoryGradients[post.category]} relative overflow-hidden`}>
                       {/* Animated icon */}
@@ -368,7 +368,7 @@ export default function BlogPage() {
                         </span>
                       </div>
 
-                      <h2 className="text-lg font-semibold text-neutral-900 mb-2 group-hover:text-amber-600 transition-colors line-clamp-2">
+                      <h2 className="text-lg font-semibold text-neutral-900 mb-2 group-hover:text-orange-600 transition-colors line-clamp-2">
                         {post.title}
                       </h2>
 
@@ -389,7 +389,7 @@ export default function BlogPage() {
                 setSelectedCategory(null)
                 setSearchQuery('')
               }}
-              className="mt-4 text-amber-600 hover:text-amber-700 font-medium"
+              className="mt-4 text-orange-600 hover:text-orange-700 font-medium"
             >
               Clear filters
             </button>
@@ -414,11 +414,11 @@ export default function BlogPage() {
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="flex-1 px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-neutral-900 font-semibold rounded-lg transition-colors"
+              className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-neutral-900 font-semibold rounded-lg transition-colors"
             >
               Subscribe
             </button>

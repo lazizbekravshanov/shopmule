@@ -197,7 +197,7 @@ export default function BlogPostPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <Link
             href="/blog"
-            className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+            className="inline-flex items-center gap-2 text-neutral-600 hover:text-orange-600 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             All Articles
@@ -248,7 +248,7 @@ export default function BlogPostPage() {
 
           {/* Article Content */}
           <div
-            className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-p:text-neutral-700 prose-a:text-amber-600 prose-strong:text-neutral-900 prose-ul:text-neutral-700 prose-li:marker:text-amber-500"
+            className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-p:text-neutral-700 prose-a:text-orange-600 prose-strong:text-neutral-900 prose-ul:text-neutral-700 prose-li:marker:text-orange-500"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 
@@ -262,7 +262,7 @@ export default function BlogPostPage() {
             </p>
             <Link
               href="/login"
-              className="inline-block px-6 py-3 bg-amber-500 hover:bg-amber-600 text-neutral-900 font-semibold rounded-lg transition-colors"
+              className="inline-block px-6 py-3 bg-orange-500 hover:bg-orange-600 text-neutral-900 font-semibold rounded-lg transition-colors"
             >
               Start Free Trial
             </Link>
@@ -289,11 +289,11 @@ export default function BlogPostPage() {
               .slice(0, 2)
               .map(([key, relatedPost]) => (
                 <Link key={key} href={`/blog/${key}`} className="group block">
-                  <div className="bg-neutral-50 rounded-xl p-5 border border-neutral-200 hover:border-amber-300 hover:shadow-lg transition-all">
+                  <div className="bg-neutral-50 rounded-xl p-5 border border-neutral-200 hover:border-orange-300 hover:shadow-lg transition-all">
                     <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium mb-2 ${categoryColors[relatedPost.category]}`}>
                       {categoryLabels[relatedPost.category]}
                     </span>
-                    <h3 className="font-semibold text-neutral-900 group-hover:text-amber-600 transition-colors line-clamp-2">
+                    <h3 className="font-semibold text-neutral-900 group-hover:text-orange-600 transition-colors line-clamp-2">
                       {relatedPost.title}
                     </h3>
                     <p className="text-sm text-neutral-500 mt-1">{relatedPost.date}</p>

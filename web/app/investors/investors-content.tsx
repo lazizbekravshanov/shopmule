@@ -113,7 +113,7 @@ export function InvestorsContent() {
             <div className="flex flex-wrap justify-center gap-4">
               <a
                 href="mailto:investors@shopmule.com"
-                className="inline-flex items-center gap-2 bg-neutral-700 hover:bg-neutral-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-lg shadow-orange-500/25"
               >
                 <Mail className="w-5 h-5" />
                 Contact Us
@@ -179,8 +179,8 @@ export function InvestorsContent() {
                 transition={{ delay: index * 0.1 }}
                 className="flex gap-4 p-6 bg-neutral-50 rounded-xl"
               >
-                <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <highlight.icon className="w-6 h-6 text-neutral-700" />
+                <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <highlight.icon className="w-6 h-6 text-orange-600" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-neutral-900 mb-2">{highlight.title}</h3>
@@ -240,7 +240,7 @@ export function InvestorsContent() {
                 <div className="relative">
                   <div className="w-72 h-72 rounded-full bg-neutral-100 border-2 border-neutral-200 flex items-center justify-center">
                     <div className="w-48 h-48 rounded-full bg-neutral-200 border-2 border-neutral-300 flex items-center justify-center">
-                      <div className="w-24 h-24 rounded-full bg-neutral-700 flex items-center justify-center text-white">
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white">
                         <div className="text-center">
                           <div className="text-lg font-bold">$850M</div>
                           <div className="text-xs">SOM</div>
@@ -304,7 +304,7 @@ export function InvestorsContent() {
                     </div>
                   </div>
                   {/* Dot */}
-                  <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-neutral-700 rounded-full border-4 border-white shadow" />
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-orange-500 rounded-full border-4 border-white shadow" />
                 </motion.div>
               ))}
             </div>
@@ -339,7 +339,7 @@ export function InvestorsContent() {
                 transition={{ delay: index * 0.1 }}
                 className="bg-white border border-neutral-200 rounded-xl p-6 text-center"
               >
-                <div className="text-4xl font-bold text-neutral-600 mb-2">
+                <div className="text-4xl font-bold text-orange-600 mb-2">
                   {item.percentage}%
                 </div>
                 <div className="text-lg font-semibold text-neutral-900 mb-2">
@@ -376,7 +376,7 @@ export function InvestorsContent() {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <div className="w-24 h-24 bg-neutral-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-500/25">
                   <span className="text-2xl font-bold text-white">{member.initials}</span>
                 </div>
                 <div className="font-semibold text-neutral-900">{member.name}</div>
@@ -440,7 +440,7 @@ export function InvestorsContent() {
             <div className="flex flex-wrap justify-center gap-4">
               <a
                 href="mailto:investors@shopmule.com"
-                className="inline-flex items-center gap-2 bg-neutral-700 hover:bg-neutral-600 text-white font-semibold px-8 py-4 rounded-lg transition-colors text-lg"
+                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-4 rounded-lg transition-colors text-lg shadow-lg shadow-orange-500/25"
               >
                 <Mail className="w-5 h-5" />
                 investors@shopmule.com

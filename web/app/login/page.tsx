@@ -55,7 +55,7 @@ export default function LoginPage() {
       {/* Left Panel - Brand */}
       <div className="hidden lg:flex lg:w-1/2 bg-neutral-900 flex-col justify-between p-12">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary-500 rounded flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded flex items-center justify-center">
             <MuleIcon className="h-5 w-5 text-white" />
           </div>
           <span className="text-lg font-semibold text-white">ShopMule</span>
@@ -65,7 +65,7 @@ export default function LoginPage() {
           <h1 className="text-4xl font-bold text-white tracking-tight leading-tight">
             Run your shop
             <br />
-            <span className="text-primary-400">with precision.</span>
+            <span className="text-orange-400">with precision.</span>
           </h1>
           <p className="mt-4 text-neutral-400 max-w-sm">
             Work orders. Time tracking. Invoicing.
@@ -83,7 +83,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
-            <div className="w-8 h-8 bg-primary-500 rounded flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded flex items-center justify-center">
               <MuleIcon className="h-5 w-5 text-white" />
             </div>
             <span className="text-lg font-semibold text-neutral-900">ShopMule</span>
@@ -118,7 +118,7 @@ export default function LoginPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-11 border-neutral-200 focus:border-primary-500 focus:ring-primary-500"
+                className="h-11 border-neutral-200 focus:border-orange-500 focus:ring-orange-500"
                 required
               />
             </div>
@@ -135,14 +135,14 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-11 border-neutral-200 focus:border-primary-500 focus:ring-primary-500"
+                className="h-11 border-neutral-200 focus:border-orange-500 focus:ring-orange-500"
                 required
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full h-11 bg-primary-500 hover:bg-primary-600 text-white font-medium"
+              className="w-full h-11 bg-orange-500 hover:bg-orange-600 text-white font-medium"
               disabled={loading}
             >
               {loading ? 'Signing in...' : 'Sign in'}
@@ -153,7 +153,7 @@ export default function LoginPage() {
             Don&apos;t have an account?{' '}
             <Link
               href="/"
-              className="text-primary-600 hover:text-primary-700 font-medium"
+              className="text-orange-600 hover:text-orange-700 font-medium"
             >
               Start free trial
             </Link>

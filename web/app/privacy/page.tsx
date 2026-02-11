@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
         <div className="max-w-4xl mx-auto px-4 py-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+            className="inline-flex items-center gap-2 text-neutral-600 hover:text-orange-600 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Home
@@ -181,8 +181,8 @@ export default function PrivacyPolicyPage() {
         <div className="max-w-4xl mx-auto px-4 text-center text-neutral-600">
           <p>&copy; {new Date().getFullYear()} ShopMule. All rights reserved.</p>
           <div className="mt-2 space-x-4">
-            <Link href="/terms" className="hover:text-neutral-900">Terms of Service</Link>
-            <Link href="/contact" className="hover:text-neutral-900">Contact</Link>
+            <Link href="/terms" className="hover:text-orange-600">Terms of Service</Link>
+            <Link href="/contact" className="hover:text-orange-600">Contact</Link>
           </div>
         </div>
       </footer>
