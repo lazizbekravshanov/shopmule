@@ -1,8 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { LogOut } from "lucide-react"
 
 interface NavBarProps {
   userName?: string | null
@@ -10,11 +11,11 @@ interface NavBarProps {
 }
 
 export function NavBar({ userName, userEmail }: NavBarProps) {
-  const handleSignOut = async () => {
-    await signOut({ 
-      callbackUrl: "/",
-      redirect: true 
-    })
+  const router = useRouter()
+
+  const handleSignOut = () => {
+    // Navigate to the signout page which handles the full signout flow
+    router.push('/signout')
   }
 
   return (

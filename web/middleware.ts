@@ -20,6 +20,7 @@ const protectedRoutes = [
 const publicRoutes = [
   "/login",
   "/register",
+  "/signout", // Sign out page
   "/pay",     // Customer payment portal
   "/portal",  // Customer portal
   "/contact", // Contact form
@@ -146,7 +147,14 @@ export async function middleware(request: NextRequest) {
   // Allow public routes
   if (publicRoutes.some(route => pathname === route || pathname.startsWith(route + "/"))) {
     // If user is logged in and tries to access login page, redirect to dashboard
+    // But allow access if they just signed out (check for signedOut param or referrer)
     if (pathname === "/login") {
+      // Don't redirect if coming from signout
+      const signedOut = request.nextUrl.searchParams.get('signedOut')
+      if (signedOut === 'true') {
+        return response
+      }
+
       const token = await getToken({
         req: request,
         secret: process.env.NEXTAUTH_SECRET
