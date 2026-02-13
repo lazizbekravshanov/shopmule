@@ -8,82 +8,698 @@ datasource db {
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
+// ==========================================
+// MULTI-TENANCY
+// ==========================================
+
+model Tenant {
+  id                  String              @id @default(cuid())
+  name                String
+  slug                String              @unique
+  logoUrl             String?
+  address             String?
+  city                String?
+  state               String?
+  zipCode             String?
+  phone               String?
+  email               String?
+  website             String?
+  timezone            String              @default("America/New_York")
+  taxRate             Float               @default(0.0825)
+  subscriptionPlan    SubscriptionPlan    @default(FREE)
+  subscriptionStatus  SubscriptionStatus  @default(ACTIVE)
+  stripeCustomerId    String?
+  stripeSubscriptionId String?
+  settings            Json?               // Business hours, bay_count, default_payment_terms, etc.
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  deletedAt           DateTime?
+
+  // Relations
+  Users               User[]
+  Customers           Customer[]
+  Vehicles            Vehicle[]
+  WorkOrders          WorkOrder[]
+  Invoices            Invoice[]
+  Parts               Part[]
+  Vendors             Vendor[]
+  FleetAccounts       FleetAccount[]
+  Appointments        Appointment[]
+  PurchaseOrders      PurchaseOrder[]
+  ServiceTemplates    ServiceTemplate[]
+  Shops               Shop[]
+  EmployeeProfiles    EmployeeProfile[]
+
+  @@index([slug])
+}
+
+enum SubscriptionPlan {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  PAUSED
+}
+
+// ==========================================
+// USERS & AUTHENTICATION
+// ==========================================
+
+model User {
+  id                     String                   @id @default(cuid())
+  tenantId               String?
+  email                  String                   @unique
+  passwordHash           String
+  name                   String?
+  avatarUrl              String?
+  phone                  String?
+  role                   Role
+  isActive               Boolean                  @default(true)
+  lastLoginAt            DateTime?
+  preferences            Json?                    // Theme, notification settings, default view
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  deletedAt              DateTime?
+
+  Tenant                 Tenant?                  @relation(fields: [tenantId], references: [id])
+  EmployeeProfile        EmployeeProfile?
+  AttendanceNotification AttendanceNotification[]
+  AttendanceAuditLog     AttendanceAuditLog[]
+  TimesheetApprovals     Timesheet[]              @relation("TimesheetApprover")
+  WorkOrdersCreated      WorkOrder[]              @relation("WorkOrderCreatedBy")
+  InvoicePaymentsRecorded InvoicePayment[]
+
+  @@index([tenantId])
+  @@index([email])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MANAGER
+  SERVICE_ADVISOR
+  MECHANIC
+  FRONT_DESK
+}
+
+// ==========================================
+// CUSTOMERS
+// ==========================================
+
 model Customer {
   id                     String                   @id @default(cuid())
-  name                   String
+  tenantId               String
+  type                   CustomerType             @default(INDIVIDUAL)
+  firstName              String?
+  lastName               String?
+  companyName            String?
+  displayName            String                   // Computed: firstName lastName or companyName
+  name                   String                   // Legacy: keep for compatibility
   contactName            String?
   phone                  String?
+  secondaryPhone         String?
   email                  String?
+  address                Json?                    // { street, city, state, zip }
   billingAddress         String?
+  taxExempt              Boolean                  @default(false)
+  taxId                  String?
+  source                 CustomerSource           @default(WALK_IN)
+  tags                   String[]                 @default([])
+  notes                  String?
+  lifetimeValue          Float                    @default(0)
+  lastVisitAt            DateTime?
+  fleetAccountId         String?
   portalTokenHash        String?
   portalTokenExpiresAt   DateTime?
   portalLastAccessedAt   DateTime?
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
-  Invoice                Invoice[]
-  Vehicle                Vehicle[]
+  deletedAt              DateTime?
+
+  Tenant                 Tenant                   @relation(fields: [tenantId], references: [id])
+  FleetAccount           FleetAccount?            @relation(fields: [fleetAccountId], references: [id])
+  Vehicles               Vehicle[]
+  WorkOrders             WorkOrder[]
+  Invoices               Invoice[]
+  Appointments           Appointment[]
   Notifications          CustomerNotification[]
   NotificationPreference NotificationPreference?
+
+  @@index([tenantId])
+  @@index([email])
+  @@index([phone])
+  @@index([fleetAccountId])
 }
 
-model EmployeeProfile {
-  id                  String                @id @default(cuid())
-  name                String
-  role                Role
-  payRate             Float
-  status              String                @default("active")
-  userId              String                @unique
-  pin                 String? // 4-digit PIN for quick clock-in
-  photoUrl            String?
-  phoneNumber         String?
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  User                User                  @relation(fields: [userId], references: [id])
-  TimeEntry           TimeEntry[]
-  WorkOrderAssignment WorkOrderAssignment[]
-  WorkOrderLabor      WorkOrderLabor[]
-  PunchRecord         PunchRecord[]
-  Timesheet           Timesheet[]
-  GeofenceAssignment  GeofenceAssignment[]
-  ShopAssignment      ShopAssignment[]
+enum CustomerType {
+  INDIVIDUAL
+  COMPANY
+  FLEET
 }
+
+enum CustomerSource {
+  WALK_IN
+  PHONE
+  WEBSITE
+  REFERRAL
+  FLEET
+  MARKETING
+}
+
+// ==========================================
+// FLEET ACCOUNTS
+// ==========================================
+
+model FleetAccount {
+  id                   String              @id @default(cuid())
+  tenantId             String
+  companyName          String
+  accountNumber        String              // Auto: FA-0001
+  billingAddress       Json?               // { street, city, state, zip }
+  paymentTerms         PaymentTerms        @default(NET_30)
+  discountRatePercent  Float               @default(0)
+  creditLimit          Float               @default(0)
+  currentBalance       Float               @default(0)
+  primaryContactId     String?
+  autoApproveUnder     Float?              // Auto-approve work under this amount
+  status               FleetAccountStatus  @default(ACTIVE)
+  notes                String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  deletedAt            DateTime?
+
+  Tenant               Tenant              @relation(fields: [tenantId], references: [id])
+  Customers            Customer[]
+  Vehicles             Vehicle[]
+  WorkOrders           WorkOrder[]
+  Invoices             Invoice[]
+
+  @@unique([tenantId, accountNumber])
+  @@index([tenantId])
+  @@index([status])
+}
+
+enum FleetAccountStatus {
+  ACTIVE
+  ON_HOLD
+  SUSPENDED
+  CLOSED
+}
+
+enum PaymentTerms {
+  DUE_ON_RECEIPT
+  NET_15
+  NET_30
+  NET_45
+  NET_60
+}
+
+// ==========================================
+// VEHICLES
+// ==========================================
+
+model Vehicle {
+  id             String        @id @default(cuid())
+  tenantId       String
+  customerId     String
+  fleetAccountId String?
+  vin            String
+  unitNumber     String?       // Fleet identifier
+  year           Int?
+  make           String
+  model          String
+  submodel       String?
+  engine         String?
+  transmission   String?
+  drivetrain     String?
+  color          String?
+  licensePlate   String?
+  currentMileage Int?
+  notes          String?
+  photoUrl       String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  Tenant         Tenant        @relation(fields: [tenantId], references: [id])
+  Customer       Customer      @relation(fields: [customerId], references: [id])
+  FleetAccount   FleetAccount? @relation(fields: [fleetAccountId], references: [id])
+  WorkOrders     WorkOrder[]
+  Appointments   Appointment[]
+  ServiceHistory VehicleServiceHistory[]
+
+  @@unique([tenantId, vin])
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([fleetAccountId])
+  @@index([licensePlate])
+}
+
+model VehicleServiceHistory {
+  id          String   @id @default(cuid())
+  vehicleId   String
+  workOrderId String?
+  serviceDate DateTime
+  mileage     Int?
+  serviceType String
+  description String
+  cost        Float?
+  performedBy String?
+  createdAt   DateTime @default(now())
+
+  Vehicle     Vehicle   @relation(fields: [vehicleId], references: [id])
+  WorkOrder   WorkOrder? @relation(fields: [workOrderId], references: [id])
+
+  @@index([vehicleId])
+}
+
+// ==========================================
+// WORK ORDERS
+// ==========================================
+
+model WorkOrder {
+  id                    String              @id @default(cuid())
+  tenantId              String
+  workOrderNumber       String              // Auto: WO-2026-0001
+  customerId            String
+  vehicleId             String
+  fleetAccountId        String?
+  assignedTechnicianId  String?
+  serviceAdvisorId      String?
+  createdById           String?
+  status                WorkOrderStatus     @default(DRAFT)
+  priority              WorkOrderPriority   @default(NORMAL)
+  bayNumber             String?
+  odometerIn            Int?
+  odometerOut           Int?
+  customerComplaint     String?
+  techDiagnosis         String?
+  techRecommendations   String?
+  promisedDate          DateTime?
+  scheduledStart        DateTime?
+  scheduledEnd          DateTime?
+  actualStart           DateTime?
+  actualEnd             DateTime?
+  laborTotal            Float               @default(0)
+  partsTotal            Float               @default(0)
+  subletTotal           Float               @default(0)
+  feesTotal             Float               @default(0)
+  discountTotal         Float               @default(0)
+  taxTotal              Float               @default(0)
+  grandTotal            Float               @default(0)
+  laborRate             Float               @default(125)
+  customerSignatureUrl  String?
+  approvedAt            DateTime?
+  approvedBy            String?
+  internalNotes         String?
+  customerVisibleNotes  String?
+  tags                  String[]            @default([])
+  description           String              // Legacy: keep for compatibility
+  checklist             String?
+  notes                 String?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  deletedAt             DateTime?
+
+  Tenant                Tenant              @relation(fields: [tenantId], references: [id])
+  Customer              Customer            @relation(fields: [customerId], references: [id])
+  Vehicle               Vehicle             @relation(fields: [vehicleId], references: [id])
+  FleetAccount          FleetAccount?       @relation(fields: [fleetAccountId], references: [id])
+  AssignedTechnician    EmployeeProfile?    @relation("AssignedTechnician", fields: [assignedTechnicianId], references: [id])
+  ServiceAdvisor        EmployeeProfile?    @relation("ServiceAdvisor", fields: [serviceAdvisorId], references: [id])
+  CreatedBy             User?               @relation("WorkOrderCreatedBy", fields: [createdById], references: [id])
+  Invoice               Invoice?
+  LineItems             WorkOrderLine[]
+  Assignments           WorkOrderAssignment[]
+  Labor                 WorkOrderLabor[]
+  Parts                 WorkOrderPart[]
+  PunchRecords          PunchRecord[]
+  Appointments          Appointment[]
+  ServiceHistory        VehicleServiceHistory[]
+  Photos                WorkOrderPhoto[]
+  StatusHistory         WorkOrderStatusHistory[]
+  PartTransactions      PartTransaction[]
+
+  @@unique([tenantId, workOrderNumber])
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([vehicleId])
+  @@index([status])
+  @@index([assignedTechnicianId])
+  @@index([createdAt])
+}
+
+enum WorkOrderStatus {
+  DRAFT
+  ESTIMATE
+  ESTIMATE_SENT
+  AWAITING_APPROVAL
+  APPROVED
+  IN_PROGRESS
+  WAITING_ON_PARTS
+  QUALITY_CHECK
+  READY_FOR_PICKUP
+  COMPLETED
+  INVOICED
+  CANCELLED
+  ARCHIVED
+  // Legacy values
+  DIAGNOSED
+}
+
+enum WorkOrderPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model WorkOrderLine {
+  id              String            @id @default(cuid())
+  workOrderId     String
+  sortOrder       Int               @default(0)
+  type            LineItemType
+  description     String
+  partId          String?
+  quantity        Float             @default(1)
+  unitPrice       Float             @default(0)
+  discountPercent Float             @default(0)
+  discountAmount  Float             @default(0)
+  lineTotal       Float             @default(0)
+  technicianId    String?
+  status          LineItemStatus    @default(PENDING)
+  isTaxable       Boolean           @default(true)
+  laborHours      Float?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  WorkOrder       WorkOrder         @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  Part            Part?             @relation(fields: [partId], references: [id])
+  Technician      EmployeeProfile?  @relation("LineItemTechnician", fields: [technicianId], references: [id])
+
+  @@index([workOrderId])
+}
+
+enum LineItemType {
+  LABOR
+  PART
+  SUBLET
+  FEE
+  DISCOUNT
+  NOTE
+}
+
+enum LineItemStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+model WorkOrderPhoto {
+  id          String    @id @default(cuid())
+  workOrderId String
+  url         String
+  caption     String?
+  type        String?   // before, after, damage, etc.
+  uploadedBy  String?
+  createdAt   DateTime  @default(now())
+
+  WorkOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+
+  @@index([workOrderId])
+}
+
+model WorkOrderStatusHistory {
+  id          String          @id @default(cuid())
+  workOrderId String
+  fromStatus  WorkOrderStatus?
+  toStatus    WorkOrderStatus
+  changedBy   String?
+  notes       String?
+  createdAt   DateTime        @default(now())
+
+  WorkOrder   WorkOrder       @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+
+  @@index([workOrderId])
+  @@index([createdAt])
+}
+
+// ==========================================
+// PARTS & INVENTORY
+// ==========================================
+
+model Part {
+  id                  String              @id @default(cuid())
+  tenantId            String
+  partNumber          String
+  sku                 String
+  name                String
+  description         String?
+  category            String?
+  subcategory         String?
+  brand               String?
+  supplierName        String?
+  supplierPartNumber  String?
+  qtyOnHand           Int                 @default(0)
+  qtyReserved         Int                 @default(0)
+  qtyOnOrder          Int                 @default(0)
+  reorderPoint        Int                 @default(0)
+  reorderQty          Int                 @default(0)
+  binLocation         String?
+  cost                Float               @default(0)
+  price               Float               @default(0)
+  retailPrice         Float               @default(0)
+  markupPercent       Float               @default(0)
+  coreCharge          Float?
+  isTire              Boolean             @default(false)
+  tireSize            String?
+  barcode             String?
+  imageUrl            String?
+  status              PartStatus          @default(ACTIVE)
+  stock               Int                 @default(0)   // Legacy: keep for compatibility
+  vendorId            String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  deletedAt           DateTime?
+
+  Tenant              Tenant              @relation(fields: [tenantId], references: [id])
+  Vendor              Vendor?             @relation(fields: [vendorId], references: [id])
+  WorkOrderParts      WorkOrderPart[]
+  WorkOrderLines      WorkOrderLine[]
+  Transactions        PartTransaction[]
+  PurchaseOrderLines  PurchaseOrderLine[]
+
+  @@unique([tenantId, sku])
+  @@index([tenantId])
+  @@index([partNumber])
+  @@index([category])
+  @@index([status])
+}
+
+enum PartStatus {
+  ACTIVE
+  DISCONTINUED
+  SPECIAL_ORDER
+  ON_ORDER
+}
+
+model PartTransaction {
+  id              String                @id @default(cuid())
+  partId          String
+  workOrderId     String?
+  purchaseOrderId String?
+  type            PartTransactionType
+  quantityChange  Int                   // positive or negative
+  runningBalance  Int
+  unitCost        Float?
+  referenceNote   String?
+  performedById   String?
+  createdAt       DateTime              @default(now())
+
+  Part            Part                  @relation(fields: [partId], references: [id])
+  WorkOrder       WorkOrder?            @relation(fields: [workOrderId], references: [id])
+  PurchaseOrder   PurchaseOrder?        @relation(fields: [purchaseOrderId], references: [id])
+
+  @@index([partId])
+  @@index([createdAt])
+}
+
+enum PartTransactionType {
+  RECEIVED
+  SOLD
+  ADJUSTED
+  RETURNED
+  TRANSFERRED
+  RESERVED
+  UNRESERVED
+}
+
+// ==========================================
+// PURCHASE ORDERS
+// ==========================================
+
+model PurchaseOrder {
+  id              String              @id @default(cuid())
+  tenantId        String
+  poNumber        String              // Auto: PO-2026-0001
+  vendorId        String?
+  supplierName    String
+  supplierContact String?
+  supplierEmail   String?
+  supplierPhone   String?
+  status          PurchaseOrderStatus @default(DRAFT)
+  orderDate       DateTime?
+  expectedDate    DateTime?
+  receivedDate    DateTime?
+  subtotal        Float               @default(0)
+  tax             Float               @default(0)
+  shipping        Float               @default(0)
+  total           Float               @default(0)
+  notes           String?
+  createdById     String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  deletedAt       DateTime?
+
+  Tenant          Tenant              @relation(fields: [tenantId], references: [id])
+  Vendor          Vendor?             @relation(fields: [vendorId], references: [id])
+  Lines           PurchaseOrderLine[]
+  Transactions    PartTransaction[]
+
+  @@unique([tenantId, poNumber])
+  @@index([tenantId])
+  @@index([status])
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  SUBMITTED
+  PARTIAL_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+model PurchaseOrderLine {
+  id               String        @id @default(cuid())
+  purchaseOrderId  String
+  partId           String
+  quantityOrdered  Int
+  quantityReceived Int           @default(0)
+  unitCost         Float
+  lineTotal        Float
+  notes            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  PurchaseOrder    PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  Part             Part          @relation(fields: [partId], references: [id])
+
+  @@index([purchaseOrderId])
+}
+
+// ==========================================
+// INVOICES
+// ==========================================
 
 model Invoice {
-  id                   String        @id @default(cuid())
-  workOrderId          String        @unique
+  id                   String              @id @default(cuid())
+  tenantId             String
+  invoiceNumber        String              // Auto: INV-2026-0001
+  workOrderId          String              @unique
   customerId           String
-  subtotalParts        Float
-  subtotalLabor        Float
-  tax                  Float
-  discount             Float         @default(0)
-  total                Float
-  status               PaymentStatus @default(UNPAID)
+  fleetAccountId       String?
+  status               InvoiceStatus       @default(DRAFT)
+  subtotal             Float               @default(0)
+  discountTotal        Float               @default(0)
+  taxRate              Float               @default(0)
+  taxAmount            Float               @default(0)
+  total                Float               @default(0)
+  amountPaid           Float               @default(0)
+  balanceDue           Float               @default(0)
+  dueDate              DateTime?
+  paymentTerms         PaymentTerms        @default(DUE_ON_RECEIPT)
+  sentAt               DateTime?
+  viewedAt             DateTime?
+  paidAt               DateTime?
+  stripePaymentLink    String?
+  notes                String?
+  footerText           String?
+  subtotalParts        Float               @default(0)   // Legacy
+  subtotalLabor        Float               @default(0)   // Legacy
+  tax                  Float               @default(0)   // Legacy
+  discount             Float               @default(0)   // Legacy
   portalTokenHash      String?
   portalTokenExpiresAt DateTime?
   portalViewedAt       DateTime?
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
-  Customer             Customer      @relation(fields: [customerId], references: [id])
-  WorkOrder            WorkOrder     @relation(fields: [workOrderId], references: [id])
-  Payment              Payment[]
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  deletedAt            DateTime?
+
+  Tenant               Tenant              @relation(fields: [tenantId], references: [id])
+  WorkOrder            WorkOrder           @relation(fields: [workOrderId], references: [id])
+  Customer             Customer            @relation(fields: [customerId], references: [id])
+  FleetAccount         FleetAccount?       @relation(fields: [fleetAccountId], references: [id])
+  Payments             InvoicePayment[]
+  LegacyPayments       Payment[]           // Legacy relation
+
+  @@unique([tenantId, invoiceNumber])
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([status])
+  @@index([dueDate])
 }
 
-model Part {
-  id            String          @id @default(cuid())
-  sku           String          @unique
-  name          String
-  category      String?
-  cost          Float
-  price         Float
-  stock         Int             @default(0)
-  reorderPoint  Int             @default(0)
-  vendorId      String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  Vendor        Vendor?         @relation(fields: [vendorId], references: [id])
-  WorkOrderPart WorkOrderPart[]
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  VIEWED
+  PARTIAL
+  PAID
+  OVERDUE
+  VOID
+  REFUNDED
+  COLLECTIONS
+  // Legacy
+  UNPAID
 }
 
+model InvoicePayment {
+  id              String        @id @default(cuid())
+  invoiceId       String
+  amount          Float
+  paymentMethod   PaymentMethod
+  referenceNumber String?
+  paymentDate     DateTime      @default(now())
+  recordedById    String?
+  notes           String?
+  createdAt       DateTime      @default(now())
+
+  Invoice         Invoice       @relation(fields: [invoiceId], references: [id])
+  RecordedBy      User?         @relation(fields: [recordedById], references: [id])
+
+  @@index([invoiceId])
+}
+
+enum PaymentMethod {
+  CASH
+  CHECK
+  CREDIT_CARD
+  DEBIT_CARD
+  ACH
+  WIRE
+  ACCOUNT_CREDIT
+  STRIPE
+  OTHER
+}
+
+// Legacy Payment model (keep for backward compatibility)
 model Payment {
   id                    String   @id @default(cuid())
   invoiceId             String
@@ -96,21 +712,176 @@ model Payment {
   Invoice               Invoice  @relation(fields: [invoiceId], references: [id])
 }
 
-model TimeEntry {
-  id              String          @id @default(cuid())
-  employeeId      String
-  clockIn         DateTime
-  clockOut        DateTime?
-  jobId           String?
-  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id])
+// ==========================================
+// APPOINTMENTS / SCHEDULE
+// ==========================================
+
+model Appointment {
+  id                String              @id @default(cuid())
+  tenantId          String
+  customerId        String
+  vehicleId         String?
+  workOrderId       String?
+  technicianId      String?
+  bayNumber         String?
+  type              AppointmentType     @default(APPOINTMENT)
+  scheduledStart    DateTime
+  scheduledEnd      DateTime
+  durationMinutes   Int                 @default(60)
+  actualStart       DateTime?
+  actualEnd         DateTime?
+  status            AppointmentStatus   @default(SCHEDULED)
+  reminderSentAt    DateTime?
+  confirmationSentAt DateTime?
+  notes             String?
+  colorLabel        String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+
+  Tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  Customer          Customer            @relation(fields: [customerId], references: [id])
+  Vehicle           Vehicle?            @relation(fields: [vehicleId], references: [id])
+  WorkOrder         WorkOrder?          @relation(fields: [workOrderId], references: [id])
+  Technician        EmployeeProfile?    @relation("AppointmentTechnician", fields: [technicianId], references: [id])
+
+  @@index([tenantId])
+  @@index([scheduledStart])
+  @@index([status])
+  @@index([technicianId])
+}
+
+enum AppointmentType {
+  APPOINTMENT
+  DROP_OFF
+  PICKUP
+  FOLLOW_UP
+  TEST_DRIVE
+  ESTIMATE_ONLY
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  CHECKED_IN
+  IN_PROGRESS
+  COMPLETED
+  NO_SHOW
+  CANCELLED
+  RESCHEDULED
 }
 
 // ==========================================
-// TIME TRACKING & ATTENDANCE MODELS
+// SERVICE TEMPLATES
+// ==========================================
+
+model ServiceTemplate {
+  id           String                @id @default(cuid())
+  tenantId     String
+  name         String
+  description  String?
+  category     String?
+  flatRatePrice Float?
+  laborHours   Float?
+  isActive     Boolean               @default(true)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  deletedAt    DateTime?
+
+  Tenant       Tenant                @relation(fields: [tenantId], references: [id])
+  Lines        ServiceTemplateLine[]
+
+  @@index([tenantId])
+  @@index([category])
+}
+
+model ServiceTemplateLine {
+  id                String          @id @default(cuid())
+  serviceTemplateId String
+  type              LineItemType
+  description       String
+  partId            String?
+  quantity          Float           @default(1)
+  unitPrice         Float           @default(0)
+  laborHours        Float?
+
+  ServiceTemplate   ServiceTemplate @relation(fields: [serviceTemplateId], references: [id], onDelete: Cascade)
+
+  @@index([serviceTemplateId])
+}
+
+// ==========================================
+// EMPLOYEE PROFILES
+// ==========================================
+
+model EmployeeProfile {
+  id                  String                @id @default(cuid())
+  tenantId            String?
+  name                String
+  role                Role
+  payRate             Float
+  status              String                @default("active")
+  userId              String                @unique
+  pin                 String?
+  photoUrl            String?
+  phoneNumber         String?
+  specializations     String[]              @default([])
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  deletedAt           DateTime?
+
+  Tenant              Tenant?               @relation(fields: [tenantId], references: [id])
+  User                User                  @relation(fields: [userId], references: [id])
+  TimeEntries         TimeEntry[]
+  WorkOrderAssignments WorkOrderAssignment[]
+  WorkOrderLabor      WorkOrderLabor[]
+  PunchRecords        PunchRecord[]
+  Timesheets          Timesheet[]
+  GeofenceAssignments GeofenceAssignment[]
+  ShopAssignments     ShopAssignment[]
+  AssignedWorkOrders  WorkOrder[]           @relation("AssignedTechnician")
+  AdvisedWorkOrders   WorkOrder[]           @relation("ServiceAdvisor")
+  LineItems           WorkOrderLine[]       @relation("LineItemTechnician")
+  Appointments        Appointment[]         @relation("AppointmentTechnician")
+
+  @@index([tenantId])
+  @@index([userId])
+}
+
+// ==========================================
+// VENDORS
+// ==========================================
+
+model Vendor {
+  id             String          @id @default(cuid())
+  tenantId       String?
+  name           String
+  contact        String?
+  phone          String?
+  email          String?
+  address        String?
+  website        String?
+  accountNumber  String?
+  paymentTerms   PaymentTerms?
+  notes          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+
+  Tenant         Tenant?         @relation(fields: [tenantId], references: [id])
+  Parts          Part[]
+  PurchaseOrders PurchaseOrder[]
+
+  @@index([tenantId])
+}
+
+// ==========================================
+// SHOPS (Physical Locations)
 // ==========================================
 
 model Shop {
   id              String           @id @default(cuid())
+  tenantId        String?
   name            String
   address         String?
   city            String?
@@ -119,57 +890,38 @@ model Shop {
   latitude        Float?
   longitude       Float?
   timezone        String           @default("America/New_York")
-  geofenceRadius  Int              @default(150) // meters
+  geofenceRadius  Int              @default(150)
   geofenceEnabled Boolean          @default(true)
   photoOnPunch    Boolean          @default(false)
   qrCodeEnabled   Boolean          @default(false)
   pinEnabled      Boolean          @default(true)
+  bayCount        Int              @default(4)
+  businessHours   Json?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  Geofence        Geofence[]
-  PunchRecord     PunchRecord[]
-  ShopAssignment  ShopAssignment[]
+  deletedAt       DateTime?
+
+  Tenant          Tenant?          @relation(fields: [tenantId], references: [id])
+  Geofences       Geofence[]
+  PunchRecords    PunchRecord[]
+  ShopAssignments ShopAssignment[]
+
+  @@index([tenantId])
 }
 
-model Geofence {
-  id                 String               @id @default(cuid())
-  shopId             String
-  name               String
-  latitude           Float
-  longitude          Float
-  radiusMeters       Int                  @default(150)
-  isRequired         Boolean              @default(true)
-  isActive           Boolean              @default(true)
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  Shop               Shop                 @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  PunchRecord        PunchRecord[]
-  GeofenceAssignment GeofenceAssignment[]
+// ==========================================
+// TIME TRACKING
+// ==========================================
 
-  @@index([shopId])
-}
-
-model GeofenceAssignment {
+model TimeEntry {
   id              String          @id @default(cuid())
-  geofenceId      String
   employeeId      String
-  assignedAt      DateTime        @default(now())
-  Geofence        Geofence        @relation(fields: [geofenceId], references: [id], onDelete: Cascade)
-  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  clockIn         DateTime
+  clockOut        DateTime?
+  jobId           String?
+  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id])
 
-  @@unique([geofenceId, employeeId])
-}
-
-model ShopAssignment {
-  id              String          @id @default(cuid())
-  shopId          String
-  employeeId      String
-  isPrimary       Boolean         @default(false)
-  assignedAt      DateTime        @default(now())
-  Shop            Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  @@unique([shopId, employeeId])
+  @@index([employeeId])
 }
 
 model PunchRecord {
@@ -179,12 +931,12 @@ model PunchRecord {
   timestamp            DateTime        @default(now())
   latitude             Float?
   longitude            Float?
-  accuracy             Float? // GPS accuracy in meters
+  accuracy             Float?
   photoUrl             String?
   geofenceId           String?
   shopId               String?
   isWithinGeofence     Boolean?
-  distanceFromGeofence Float? // meters from geofence center
+  distanceFromGeofence Float?
   workOrderId          String?
   punchMethod          PunchMethod     @default(APP)
   deviceInfo           String?
@@ -193,6 +945,7 @@ model PunchRecord {
   offlineSyncedAt      DateTime?
   notes                String?
   createdAt            DateTime        @default(now())
+
   EmployeeProfile      EmployeeProfile @relation(fields: [employeeId], references: [id])
   Geofence             Geofence?       @relation(fields: [geofenceId], references: [id])
   Shop                 Shop?           @relation(fields: [shopId], references: [id])
@@ -220,69 +973,13 @@ model Timesheet {
   notes              String?
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
+
   EmployeeProfile    EmployeeProfile @relation(fields: [employeeId], references: [id])
   ApprovedByUser     User?           @relation("TimesheetApprover", fields: [approvedBy], references: [id])
 
   @@unique([employeeId, periodStart, periodEnd])
   @@index([employeeId])
   @@index([status])
-}
-
-model AttendanceNotification {
-  id          String           @id @default(cuid())
-  recipientId String
-  type        NotificationType
-  title       String
-  message     String
-  data        Json?
-  isRead      Boolean          @default(false)
-  readAt      DateTime?
-  createdAt   DateTime         @default(now())
-  Recipient   User             @relation(fields: [recipientId], references: [id])
-
-  @@index([recipientId])
-  @@index([isRead])
-}
-
-model AttendanceAuditLog {
-  id            String   @id @default(cuid())
-  actorId       String
-  action        String
-  entityType    String
-  entityId      String
-  changesBefore Json?
-  changesAfter  Json?
-  ipAddress     String?
-  userAgent     String?
-  timestamp     DateTime @default(now())
-  Actor         User     @relation(fields: [actorId], references: [id])
-
-  @@index([entityType, entityId])
-  @@index([actorId])
-  @@index([timestamp])
-}
-
-model OvertimeRule {
-  id                   String   @id @default(cuid())
-  name                 String
-  dailyThresholdHours  Float    @default(8)
-  weeklyThresholdHours Float    @default(40)
-  overtimeMultiplier   Float    @default(1.5)
-  isActive             Boolean  @default(true)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-}
-
-model BreakRule {
-  id                   String   @id @default(cuid())
-  name                 String
-  autoDeductMinutes    Int      @default(0)
-  afterHoursWorked     Float    @default(6)
-  reminderAfterMinutes Int?
-  isPaid               Boolean  @default(false)
-  isActive             Boolean  @default(true)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
 }
 
 enum PunchType {
@@ -308,6 +1005,75 @@ enum TimesheetStatus {
   REJECTED
 }
 
+// ==========================================
+// GEOFENCING
+// ==========================================
+
+model Geofence {
+  id                 String               @id @default(cuid())
+  shopId             String
+  name               String
+  latitude           Float
+  longitude          Float
+  radiusMeters       Int                  @default(150)
+  isRequired         Boolean              @default(true)
+  isActive           Boolean              @default(true)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  Shop               Shop                 @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  PunchRecords       PunchRecord[]
+  GeofenceAssignments GeofenceAssignment[]
+
+  @@index([shopId])
+}
+
+model GeofenceAssignment {
+  id              String          @id @default(cuid())
+  geofenceId      String
+  employeeId      String
+  assignedAt      DateTime        @default(now())
+
+  Geofence        Geofence        @relation(fields: [geofenceId], references: [id], onDelete: Cascade)
+  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([geofenceId, employeeId])
+}
+
+model ShopAssignment {
+  id              String          @id @default(cuid())
+  shopId          String
+  employeeId      String
+  isPrimary       Boolean         @default(false)
+  assignedAt      DateTime        @default(now())
+
+  Shop            Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, employeeId])
+}
+
+// ==========================================
+// NOTIFICATIONS
+// ==========================================
+
+model AttendanceNotification {
+  id          String           @id @default(cuid())
+  recipientId String
+  type        NotificationType
+  title       String
+  message     String
+  data        Json?
+  isRead      Boolean          @default(false)
+  readAt      DateTime?
+  createdAt   DateTime         @default(now())
+
+  Recipient   User             @relation(fields: [recipientId], references: [id])
+
+  @@index([recipientId])
+  @@index([isRead])
+}
+
 enum NotificationType {
   LATE_ARRIVAL
   EARLY_DEPARTURE
@@ -321,140 +1087,33 @@ enum NotificationType {
   TIMESHEET_PENDING
   TIMESHEET_APPROVED
   TIMESHEET_REJECTED
+  WORK_ORDER_ASSIGNED
+  WORK_ORDER_STATUS
+  INVOICE_OVERDUE
+  PART_LOW_STOCK
+  APPOINTMENT_REMINDER
+  CUSTOMER_APPROVAL
+  SYSTEM
 }
-
-model User {
-  id                     String                   @id @default(cuid())
-  email                  String                   @unique
-  passwordHash           String
-  role                   Role
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @updatedAt
-  EmployeeProfile        EmployeeProfile?
-  AttendanceNotification AttendanceNotification[]
-  AttendanceAuditLog     AttendanceAuditLog[]
-  TimesheetApprovals     Timesheet[]              @relation("TimesheetApprover")
-}
-
-model Vehicle {
-  id           String      @id @default(cuid())
-  vin          String      @unique
-  unitNumber   String?
-  make         String
-  model        String
-  year         Int?
-  mileage      Int?
-  licensePlate String?
-  customerId   String
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  Customer     Customer    @relation(fields: [customerId], references: [id])
-  WorkOrder    WorkOrder[]
-}
-
-model Vendor {
-  id        String   @id @default(cuid())
-  name      String
-  contact   String?
-  phone     String?
-  email     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Part      Part[]
-}
-
-model WorkOrder {
-  id                  String                @id @default(cuid())
-  vehicleId           String
-  status              WorkOrderStatus       @default(DIAGNOSED)
-  description         String
-  checklist           String?
-  notes               String?
-  laborHours          Float                 @default(0)
-  partsTotal          Float                 @default(0)
-  laborRate           Float                 @default(125)
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  Invoice             Invoice?
-  Vehicle             Vehicle               @relation(fields: [vehicleId], references: [id])
-  WorkOrderAssignment WorkOrderAssignment[]
-  WorkOrderLabor      WorkOrderLabor[]
-  WorkOrderPart       WorkOrderPart[]
-  PunchRecord         PunchRecord[]
-}
-
-model WorkOrderAssignment {
-  id              String          @id @default(cuid())
-  workOrderId     String
-  employeeId      String
-  assignedAt      DateTime        @default(now())
-  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id])
-  WorkOrder       WorkOrder       @relation(fields: [workOrderId], references: [id])
-}
-
-model WorkOrderLabor {
-  id              String          @id @default(cuid())
-  workOrderId     String
-  employeeId      String
-  hours           Float
-  rate            Float
-  note            String?
-  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id])
-  WorkOrder       WorkOrder       @relation(fields: [workOrderId], references: [id])
-}
-
-model WorkOrderPart {
-  id          String    @id @default(cuid())
-  workOrderId String
-  partId      String
-  quantity    Int
-  unitPrice   Float
-  markupPct   Float     @default(0.15)
-  Part        Part      @relation(fields: [partId], references: [id])
-  WorkOrder   WorkOrder @relation(fields: [workOrderId], references: [id])
-}
-
-enum Role {
-  ADMIN
-  MANAGER
-  MECHANIC
-  FRONT_DESK
-}
-
-enum PaymentStatus {
-  UNPAID
-  PARTIAL
-  PAID
-}
-
-enum WorkOrderStatus {
-  DIAGNOSED
-  APPROVED
-  IN_PROGRESS
-  COMPLETED
-}
-
-// ==========================================
-// CUSTOMER NOTIFICATION SYSTEM
-// ==========================================
 
 model CustomerNotification {
-  id           String                     @id @default(cuid())
-  customerId   String
-  type         CustomerNotificationType
-  channel      NotificationChannel
-  subject      String
-  content      String
-  metadata     Json?
-  status       NotificationStatus         @default(PENDING)
-  sentAt       DateTime?
-  deliveredAt  DateTime?
-  failedAt     DateTime?
+  id            String                     @id @default(cuid())
+  customerId    String
+  type          CustomerNotificationType
+  channel       NotificationChannel
+  subject       String
+  content       String
+  metadata      Json?
+  status        NotificationStatus         @default(PENDING)
+  sentAt        DateTime?
+  deliveredAt   DateTime?
+  failedAt      DateTime?
   failureReason String?
-  externalId   String?                    // Resend/Twilio message ID
-  createdAt    DateTime                   @default(now())
-  updatedAt    DateTime                   @updatedAt
-  Customer     Customer                   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  externalId    String?
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+
+  Customer      Customer                   @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@index([customerId])
   @@index([status])
@@ -474,6 +1133,7 @@ model NotificationPreference {
   marketingEmails      Boolean  @default(false)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+
   Customer             Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
@@ -508,28 +1168,55 @@ enum NotificationStatus {
 }
 
 // ==========================================
-// DEMO REQUESTS / LEADS
+// RULES & SETTINGS
+// ==========================================
+
+model OvertimeRule {
+  id                   String   @id @default(cuid())
+  name                 String
+  dailyThresholdHours  Float    @default(8)
+  weeklyThresholdHours Float    @default(40)
+  overtimeMultiplier   Float    @default(1.5)
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model BreakRule {
+  id                   String   @id @default(cuid())
+  name                 String
+  autoDeductMinutes    Int      @default(0)
+  afterHoursWorked     Float    @default(6)
+  reminderAfterMinutes Int?
+  isPaid               Boolean  @default(false)
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+// ==========================================
+// LEADS / DEMO REQUESTS
 // ==========================================
 
 model DemoRequest {
-  id           String          @id @default(cuid())
+  id           String     @id @default(cuid())
   firstName    String
   lastName     String
   email        String
   phone        String?
   company      String?
-  shopSize     String?         // "1-5", "6-15", "16-50", "50+"
+  shopSize     String?
   message      String?
-  source       String?         // "website", "referral", "google", etc.
-  status       LeadStatus      @default(NEW)
+  source       String?
+  status       LeadStatus @default(NEW)
   assignedTo   String?
   notes        String?
   followUpAt   DateTime?
   convertedAt  DateTime?
   ipAddress    String?
   userAgent    String?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   @@index([status])
   @@index([email])
@@ -548,11 +1235,12 @@ enum LeadStatus {
 }
 
 // ==========================================
-// SECURITY & AUDIT LOGGING
+// SECURITY & AUDIT
 // ==========================================
 
 model AuditLog {
   id            String      @id @default(cuid())
+  tenantId      String?
   userId        String?
   userEmail     String?
   action        AuditAction
@@ -563,21 +1251,41 @@ model AuditLog {
   ipAddress     String?
   userAgent     String?
   requestId     String?
-  duration      Int?        // milliseconds
+  duration      Int?
   success       Boolean     @default(true)
   errorMessage  String?
   metadata      Json?
   createdAt     DateTime    @default(now())
 
+  @@index([tenantId])
   @@index([userId])
   @@index([entityType, entityId])
   @@index([action])
   @@index([createdAt])
 }
 
+model AttendanceAuditLog {
+  id            String   @id @default(cuid())
+  actorId       String
+  action        String
+  entityType    String
+  entityId      String
+  changesBefore Json?
+  changesAfter  Json?
+  ipAddress     String?
+  userAgent     String?
+  timestamp     DateTime @default(now())
+
+  Actor         User     @relation(fields: [actorId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([timestamp])
+}
+
 model RateLimitRecord {
   id          String   @id @default(cuid())
-  identifier  String   // IP address or user ID
+  identifier  String
   endpoint    String
   count       Int      @default(1)
   windowStart DateTime @default(now())
@@ -613,6 +1321,7 @@ enum AuditAction {
   READ
   UPDATE
   DELETE
+  RESTORE
   LOGIN
   LOGOUT
   LOGIN_FAILED
@@ -642,4 +1351,48 @@ enum SecuritySeverity {
   MEDIUM
   HIGH
   CRITICAL
+}
+
+// Legacy compatibility
+model WorkOrderAssignment {
+  id              String          @id @default(cuid())
+  workOrderId     String
+  employeeId      String
+  assignedAt      DateTime        @default(now())
+
+  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id])
+  WorkOrder       WorkOrder       @relation(fields: [workOrderId], references: [id])
+
+  @@index([workOrderId])
+  @@index([employeeId])
+}
+
+model WorkOrderLabor {
+  id              String          @id @default(cuid())
+  workOrderId     String
+  employeeId      String
+  hours           Float
+  rate            Float
+  note            String?
+
+  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id])
+  WorkOrder       WorkOrder       @relation(fields: [workOrderId], references: [id])
+
+  @@index([workOrderId])
+  @@index([employeeId])
+}
+
+model WorkOrderPart {
+  id          String    @id @default(cuid())
+  workOrderId String
+  partId      String
+  quantity    Int
+  unitPrice   Float
+  markupPct   Float     @default(0.15)
+
+  Part        Part      @relation(fields: [partId], references: [id])
+  WorkOrder   WorkOrder @relation(fields: [workOrderId], references: [id])
+
+  @@index([workOrderId])
+  @@index([partId])
 }
