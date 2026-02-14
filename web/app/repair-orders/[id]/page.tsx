@@ -8,32 +8,26 @@ import { notFound } from "next/navigation"
 import { BackButton } from "@/components/dashboard/back-button"
 
 export default async function RepairOrderDetailPage({
-  params,
+  params: paramsPromise,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const session = await requireAuth()
-  const shopId = session.user.shopId
+  const params = await paramsPromise
 
-  const repairOrder = await prisma.repairOrder.findFirst({
-    where: { id: params.id, shopId },
+  const workOrder = await prisma.workOrder.findFirst({
+    where: { id: params.id },
     include: {
-      customer: true,
-      vehicle: true,
-      laborLines: {
-        include: { tech: true },
-      },
-      partLines: {
-        include: { part: true },
-      },
-      timeEntries: {
-        include: { tech: true },
-        orderBy: { clockIn: "desc" },
+      Customer: true,
+      Vehicle: true,
+      Labor: true,
+      Parts: {
+        include: { Part: true },
       },
     },
   })
 
-  if (!repairOrder) {
+  if (!workOrder) {
     notFound()
   }
 
@@ -43,8 +37,8 @@ export default async function RepairOrderDetailPage({
         <div className="flex items-center space-x-4">
           <BackButton href="/repair-orders" />
           <div>
-            <h1 className="text-3xl font-bold">Repair Order RO-{repairOrder.id.slice(0, 8)}</h1>
-            <p className="text-gray-600 mt-1">{repairOrder.customer.name}</p>
+            <h1 className="text-3xl font-bold">Repair Order RO-{workOrder.id.slice(0, 8)}</h1>
+            <p className="text-gray-600 mt-1">{workOrder.Customer?.name || "Unknown"}</p>
           </div>
         </div>
       </div>
@@ -58,32 +52,32 @@ export default async function RepairOrderDetailPage({
             <div>
               <span className="text-sm font-medium">Status:</span>{" "}
               <span className="px-2 py-1 text-xs rounded-full bg-gray-100">
-                {repairOrder.status}
+                {workOrder.status}
               </span>
             </div>
             <div>
-              <span className="text-sm font-medium">Customer:</span> {repairOrder.customer.name}
+              <span className="text-sm font-medium">Customer:</span> {workOrder.Customer?.name || "Unknown"}
             </div>
-            {repairOrder.vehicle && (
+            {workOrder.Vehicle && (
               <div>
                 <span className="text-sm font-medium">Vehicle:</span>{" "}
-                {repairOrder.vehicle.make} {repairOrder.vehicle.model} ({repairOrder.vehicle.vin})
+                {workOrder.Vehicle.make} {workOrder.Vehicle.model} ({workOrder.Vehicle.vin})
               </div>
             )}
             <div>
               <span className="text-sm font-medium">Opened:</span>{" "}
-              {new Date(repairOrder.openedAt).toLocaleString()}
+              {new Date(workOrder.createdAt).toLocaleString()}
             </div>
-            {repairOrder.internalNotes && (
+            {workOrder.internalNotes && (
               <div>
                 <span className="text-sm font-medium">Internal Notes:</span>
-                <p className="mt-1 text-sm text-gray-600">{repairOrder.internalNotes}</p>
+                <p className="mt-1 text-sm text-gray-600">{workOrder.internalNotes}</p>
               </div>
             )}
-            {repairOrder.customerNotes && (
+            {workOrder.customerVisibleNotes && (
               <div>
                 <span className="text-sm font-medium">Customer Notes:</span>
-                <p className="mt-1 text-sm text-gray-600">{repairOrder.customerNotes}</p>
+                <p className="mt-1 text-sm text-gray-600">{workOrder.customerVisibleNotes}</p>
               </div>
             )}
           </CardContent>
@@ -94,25 +88,23 @@ export default async function RepairOrderDetailPage({
             <CardTitle>Labor Lines</CardTitle>
           </CardHeader>
           <CardContent>
-            {repairOrder.laborLines.length === 0 ? (
+            {workOrder.Labor.length === 0 ? (
               <p className="text-sm text-gray-600">No labor lines</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Tech</TableHead>
+                    <TableHead>Description</TableHead>
                     <TableHead>Hours</TableHead>
                     <TableHead>Rate</TableHead>
-                    <TableHead>Description</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {repairOrder.laborLines.map((line) => (
+                  {workOrder.Labor.map((line: any) => (
                     <TableRow key={line.id}>
-                      <TableCell>{line.tech?.name || "Unassigned"}</TableCell>
+                      <TableCell>{line.note || "Labor"}</TableCell>
                       <TableCell>{line.hours.toString()}</TableCell>
                       <TableCell>${line.rate.toString()}</TableCell>
-                      <TableCell>{line.description}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -126,7 +118,7 @@ export default async function RepairOrderDetailPage({
             <CardTitle>Parts</CardTitle>
           </CardHeader>
           <CardContent>
-            {repairOrder.partLines.length === 0 ? (
+            {workOrder.Parts.length === 0 ? (
               <p className="text-sm text-gray-600">No parts</p>
             ) : (
               <Table>
@@ -139,51 +131,16 @@ export default async function RepairOrderDetailPage({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {repairOrder.partLines.map((line) => (
+                  {workOrder.Parts.map((line: any) => (
                     <TableRow key={line.id}>
-                      <TableCell>{line.part?.description || "Custom Part"}</TableCell>
-                      <TableCell>{line.qty}</TableCell>
+                      <TableCell>{line.Part?.name || "Custom Part"}</TableCell>
+                      <TableCell>{line.quantity}</TableCell>
                       <TableCell>${line.unitPrice.toString()}</TableCell>
-                      <TableCell>${(Number(line.qty) * Number(line.unitPrice)).toFixed(2)}</TableCell>
+                      <TableCell>${(Number(line.quantity) * Number(line.unitPrice)).toFixed(2)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Time Entries</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {repairOrder.timeEntries.length === 0 ? (
-              <p className="text-sm text-gray-600">No time entries</p>
-            ) : (
-              <div className="space-y-2">
-                {repairOrder.timeEntries.map((entry) => (
-                  <div key={entry.id} className="border-b pb-2">
-                    <div className="flex justify-between">
-                      <span className="font-medium">{entry.tech.name || entry.tech.email}</span>
-                      {entry.clockOut ? (
-                        <span className="text-sm text-gray-600">
-                          {Math.round(
-                            (new Date(entry.clockOut).getTime() - new Date(entry.clockIn).getTime()) / 3600000 * 10
-                          ) / 10} hours
-                        </span>
-                      ) : (
-                        <span className="text-sm text-blue-600">Active</span>
-                      )}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {new Date(entry.clockIn).toLocaleString()} -{" "}
-                      {entry.clockOut ? new Date(entry.clockOut).toLocaleString() : "Ongoing"}
-                    </div>
-                    {entry.notes && <div className="text-sm text-gray-500 mt-1">{entry.notes}</div>}
-                  </div>
-                ))}
-              </div>
             )}
           </CardContent>
         </Card>

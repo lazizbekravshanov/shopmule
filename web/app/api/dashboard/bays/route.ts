@@ -53,7 +53,7 @@ export async function GET() {
       },
       include: {
         Vehicle: true,
-        WorkOrderAssignment: {
+        Assignments: {
           include: {
             EmployeeProfile: true,
           },
@@ -72,7 +72,7 @@ export async function GET() {
       const workOrder = activeWorkOrders[i - 1]; // Assign work orders to bays in order
 
       if (workOrder && workOrder.Vehicle) {
-        const technician = workOrder.WorkOrderAssignment?.[0]?.EmployeeProfile;
+        const technician = workOrder.Assignments?.[0]?.EmployeeProfile;
         const startTime = new Date(workOrder.createdAt);
         const estimatedCompletion = new Date(startTime);
         estimatedCompletion.setHours(estimatedCompletion.getHours() + 4); // Estimate 4 hours per job

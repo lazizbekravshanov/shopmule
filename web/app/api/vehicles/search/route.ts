@@ -31,12 +31,12 @@ export async function GET(request: Request) {
 
     const normalizedVin = vin.toUpperCase()
 
-    // Find vehicle by VIN
-    const vehicle = await prisma.vehicle.findUnique({
+    // Find vehicle by VIN (use findFirst since vin alone isn't unique - compound key is tenantId+vin)
+    const vehicle = await prisma.vehicle.findFirst({
       where: { vin: normalizedVin },
       include: {
         Customer: true,
-        WorkOrder: {
+        WorkOrders: {
           orderBy: { createdAt: "desc" },
           take: 10,
         },
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
         make: vehicle.make,
         model: vehicle.model,
         year: vehicle.year,
-        mileage: vehicle.mileage,
+        mileage: vehicle.currentMileage,
         licensePlate: vehicle.licensePlate,
         customerId: vehicle.customerId,
         customer: vehicle.Customer
@@ -74,13 +74,13 @@ export async function GET(request: Request) {
         createdAt: vehicle.createdAt.toISOString(),
         updatedAt: vehicle.updatedAt.toISOString(),
       },
-      workOrders: vehicle.WorkOrder.map((wo) => ({
+      workOrders: vehicle.WorkOrders.map((wo) => ({
         id: wo.id,
         vehicleId: wo.vehicleId,
         status: wo.status,
         description: wo.description,
         notes: wo.notes,
-        laborHours: wo.laborHours,
+        laborTotal: wo.laborTotal,
         partsTotal: wo.partsTotal,
         laborRate: wo.laborRate,
         createdAt: wo.createdAt.toISOString(),

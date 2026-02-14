@@ -11,7 +11,7 @@ export async function GET(
     const shop = await prisma.shop.findUnique({
       where: { id },
       include: {
-        Geofence: {
+        Geofences: {
           select: {
             id: true,
             name: true,
@@ -21,11 +21,11 @@ export async function GET(
             isRequired: true,
             isActive: true,
             _count: {
-              select: { GeofenceAssignment: true },
+              select: { GeofenceAssignments: true },
             },
           },
         },
-        ShopAssignment: {
+        ShopAssignments: {
           include: {
             EmployeeProfile: {
               select: {
@@ -39,7 +39,7 @@ export async function GET(
         },
         _count: {
           select: {
-            PunchRecord: true,
+            PunchRecords: true,
           },
         },
       },

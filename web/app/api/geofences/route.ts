@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
             name: true,
           },
         },
-        GeofenceAssignment: includeAssignments ? {
+        GeofenceAssignments: includeAssignments ? {
           include: {
             EmployeeProfile: {
               select: {
@@ -29,8 +29,8 @@ export async function GET(request: NextRequest) {
         } : false,
         _count: {
           select: {
-            GeofenceAssignment: true,
-            PunchRecord: true,
+            GeofenceAssignments: true,
+            PunchRecords: true,
           },
         },
       },
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
         radiusMeters,
         isRequired,
         isActive,
-        GeofenceAssignment: employeeIds.length > 0 ? {
+        GeofenceAssignments: employeeIds.length > 0 ? {
           create: employeeIds.map((employeeId: string) => ({
             employeeId,
           })),
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
             name: true,
           },
         },
-        GeofenceAssignment: {
+        GeofenceAssignments: {
           include: {
             EmployeeProfile: {
               select: {

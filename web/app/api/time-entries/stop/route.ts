@@ -9,10 +9,18 @@ export async function POST() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  // Find employee profile for this user
+  const employee = await prisma.employeeProfile.findUnique({
+    where: { userId: session.user.id },
+  })
+
+  if (!employee) {
+    return NextResponse.json({ error: "Employee profile not found" }, { status: 404 })
+  }
+
   const entry = await prisma.timeEntry.findFirst({
     where: {
-      shopId: session.user.shopId,
-      techId: session.user.id,
+      employeeId: employee.id,
       clockOut: null,
     },
   })

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { PaymentStatus, Prisma } from '@prisma/client';
+import { InvoiceStatus, Prisma } from '@prisma/client';
 
 type InvoiceWithRelations = Prisma.InvoiceGetPayload<{
   include: {
@@ -10,7 +10,7 @@ type InvoiceWithRelations = Prisma.InvoiceGetPayload<{
         Vehicle: true;
       };
     };
-    Payment: true;
+    LegacyPayments: true;
   };
 }>;
 
@@ -33,7 +33,7 @@ export async function GET() {
     const invoices = await prisma.invoice.findMany({
       where: {
         status: {
-          in: [PaymentStatus.UNPAID, PaymentStatus.PARTIAL],
+          in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIAL],
         },
       },
       include: {
@@ -43,7 +43,7 @@ export async function GET() {
             Vehicle: true,
           },
         },
-        Payment: {
+        LegacyPayments: {
           orderBy: {
             receivedAt: 'desc',
           },
@@ -74,7 +74,7 @@ export async function GET() {
       const daysOverdue = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
       // Calculate remaining balance
-      const paidAmount = inv.Payment.reduce((sum: number, p: { amount: number }) => sum + p.amount, 0);
+      const paidAmount = inv.LegacyPayments.reduce((sum: number, p: { amount: number }) => sum + p.amount, 0);
       const balance = inv.total - paidAmount;
 
       return {
@@ -89,7 +89,7 @@ export async function GET() {
         dueDate: dueDate.toISOString(),
         daysOverdue, // negative means days until due
         status: inv.status,
-        lastPayment: inv.Payment[0]?.receivedAt || null,
+        lastPayment: inv.LegacyPayments[0]?.receivedAt || null,
       };
     });
 

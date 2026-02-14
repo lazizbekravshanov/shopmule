@@ -2,11 +2,6 @@
 const nextConfig = {
   output: 'standalone',
 
-  // Skip type checking during build (there are schema mismatches to fix later)
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
   // Security: Disable x-powered-by header
   poweredByHeader: false,
 

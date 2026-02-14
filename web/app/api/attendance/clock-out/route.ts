@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { validateGeofence } from '@/lib/geofence-validation'
 
 interface ClockOutRequest {
   employeeId: string
@@ -37,6 +38,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Get employee with assignments for geofence validation
+    const employee = await prisma.employeeProfile.findUnique({
+      where: { id: employeeId },
+      include: {
+        ShopAssignments: {
+          include: {
+            Shop: {
+              include: {
+                Geofences: { where: { isActive: true } },
+              },
+            },
+          },
+        },
+        GeofenceAssignments: {
+          include: {
+            Geofence: true,
+          },
+        },
+      },
+    })
+
+    if (!employee) {
+      return NextResponse.json(
+        { error: 'Employee not found' },
+        { status: 404 }
+      )
+    }
+
     // Check if clocked in
     const lastPunch = await prisma.punchRecord.findFirst({
       where: { employeeId },
@@ -62,6 +91,25 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Geofence validation
+    const { result: geofenceResult, error: geofenceError } = validateGeofence(
+      latitude,
+      longitude,
+      employee.ShopAssignments as any,
+      employee.GeofenceAssignments as any,
+    )
+
+    if (geofenceError) {
+      return NextResponse.json(
+        {
+          error: 'Outside geofence',
+          message: geofenceError,
+          distance: geofenceResult.distance,
+        },
+        { status: 403 }
+      )
+    }
+
     const timestamp = isOfflinePunch && offlineTimestamp
       ? new Date(offlineTimestamp)
       : new Date()
@@ -78,9 +126,10 @@ export async function POST(request: NextRequest) {
         longitude,
         accuracy,
         photoUrl,
-        shopId: clockInPunch?.shopId,
-        geofenceId: clockInPunch?.geofenceId,
-        isWithinGeofence: latitude && longitude ? true : null,
+        shopId: geofenceResult.shopId || clockInPunch?.shopId,
+        geofenceId: geofenceResult.geofenceId || clockInPunch?.geofenceId,
+        isWithinGeofence: geofenceResult.isWithin,
+        distanceFromGeofence: geofenceResult.distance,
         punchMethod,
         deviceInfo,
         ipAddress,

@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     const customers = await prisma.customer.findMany({
       orderBy: { createdAt: "desc" },
       include: {
-        Vehicle: true,
+        Vehicles: true,
       },
     })
 
@@ -33,14 +33,14 @@ export async function GET(request: Request) {
       phone: c.phone,
       email: c.email,
       billingAddress: c.billingAddress,
-      vehicles: c.Vehicle.map((v) => ({
+      vehicles: c.Vehicles.map((v) => ({
         id: v.id,
         vin: v.vin,
         unitNumber: v.unitNumber,
         make: v.make,
         model: v.model,
         year: v.year,
-        mileage: v.mileage,
+        currentMileage: v.currentMileage,
         licensePlate: v.licensePlate,
         customerId: v.customerId,
       })),
@@ -78,9 +78,21 @@ export async function POST(request: Request) {
 
     const data = parsed.data
 
+    // Look up user to get tenantId
+    const user = await prisma.user.findUnique({
+      where: { id: authResult.user!.id },
+      select: { tenantId: true },
+    })
+
+    if (!user?.tenantId) {
+      return NextResponse.json({ error: "No tenant associated with user" }, { status: 400 })
+    }
+
     const customer = await prisma.customer.create({
       data: {
+        tenantId: user.tenantId,
         name: data.name,
+        displayName: data.name,
         contactName: data.contactName || null,
         phone: data.phone || null,
         email: data.email || null,

@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
     const shops = await prisma.shop.findMany({
       include: {
-        Geofence: includeGeofences ? {
+        Geofences: includeGeofences ? {
           where: { isActive: true },
           select: {
             id: true,
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
             isRequired: true,
           },
         } : false,
-        ShopAssignment: includeEmployees ? {
+        ShopAssignments: includeEmployees ? {
           include: {
             EmployeeProfile: {
               select: {
@@ -33,8 +33,8 @@ export async function GET(request: NextRequest) {
         } : false,
         _count: {
           select: {
-            ShopAssignment: true,
-            PunchRecord: true,
+            ShopAssignments: true,
+            PunchRecords: true,
           },
         },
       },

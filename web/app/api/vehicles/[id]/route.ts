@@ -5,7 +5,7 @@ import { isValidId } from "@/lib/security"
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params: paramsPromise }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify authentication (supports both session and Bearer token)
@@ -14,6 +14,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const params = await paramsPromise
     const { id } = params
 
     if (!isValidId(id)) {
@@ -45,7 +46,7 @@ export async function GET(
       make: vehicle.make,
       model: vehicle.model,
       year: vehicle.year,
-      mileage: vehicle.mileage,
+      mileage: vehicle.currentMileage,
       licensePlate: vehicle.licensePlate,
       customerId: vehicle.customerId,
       customer: vehicle.Customer

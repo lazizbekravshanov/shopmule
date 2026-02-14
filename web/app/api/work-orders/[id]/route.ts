@@ -28,17 +28,17 @@ export async function GET(
             Customer: true,
           },
         },
-        WorkOrderAssignment: {
+        Assignments: {
           include: {
             EmployeeProfile: true,
           },
         },
-        WorkOrderLabor: {
+        Labor: {
           include: {
             EmployeeProfile: true,
           },
         },
-        WorkOrderPart: {
+        Parts: {
           include: {
             Part: true,
           },
@@ -60,7 +60,7 @@ export async function GET(
       description: workOrder.description,
       checklist: workOrder.checklist,
       notes: workOrder.notes,
-      laborHours: workOrder.laborHours,
+      laborHours: workOrder.laborTotal,
       partsTotal: workOrder.partsTotal,
       laborRate: workOrder.laborRate,
       vehicle: workOrder.Vehicle
@@ -71,7 +71,7 @@ export async function GET(
             make: workOrder.Vehicle.make,
             model: workOrder.Vehicle.model,
             year: workOrder.Vehicle.year,
-            mileage: workOrder.Vehicle.mileage,
+            mileage: workOrder.Vehicle.currentMileage,
             licensePlate: workOrder.Vehicle.licensePlate,
             customerId: workOrder.Vehicle.customerId,
             customer: workOrder.Vehicle.Customer
@@ -84,7 +84,7 @@ export async function GET(
               : undefined,
           }
         : undefined,
-      laborEntries: workOrder.WorkOrderLabor.map((l) => ({
+      laborEntries: workOrder.Labor.map((l) => ({
         id: l.id,
         hours: l.hours,
         rate: l.rate,
@@ -97,7 +97,7 @@ export async function GET(
             }
           : undefined,
       })),
-      partsUsed: workOrder.WorkOrderPart.map((p) => ({
+      partsUsed: workOrder.Parts.map((p) => ({
         id: p.id,
         quantity: p.quantity,
         unitPrice: p.unitPrice,

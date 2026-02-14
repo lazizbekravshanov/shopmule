@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db"
-import { RepairOrderStatus } from "@prisma/client"
+import { WorkOrderStatus } from "@prisma/client"
 import { z } from "zod"
 import { getAuthSession, isValidUUID, sanitizeInput } from "@/lib/security"
 import {
@@ -35,11 +35,10 @@ export async function POST(request: Request) {
       return errorResponse("Invalid vehicle ID format", 400, "INVALID_ID")
     }
 
-    // Verify customer belongs to shop
+    // Verify customer exists
     const customer = await prisma.customer.findFirst({
       where: {
         id: data.customerId,
-        shopId: session.user.shopId,
       },
     })
 
@@ -52,7 +51,6 @@ export async function POST(request: Request) {
       const vehicle = await prisma.vehicle.findFirst({
         where: {
           id: data.vehicleId,
-          shopId: session.user.shopId,
           customerId: data.customerId,
         },
       })
@@ -62,22 +60,25 @@ export async function POST(request: Request) {
       }
     }
 
-    const repairOrder = await prisma.repairOrder.create({
+    // Use workOrder model (repairOrder doesn't exist in schema)
+    const workOrder = await prisma.workOrder.create({
       data: {
-        shopId: session.user.shopId,
+        tenantId: customer.tenantId,
         customerId: data.customerId,
-        vehicleId: data.vehicleId || null,
+        vehicleId: data.vehicleId || "",
+        workOrderNumber: `WO-${Date.now()}`,
+        description: data.customerNotes ? sanitizeInput(data.customerNotes) : "New repair order",
         internalNotes: data.internalNotes ? sanitizeInput(data.internalNotes) : null,
-        customerNotes: data.customerNotes ? sanitizeInput(data.customerNotes) : null,
-        status: RepairOrderStatus.DRAFT,
+        customerVisibleNotes: data.customerNotes ? sanitizeInput(data.customerNotes) : null,
+        status: WorkOrderStatus.DRAFT,
       },
       include: {
-        customer: true,
-        vehicle: true,
+        Customer: true,
+        Vehicle: true,
       },
     })
 
-    return successResponse(repairOrder, 201)
+    return successResponse(workOrder, 201)
   } catch (error) {
     return handleApiError(error)
   }

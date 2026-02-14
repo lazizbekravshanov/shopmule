@@ -1,5 +1,5 @@
 import { anthropic } from '@ai-sdk/anthropic'
-import { streamText } from 'ai'
+import { streamText, stepCountIs } from 'ai'
 import { aiTools } from '@/lib/ai/tools'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
       system: personalizedPrompt,
       messages,
       tools: aiTools,
-      maxSteps: 5, // Allow multi-step tool usage
+      stopWhen: stepCountIs(5), // Allow multi-step tool usage
       onError: (error) => {
         console.error('[AI Chat Error]', error)
       },

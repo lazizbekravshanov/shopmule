@@ -538,5 +538,3 @@ export function PunchReviewDashboard({
     </div>
   )
 }
-
-export type { PunchForReview }

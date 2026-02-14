@@ -17,19 +17,19 @@ export async function GET(
         WorkOrder: {
           include: {
             Vehicle: true,
-            WorkOrderLabor: {
+            Labor: {
               include: {
                 EmployeeProfile: true,
               },
             },
-            WorkOrderPart: {
+            Parts: {
               include: {
                 Part: true,
               },
             },
           },
         },
-        Payment: {
+        LegacyPayments: {
           orderBy: {
             receivedAt: 'asc',
           },
@@ -46,7 +46,7 @@ export async function GET(
     const customer = invoice.Customer;
 
     // Calculate totals
-    const totalPaid = invoice.Payment.reduce((sum, p) => sum + p.amount, 0);
+    const totalPaid = invoice.LegacyPayments.reduce((sum, p) => sum + p.amount, 0);
     const balanceDue = invoice.total - totalPaid;
 
     // Build invoice data
@@ -77,14 +77,14 @@ export async function GET(
       // Vehicle info
       vehicleInfo: `${vehicle.year || ''} ${vehicle.make} ${vehicle.model}`.trim(),
       vehicleVin: vehicle.vin,
-      vehicleMileage: vehicle.mileage || undefined,
+      vehicleMileage: vehicle.currentMileage || undefined,
 
       // Work order info
       workOrderId: `WO-${workOrder.id.slice(-6).toUpperCase()}`,
       workOrderDescription: workOrder.description,
 
       // Labor items
-      laborItems: workOrder.WorkOrderLabor.map((labor) => ({
+      laborItems: workOrder.Labor.map((labor) => ({
         description: labor.note || `Labor - ${labor.EmployeeProfile?.name || 'Technician'}`,
         hours: labor.hours,
         rate: labor.rate,
@@ -92,7 +92,7 @@ export async function GET(
       })),
 
       // Parts items
-      partsItems: workOrder.WorkOrderPart.map((part) => ({
+      partsItems: workOrder.Parts.map((part) => ({
         name: part.Part?.name || 'Unknown Part',
         sku: part.Part?.sku || '-',
         quantity: part.quantity,
@@ -109,7 +109,7 @@ export async function GET(
       total: invoice.total,
 
       // Payments
-      payments: invoice.Payment.map((payment) => ({
+      payments: invoice.LegacyPayments.map((payment) => ({
         date: payment.receivedAt.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',

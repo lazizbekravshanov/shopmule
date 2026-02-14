@@ -57,7 +57,7 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 
 const statusOptions = [
   { label: 'Unpaid', value: 'UNPAID' },
-  { label: 'Partial', value: 'PARTIALLY_PAID' },
+  { label: 'Partial', value: 'PARTIAL' },
   { label: 'Paid', value: 'PAID' },
 ];
 
@@ -106,12 +106,12 @@ const columns: ColumnDef<Invoice>[] = [
           variant={
             status === 'PAID'
               ? 'success'
-              : status === 'PARTIALLY_PAID'
+              : status === 'PARTIAL'
                 ? 'warning'
                 : 'destructive'
           }
         >
-          {status === 'PARTIALLY_PAID' ? 'PARTIAL' : status}
+          {status}
         </Badge>
       );
     },

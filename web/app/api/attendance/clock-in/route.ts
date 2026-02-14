@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { isWithinGeofence, findNearestGeofence } from '@/lib/geo-utils'
+import { verifyPin } from '@/lib/pin-utils'
+import { validateGeofence } from '@/lib/geofence-validation'
 
 interface ClockInRequest {
   employeeId: string
@@ -46,16 +47,16 @@ export async function POST(request: NextRequest) {
     const employee = await prisma.employeeProfile.findUnique({
       where: { id: employeeId },
       include: {
-        ShopAssignment: {
+        ShopAssignments: {
           include: {
             Shop: {
               include: {
-                Geofence: { where: { isActive: true } },
+                Geofences: { where: { isActive: true } },
               },
             },
           },
         },
-        GeofenceAssignment: {
+        GeofenceAssignments: {
           include: {
             Geofence: true,
           },
@@ -71,11 +72,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify PIN if provided
-    if (punchMethod === 'PIN' && pin && employee.pin !== pin) {
-      return NextResponse.json(
-        { error: 'Invalid PIN' },
-        { status: 401 }
-      )
+    if (punchMethod === 'PIN' && pin) {
+      if (!employee.pin || !(await verifyPin(pin, employee.pin))) {
+        return NextResponse.json(
+          { error: 'Invalid PIN' },
+          { status: 401 }
+        )
+      }
     }
 
     // Check if already clocked in
@@ -92,61 +95,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Geofence validation
-    let geofenceResult = {
-      isWithin: true,
-      distance: 0,
-      geofenceId: null as string | null,
-      detectedShopId: shopId || null as string | null,
-    }
+    const { result: geofenceResult, error: geofenceError } = validateGeofence(
+      latitude,
+      longitude,
+      employee.ShopAssignments as any,
+      employee.GeofenceAssignments as any,
+      shopId,
+    )
 
-    if (latitude !== undefined && longitude !== undefined) {
-      const allGeofences = [
-        ...employee.ShopAssignment.flatMap((sa) =>
-          sa.Shop.Geofence.map((g) => ({ ...g, shopId: sa.Shop.id }))
-        ),
-        ...employee.GeofenceAssignment.map((ga) => ({
-          ...ga.Geofence,
-          shopId: ga.Geofence.shopId,
-        })),
-      ]
-
-      const uniqueGeofences = Array.from(
-        new Map(allGeofences.map((g) => [g.id, g])).values()
+    if (geofenceError) {
+      return NextResponse.json(
+        {
+          error: 'Outside geofence',
+          message: geofenceError,
+          distance: geofenceResult.distance,
+        },
+        { status: 403 }
       )
-
-      if (uniqueGeofences.length > 0) {
-        const nearest = findNearestGeofence(
-          latitude,
-          longitude,
-          uniqueGeofences.map((g) => ({
-            id: g.id,
-            latitude: g.latitude,
-            longitude: g.longitude,
-            radiusMeters: g.radiusMeters,
-          }))
-        )
-
-        if (nearest.geofence) {
-          const geoData = uniqueGeofences.find((g) => g.id === nearest.geofence!.id)
-          geofenceResult = {
-            isWithin: nearest.isWithin,
-            distance: nearest.distance,
-            geofenceId: nearest.geofence.id,
-            detectedShopId: geoData?.shopId || null,
-          }
-
-          if (geoData?.isRequired && !nearest.isWithin) {
-            return NextResponse.json(
-              {
-                error: 'Outside geofence',
-                message: `You are ${nearest.distance} meters from the allowed area. Please move closer to clock in.`,
-                distance: nearest.distance,
-              },
-              { status: 403 }
-            )
-          }
-        }
-      }
     }
 
     const timestamp = isOfflinePunch && offlineTimestamp
@@ -166,7 +131,7 @@ export async function POST(request: NextRequest) {
         accuracy,
         photoUrl,
         geofenceId: geofenceResult.geofenceId,
-        shopId: geofenceResult.detectedShopId,
+        shopId: geofenceResult.shopId,
         isWithinGeofence: geofenceResult.isWithin,
         distanceFromGeofence: geofenceResult.distance,
         workOrderId,

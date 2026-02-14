@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
       include: {
-        Payment: true,
+        LegacyPayments: true,
         Customer: true,
       },
     });
@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
       return errorResponse('Invoice is already paid', 400, 'ALREADY_PAID');
     }
 
-    const paidAmount = invoice.Payment.reduce(
-      (sum, p) => sum + Number(p.amount),
+    const paidAmount = invoice.LegacyPayments.reduce(
+      (sum: number, p: { amount: number }) => sum + Number(p.amount),
       0
     );
     const remainingBalance = Number(invoice.total) - paidAmount;

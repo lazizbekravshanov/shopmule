@@ -41,7 +41,7 @@ export async function GET(
                 vin: true,
               },
             },
-            WorkOrderLabor: {
+            Labor: {
               select: {
                 id: true,
                 note: true,
@@ -49,7 +49,7 @@ export async function GET(
                 rate: true,
               },
             },
-            WorkOrderPart: {
+            Parts: {
               include: {
                 Part: {
                   select: {
@@ -61,7 +61,7 @@ export async function GET(
             },
           },
         },
-        Payment: {
+        LegacyPayments: {
           select: {
             id: true,
             amount: true,
@@ -93,13 +93,13 @@ export async function GET(
       });
     }
 
-    const paidAmount = invoice.Payment.reduce(
-      (sum, p) => sum + Number(p.amount),
+    const paidAmount = invoice.LegacyPayments.reduce(
+      (sum: number, p: { amount: number }) => sum + Number(p.amount),
       0
     );
     const remainingBalance = Number(invoice.total) - paidAmount;
 
-    const laborLines = invoice.WorkOrder?.WorkOrderLabor.map((line) => ({
+    const laborLines = invoice.WorkOrder?.Labor.map((line: { id: string; note: string | null; hours: number; rate: number }) => ({
       id: line.id,
       description: line.note || 'Labor',
       hours: Number(line.hours),
@@ -107,7 +107,7 @@ export async function GET(
       total: Number(line.hours) * Number(line.rate),
     })) || [];
 
-    const partLines = invoice.WorkOrder?.WorkOrderPart.map((line) => ({
+    const partLines = invoice.WorkOrder?.Parts.map((line: any) => ({
       id: line.id,
       description: line.Part?.name || 'Part',
       qty: line.quantity,
@@ -115,8 +115,8 @@ export async function GET(
       total: line.quantity * Number(line.unitPrice) * (1 + line.markupPct),
     })) || [];
 
-    const laborTotal = laborLines.reduce((sum, line) => sum + line.total, 0);
-    const partsTotal = partLines.reduce((sum, line) => sum + line.total, 0);
+    const laborTotal = laborLines.reduce((sum: number, line: { total: number }) => sum + line.total, 0);
+    const partsTotal = partLines.reduce((sum: number, line: { total: number }) => sum + line.total, 0);
 
     return successResponse({
       id: invoice.id,
@@ -135,7 +135,7 @@ export async function GET(
       partLines,
       laborTotal,
       partsTotal,
-      payments: invoice.Payment.map((p) => ({
+      payments: invoice.LegacyPayments.map((p: any) => ({
         ...p,
         amount: Number(p.amount),
         paidAt: p.receivedAt.toISOString(),

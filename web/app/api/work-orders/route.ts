@@ -32,19 +32,13 @@ export async function GET(request: Request) {
     if (summary) {
       const limit = take ?? 5
 
-      const [total, open, statusCounts, recentOrders] = await prisma.$transaction([
+      const [total, open, recentOrders] = await prisma.$transaction([
         prisma.workOrder.count(),
         prisma.workOrder.count({
           where: {
             status: {
               not: "COMPLETED",
             },
-          },
-        }),
-        prisma.workOrder.groupBy({
-          by: ["status"],
-          _count: {
-            _all: true,
           },
         }),
         prisma.workOrder.findMany({
@@ -65,9 +59,14 @@ export async function GET(request: Request) {
         }),
       ])
 
+      const statusCounts = await prisma.workOrder.groupBy({
+        by: ["status"],
+        _count: { _all: true },
+      })
+
       const activeCustomers = await prisma.vehicle.findMany({
         where: {
-          WorkOrder: {
+          WorkOrders: {
             some: {
               status: {
                 not: "COMPLETED",
@@ -115,7 +114,7 @@ export async function GET(request: Request) {
       "description",
       "checklist",
       "notes",
-      "laborHours",
+      "laborTotal",
       "partsTotal",
       "laborRate",
       "createdAt",
@@ -127,7 +126,7 @@ export async function GET(request: Request) {
       "vehicle.make",
       "vehicle.model",
       "vehicle.year",
-      "vehicle.mileage",
+      "vehicle.currentMileage",
       "vehicle.licensePlate",
       "vehicle.customerId",
       "vehicle.customer",
@@ -149,7 +148,7 @@ export async function GET(request: Request) {
       "vehicle.make",
       "vehicle.model",
       "vehicle.year",
-      "vehicle.mileage",
+      "vehicle.currentMileage",
       "vehicle.licensePlate",
       "vehicle.customerId",
       "vehicle.customer",
@@ -181,7 +180,7 @@ export async function GET(request: Request) {
             description: selectedFields.has("description"),
             checklist: selectedFields.has("checklist"),
             notes: selectedFields.has("notes"),
-            laborHours: selectedFields.has("laborHours"),
+            laborTotal: selectedFields.has("laborTotal"),
             partsTotal: selectedFields.has("partsTotal"),
             laborRate: selectedFields.has("laborRate"),
             createdAt: selectedFields.has("createdAt"),
@@ -195,7 +194,7 @@ export async function GET(request: Request) {
                     make: useDefaultVehicleFields || selectedFields.has("vehicle.make"),
                     model: useDefaultVehicleFields || selectedFields.has("vehicle.model"),
                     year: useDefaultVehicleFields || selectedFields.has("vehicle.year"),
-                    mileage: useDefaultVehicleFields || selectedFields.has("vehicle.mileage"),
+                    currentMileage: useDefaultVehicleFields || selectedFields.has("vehicle.currentMileage"),
                     licensePlate: useDefaultVehicleFields || selectedFields.has("vehicle.licensePlate"),
                     customerId: useDefaultVehicleFields || selectedFields.has("vehicle.customerId"),
                     Customer: selectedFields.has("vehicle.customer")
@@ -224,17 +223,17 @@ export async function GET(request: Request) {
                 Customer: true,
               },
             },
-            WorkOrderAssignment: {
+            Assignments: {
               include: {
                 EmployeeProfile: true,
               },
             },
-            WorkOrderLabor: {
+            Labor: {
               include: {
                 EmployeeProfile: true,
               },
             },
-            WorkOrderPart: {
+            Parts: {
               include: {
                 Part: true,
               },
@@ -243,7 +242,7 @@ export async function GET(request: Request) {
         })
 
     if (selectedFields && selectedFields.size > 0) {
-      const transformed = workOrders.map((wo) => {
+      const transformed = (workOrders as any[]).map((wo: any) => {
         const vehicle = wo.Vehicle
           ? {
               ...(useDefaultVehicleFields || selectedFields.has("vehicle.id")
@@ -264,8 +263,8 @@ export async function GET(request: Request) {
               ...(useDefaultVehicleFields || selectedFields.has("vehicle.year")
                 ? { year: wo.Vehicle.year }
                 : {}),
-              ...(useDefaultVehicleFields || selectedFields.has("vehicle.mileage")
-                ? { mileage: wo.Vehicle.mileage }
+              ...(useDefaultVehicleFields || selectedFields.has("vehicle.currentMileage")
+                ? { mileage: wo.Vehicle.currentMileage }
                 : {}),
               ...(useDefaultVehicleFields || selectedFields.has("vehicle.licensePlate")
                 ? { licensePlate: wo.Vehicle.licensePlate }
@@ -297,7 +296,7 @@ export async function GET(request: Request) {
             : {}),
           ...(selectedFields.has("checklist") ? { checklist: wo.checklist } : {}),
           ...(selectedFields.has("notes") ? { notes: wo.notes } : {}),
-          ...(selectedFields.has("laborHours") ? { laborHours: wo.laborHours } : {}),
+          ...(selectedFields.has("laborTotal") ? { laborHours: wo.laborTotal } : {}),
           ...(selectedFields.has("partsTotal") ? { partsTotal: wo.partsTotal } : {}),
           ...(selectedFields.has("laborRate") ? { laborRate: wo.laborRate } : {}),
           ...(selectedFields.has("createdAt")
@@ -316,14 +315,14 @@ export async function GET(request: Request) {
     console.log("GET /api/work-orders - found", workOrders.length, "work orders")
 
     // Transform to match frontend expected format
-    const transformed = workOrders.map((wo) => ({
+    const transformed = (workOrders as any[]).map((wo: any) => ({
       id: wo.id,
       vehicleId: wo.vehicleId,
       status: wo.status,
       description: wo.description,
       checklist: wo.checklist,
       notes: wo.notes,
-      laborHours: wo.laborHours,
+      laborHours: wo.laborTotal,
       partsTotal: wo.partsTotal,
       laborRate: wo.laborRate,
       vehicle: wo.Vehicle
@@ -334,7 +333,7 @@ export async function GET(request: Request) {
             make: wo.Vehicle.make,
             model: wo.Vehicle.model,
             year: wo.Vehicle.year,
-            mileage: wo.Vehicle.mileage,
+            mileage: wo.Vehicle.currentMileage,
             licensePlate: wo.Vehicle.licensePlate,
             customerId: wo.Vehicle.customerId,
             customer: wo.Vehicle.Customer
@@ -347,7 +346,7 @@ export async function GET(request: Request) {
               : undefined,
           }
         : undefined,
-      assignments: wo.WorkOrderAssignment.map((a) => ({
+      assignments: wo.Assignments?.map((a: any) => ({
         employee: a.EmployeeProfile
           ? {
               id: a.EmployeeProfile.id,
@@ -355,8 +354,8 @@ export async function GET(request: Request) {
               role: a.EmployeeProfile.role,
             }
           : undefined,
-      })),
-      laborEntries: wo.WorkOrderLabor.map((l) => ({
+      })) || [],
+      laborEntries: wo.Labor?.map((l: any) => ({
         id: l.id,
         hours: l.hours,
         rate: l.rate,
@@ -368,8 +367,8 @@ export async function GET(request: Request) {
               role: l.EmployeeProfile.role,
             }
           : undefined,
-      })),
-      partsUsed: wo.WorkOrderPart.map((p) => ({
+      })) || [],
+      partsUsed: wo.Parts?.map((p: any) => ({
         id: p.id,
         quantity: p.quantity,
         unitPrice: p.unitPrice,
@@ -386,7 +385,7 @@ export async function GET(request: Request) {
               reorderPoint: p.Part.reorderPoint,
             }
           : undefined,
-      })),
+      })) || [],
       createdAt: wo.createdAt.toISOString(),
       updatedAt: wo.updatedAt.toISOString(),
     }))
@@ -431,14 +430,14 @@ export async function POST(request: Request) {
 
     const workOrder = await prisma.workOrder.create({
       data: {
+        tenantId: vehicle.tenantId,
+        customerId: vehicle.customerId,
         vehicleId: data.vehicleId,
+        workOrderNumber: `WO-${Date.now()}`,
         description: data.description,
         notes: data.notes || null,
         checklist: data.checklist || null,
         status: "DIAGNOSED",
-        laborHours: 0,
-        partsTotal: 0,
-        laborRate: 125,
       },
       include: {
         Vehicle: {
@@ -457,7 +456,7 @@ export async function POST(request: Request) {
       description: workOrder.description,
       checklist: workOrder.checklist,
       notes: workOrder.notes,
-      laborHours: workOrder.laborHours,
+      laborHours: workOrder.laborTotal,
       partsTotal: workOrder.partsTotal,
       laborRate: workOrder.laborRate,
       vehicle: workOrder.Vehicle

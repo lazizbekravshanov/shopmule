@@ -78,9 +78,21 @@ export async function POST(request: Request) {
 
     const data = parsed.data
 
+    // Get tenantId from session
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { tenantId: true },
+    })
+
+    if (!user?.tenantId) {
+      return NextResponse.json({ error: "No tenant associated with user" }, { status: 400 })
+    }
+
+    const tenantId = user.tenantId
+
     // Check for duplicate SKU
     const existing = await prisma.part.findUnique({
-      where: { sku: data.sku },
+      where: { tenantId_sku: { tenantId, sku: data.sku } },
     })
 
     if (existing) {
@@ -92,7 +104,9 @@ export async function POST(request: Request) {
 
     const part = await prisma.part.create({
       data: {
+        tenantId,
         sku: data.sku,
+        partNumber: data.sku,
         name: data.name,
         category: data.category || null,
         cost: data.cost,

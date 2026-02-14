@@ -37,7 +37,7 @@ export async function POST(
             email: true,
           },
         },
-        Payment: true,
+        LegacyPayments: true,
       },
     });
 
@@ -56,8 +56,8 @@ export async function POST(
       return errorResponse('Invoice is already paid', 400, 'ALREADY_PAID');
     }
 
-    const paidAmount = invoice.Payment.reduce(
-      (sum, p) => sum + Number(p.amount),
+    const paidAmount = invoice.LegacyPayments.reduce(
+      (sum: number, p: { amount: number }) => sum + Number(p.amount),
       0
     );
     const remainingBalance = Number(invoice.total) - paidAmount;
@@ -87,7 +87,7 @@ export async function POST(
 
     // Audit log: Payment intent created
     await logAudit({
-      action: 'PAYMENT',
+      action: 'PAYMENT_PROCESSED',
       entityType: 'Invoice',
       entityId: invoice.id,
       metadata: {

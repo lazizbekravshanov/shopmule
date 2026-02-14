@@ -905,6 +905,7 @@ model Shop {
   Geofences       Geofence[]
   PunchRecords    PunchRecord[]
   ShopAssignments ShopAssignment[]
+  DisplayTokens   DisplayToken[]
 
   @@index([tenantId])
 }
@@ -1351,6 +1352,24 @@ enum SecuritySeverity {
   MEDIUM
   HIGH
   CRITICAL
+}
+
+// ==========================================
+// TV DISPLAY TOKENS
+// ==========================================
+
+model DisplayToken {
+  id        String   @id @default(cuid())
+  shopId    String
+  tokenHash String   @unique
+  label     String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@index([shopId])
 }
 
 // Legacy compatibility

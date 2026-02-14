@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db"
 import { z } from "zod"
 
 const startTimeEntrySchema = z.object({
-  repairOrderId: z.string(),
+  workOrderId: z.string().optional(),
   notes: z.string().optional(),
 })
 
@@ -15,27 +15,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  // Check if user is clocked in
-  const punch = await prisma.shiftPunch.findFirst({
-    where: {
-      shopId: session.user.shopId,
-      userId: session.user.id,
-      clockOutAt: null,
-    },
+  // Find employee profile for this user
+  const employee = await prisma.employeeProfile.findUnique({
+    where: { userId: session.user.id },
   })
 
-  if (!punch) {
+  if (!employee) {
     return NextResponse.json(
-      { error: "Must be clocked in to start time entry" },
-      { status: 400 }
+      { error: "Employee profile not found" },
+      { status: 404 }
     )
   }
 
   // Check if already has open time entry
   const existingEntry = await prisma.timeEntry.findFirst({
     where: {
-      shopId: session.user.shopId,
-      techId: session.user.id,
+      employeeId: employee.id,
       clockOut: null,
     },
   })
@@ -48,24 +43,22 @@ export async function POST(request: Request) {
     const body = await request.json()
     const data = startTimeEntrySchema.parse(body)
 
-    // Verify repair order exists
-    const repairOrder = await prisma.repairOrder.findFirst({
-      where: {
-        id: data.repairOrderId,
-        shopId: session.user.shopId,
-      },
-    })
+    // Verify work order exists if provided
+    if (data.workOrderId) {
+      const workOrder = await prisma.workOrder.findUnique({
+        where: { id: data.workOrderId },
+      })
 
-    if (!repairOrder) {
-      return NextResponse.json({ error: "Invalid repair order" }, { status: 400 })
+      if (!workOrder) {
+        return NextResponse.json({ error: "Invalid work order" }, { status: 400 })
+      }
     }
 
     const entry = await prisma.timeEntry.create({
       data: {
-        shopId: session.user.shopId,
-        techId: session.user.id,
-        repairOrderId: data.repairOrderId,
-        notes: data.notes || null,
+        employeeId: employee.id,
+        clockIn: new Date(),
+        jobId: data.workOrderId || null,
       },
     })
 

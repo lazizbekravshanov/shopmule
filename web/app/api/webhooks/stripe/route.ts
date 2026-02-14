@@ -63,10 +63,10 @@ export async function POST(request: NextRequest) {
 }
 
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  const { invoiceId, shopId } = paymentIntent.metadata;
+  const { invoiceId } = paymentIntent.metadata;
 
-  if (!invoiceId || !shopId) {
-    console.error('Missing invoiceId or shopId in payment intent metadata');
+  if (!invoiceId) {
+    console.error('Missing invoiceId in payment intent metadata');
     return;
   }
 
@@ -85,7 +85,6 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     await tx.payment.create({
       data: {
         invoiceId,
-        shopId,
         method: 'STRIPE',
         amount: amountInDollars,
         stripePaymentIntentId: paymentIntent.id,
@@ -96,15 +95,15 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 
     const invoice = await tx.invoice.findUnique({
       where: { id: invoiceId },
-      include: { payments: true },
+      include: { LegacyPayments: true },
     });
 
     if (invoice) {
       const totalPaid =
-        invoice.payments.reduce((sum, p) => sum + Number(p.amount), 0) +
+        invoice.LegacyPayments.reduce((sum: number, p: { amount: number }) => sum + Number(p.amount), 0) +
         amountInDollars;
       const invoiceTotal = Number(invoice.total);
-      const newStatus = totalPaid >= invoiceTotal ? 'PAID' : 'PARTIALLY_PAID';
+      const newStatus = totalPaid >= invoiceTotal ? 'PAID' : 'PARTIAL';
 
       await tx.invoice.update({
         where: { id: invoiceId },

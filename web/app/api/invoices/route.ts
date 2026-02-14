@@ -26,7 +26,7 @@ export async function GET() {
             Vehicle: true,
           },
         },
-        Payment: true,
+        LegacyPayments: true,
       },
     })
 
@@ -66,7 +66,7 @@ export async function GET() {
               : null,
           }
         : null,
-      payments: inv.Payment.map((p) => ({
+      payments: inv.LegacyPayments.map((p) => ({
         id: p.id,
         method: p.method,
         amount: p.amount,
@@ -124,12 +124,12 @@ export async function POST(request: Request) {
             Customer: true,
           },
         },
-        WorkOrderPart: {
+        Parts: {
           include: {
             Part: true,
           },
         },
-        WorkOrderLabor: true,
+        Labor: true,
       },
     })
 
@@ -148,12 +148,12 @@ export async function POST(request: Request) {
     }
 
     // Calculate totals
-    const subtotalParts = workOrder.WorkOrderPart.reduce((sum, p) => {
+    const subtotalParts = workOrder.Parts.reduce((sum, p) => {
       const partTotal = p.quantity * p.unitPrice * (1 + p.markupPct)
       return sum + partTotal
     }, 0)
 
-    const subtotalLabor = workOrder.WorkOrderLabor.reduce((sum, l) => {
+    const subtotalLabor = workOrder.Labor.reduce((sum, l) => {
       return sum + l.hours * l.rate
     }, 0)
 
@@ -161,8 +161,24 @@ export async function POST(request: Request) {
     const tax = subtotal * taxRate
     const total = subtotal + tax - discount
 
+    // Get tenantId from session user
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { tenantId: true },
+    })
+
+    if (!user?.tenantId) {
+      return NextResponse.json({ error: "No tenant associated with user" }, { status: 400 })
+    }
+
+    // Generate invoice number
+    const invoiceCount = await prisma.invoice.count({ where: { tenantId: user.tenantId } })
+    const invoiceNumber = `INV-${new Date().getFullYear()}-${String(invoiceCount + 1).padStart(4, '0')}`
+
     const invoice = await prisma.invoice.create({
       data: {
+        tenantId: user.tenantId,
+        invoiceNumber,
         workOrderId,
         customerId: workOrder.Vehicle.Customer.id,
         subtotalParts,

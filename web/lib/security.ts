@@ -9,6 +9,8 @@ export interface AuthenticatedSession {
     email: string
     name?: string | null
     role: Role
+    tenantId: string | null
+    shopId: string | null
   }
 }
 

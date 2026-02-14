@@ -21,18 +21,18 @@ export async function GET(
         portalTokenHash: tokenHash,
       },
       include: {
-        Vehicle: {
+        Vehicles: {
           include: {
-            WorkOrder: {
+            WorkOrders: {
               orderBy: { createdAt: 'desc' },
               take: 1,
             },
           },
           orderBy: { updatedAt: 'desc' },
         },
-        Invoice: {
+        Invoices: {
           include: {
-            Payment: {
+            LegacyPayments: {
               select: {
                 id: true,
                 amount: true,
@@ -99,7 +99,7 @@ export async function GET(
             portalTokenHash: true,
           },
         },
-        WorkOrderLabor: {
+        Labor: {
           select: {
             id: true,
             note: true,
@@ -107,7 +107,7 @@ export async function GET(
             rate: true,
           },
         },
-        WorkOrderPart: {
+        Parts: {
           include: {
             Part: {
               select: {
@@ -121,7 +121,7 @@ export async function GET(
       orderBy: { createdAt: 'desc' },
     });
 
-    const vehicles = customer.Vehicle.map((v) => ({
+    const vehicles = customer.Vehicles.map((v: any) => ({
       id: v.id,
       make: v.make,
       model: v.model,
@@ -129,11 +129,11 @@ export async function GET(
       licensePlate: v.licensePlate,
       vin: v.vin,
       unitNumber: v.unitNumber,
-      mileage: v.mileage,
-      lastServiceDate: v.WorkOrder[0]?.createdAt?.toISOString() || null,
+      mileage: v.currentMileage,
+      lastServiceDate: v.WorkOrders[0]?.createdAt?.toISOString() || null,
     }));
 
-    const workOrders = allWorkOrders.map((wo) => ({
+    const workOrders = allWorkOrders.map((wo: any) => ({
       id: wo.id,
       status: wo.status,
       description: wo.description,
@@ -141,22 +141,22 @@ export async function GET(
       createdAt: wo.createdAt.toISOString(),
       updatedAt: wo.updatedAt.toISOString(),
       vehicle: wo.Vehicle,
-      laborTotal: wo.WorkOrderLabor.reduce(
-        (sum, l) => sum + Number(l.hours) * Number(l.rate),
+      laborTotal: wo.Labor.reduce(
+        (sum: number, l: any) => sum + Number(l.hours) * Number(l.rate),
         0
       ),
-      partsTotal: wo.WorkOrderPart.reduce(
-        (sum, p) => sum + p.quantity * Number(p.unitPrice) * (1 + p.markupPct),
+      partsTotal: wo.Parts.reduce(
+        (sum: number, p: any) => sum + p.quantity * Number(p.unitPrice) * (1 + p.markupPct),
         0
       ),
-      laborLines: wo.WorkOrderLabor.map((l) => ({
+      laborLines: wo.Labor.map((l: any) => ({
         id: l.id,
         description: l.note || 'Labor',
         hours: Number(l.hours),
         rate: Number(l.rate),
         total: Number(l.hours) * Number(l.rate),
       })),
-      partLines: wo.WorkOrderPart.map((p) => ({
+      partLines: wo.Parts.map((p: any) => ({
         id: p.id,
         description: p.Part?.name || 'Part',
         quantity: p.quantity,
@@ -168,9 +168,9 @@ export async function GET(
       invoiceStatus: wo.Invoice?.status || null,
     }));
 
-    const invoices = customer.Invoice.map((inv) => {
-      const paidAmount = inv.Payment.reduce(
-        (sum, p) => sum + Number(p.amount),
+    const invoices = customer.Invoices.map((inv: any) => {
+      const paidAmount = inv.LegacyPayments.reduce(
+        (sum: number, p: any) => sum + Number(p.amount),
         0
       );
       return {
@@ -186,11 +186,11 @@ export async function GET(
     });
 
     const activeWorkOrders = workOrders.filter(
-      (wo) => wo.status !== 'COMPLETED'
+      (wo: any) => wo.status !== 'COMPLETED'
     );
     const unpaidBalance = invoices
-      .filter((inv) => inv.status !== 'PAID')
-      .reduce((sum, inv) => sum + inv.remainingBalance, 0);
+      .filter((inv: any) => inv.status !== 'PAID')
+      .reduce((sum: number, inv: any) => sum + inv.remainingBalance, 0);
 
     return successResponse({
       customer: {

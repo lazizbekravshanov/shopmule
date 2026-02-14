@@ -2,21 +2,10 @@ import { prisma } from '@/lib/db';
 import { headers } from 'next/headers';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import type { AuditAction } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
-export type AuditAction =
-  | 'CREATE'
-  | 'UPDATE'
-  | 'DELETE'
-  | 'LOGIN'
-  | 'LOGOUT'
-  | 'EXPORT'
-  | 'IMPORT'
-  | 'APPROVE'
-  | 'REJECT'
-  | 'PAYMENT'
-  | 'GENERATE'
-  | 'SEND'
-  | 'VIEW';
+export type { AuditAction } from '@prisma/client';
 
 export interface AuditLogInput {
   action: AuditAction;
@@ -79,14 +68,14 @@ export async function logAudit(input: AuditLogInput): Promise<void> {
         action: input.action,
         entityType: input.entityType,
         entityId: input.entityId,
-        oldValues: input.oldValues || undefined,
-        newValues: input.newValues || undefined,
+        oldValues: (input.oldValues as Prisma.InputJsonValue) || undefined,
+        newValues: (input.newValues as Prisma.InputJsonValue) || undefined,
         ipAddress: context.ipAddress,
         userAgent: context.userAgent,
         requestId: context.requestId,
         success: input.success ?? true,
         errorMessage: input.errorMessage,
-        metadata: input.metadata || undefined,
+        metadata: (input.metadata as Prisma.InputJsonValue) || undefined,
       },
     });
   } catch (error) {
@@ -200,7 +189,7 @@ export const audit = {
     errorMessage?: string
   ) {
     await logAudit({
-      action: 'PAYMENT',
+      action: 'PAYMENT_PROCESSED',
       entityType: 'Invoice',
       entityId: invoiceId,
       success,
@@ -225,7 +214,7 @@ export const audit = {
     success: boolean
   ) {
     await logAudit({
-      action: 'SEND',
+      action: 'NOTIFICATION_SENT',
       entityType,
       entityId,
       success,

@@ -37,7 +37,7 @@ export async function POST(
     const invoice = await prisma.invoice.findUnique({
       where: { id },
       include: {
-        Payment: true,
+        LegacyPayments: true,
         Customer: true,
       },
     })
@@ -47,7 +47,7 @@ export async function POST(
     }
 
     // Calculate total paid so far
-    const totalPaid = invoice.Payment.reduce((sum, p) => sum + p.amount, 0)
+    const totalPaid = invoice.LegacyPayments.reduce((sum, p) => sum + p.amount, 0)
     const remainingBalance = invoice.total - totalPaid
 
     if (amount > remainingBalance) {

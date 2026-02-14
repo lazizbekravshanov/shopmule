@@ -66,7 +66,7 @@ export async function GET() {
       prisma.part.count({
         where: {
           stock: { lte: prisma.part.fields.reorderPoint },
-          status: 'active',
+          status: 'ACTIVE',
         },
       }).catch(() =>
         // Fallback if status field doesn't exist
@@ -115,9 +115,9 @@ export async function GET() {
       // Active customers this month (with work orders)
       prisma.customer.count({
         where: {
-          Vehicle: {
+          Vehicles: {
             some: {
-              WorkOrder: {
+              WorkOrders: {
                 some: {
                   createdAt: { gte: startOfMonth },
                 },

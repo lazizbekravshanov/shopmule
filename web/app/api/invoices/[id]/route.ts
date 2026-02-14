@@ -22,19 +22,19 @@ export async function GET(
         WorkOrder: {
           include: {
             Vehicle: true,
-            WorkOrderPart: {
+            Parts: {
               include: {
                 Part: true,
               },
             },
-            WorkOrderLabor: {
+            Labor: {
               include: {
                 EmployeeProfile: true,
               },
             },
           },
         },
-        Payment: true,
+        LegacyPayments: true,
       },
     })
 
@@ -80,7 +80,7 @@ export async function GET(
                   licensePlate: invoice.WorkOrder.Vehicle.licensePlate,
                 }
               : null,
-            parts: invoice.WorkOrder.WorkOrderPart.map((p) => ({
+            parts: invoice.WorkOrder.Parts.map((p) => ({
               id: p.id,
               quantity: p.quantity,
               unitPrice: p.unitPrice,
@@ -94,7 +94,7 @@ export async function GET(
                   }
                 : null,
             })),
-            labor: invoice.WorkOrder.WorkOrderLabor.map((l) => ({
+            labor: invoice.WorkOrder.Labor.map((l) => ({
               id: l.id,
               hours: l.hours,
               rate: l.rate,
@@ -109,7 +109,7 @@ export async function GET(
             })),
           }
         : null,
-      payments: invoice.Payment.map((p) => ({
+      payments: invoice.LegacyPayments.map((p) => ({
         id: p.id,
         method: p.method,
         amount: p.amount,

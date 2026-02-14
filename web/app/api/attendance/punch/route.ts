@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { isWithinGeofence, findNearestGeofence } from '@/lib/geo-utils'
+import { verifyPin } from '@/lib/pin-utils'
+import { validateGeofence } from '@/lib/geofence-validation'
 
 interface PunchRequest {
   employeeId: string
@@ -50,18 +51,18 @@ export async function POST(request: NextRequest) {
       where: { id: employeeId },
       include: {
         User: true,
-        ShopAssignment: {
+        ShopAssignments: {
           include: {
             Shop: {
               include: {
-                Geofence: {
+                Geofences: {
                   where: { isActive: true },
                 },
               },
             },
           },
         },
-        GeofenceAssignment: {
+        GeofenceAssignments: {
           include: {
             Geofence: {
               include: {
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
-      if (employee.pin !== pin) {
+      if (!employee.pin || !(await verifyPin(pin, employee.pin))) {
         return NextResponse.json(
           { error: 'Invalid PIN' },
           { status: 401 }
@@ -151,82 +152,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Geofence validation
-    let geofenceResult: {
-      isWithin: boolean
-      distance: number
-      geofenceId: string | null
-      shopId: string | null
-    } = {
-      isWithin: true,
-      distance: 0,
-      geofenceId: null,
-      shopId: null,
-    }
+    const { result: geofenceResult, error: geofenceError } = validateGeofence(
+      latitude,
+      longitude,
+      employee.ShopAssignments as any,
+      employee.GeofenceAssignments as any,
+    )
 
-    if (latitude !== undefined && longitude !== undefined) {
-      // Get all assigned geofences
-      const assignedGeofences = [
-        // Geofences from assigned shops
-        ...employee.ShopAssignment.flatMap((sa) =>
-          sa.Shop.Geofence.map((g) => ({
-            ...g,
-            shopId: sa.Shop.id,
-          }))
-        ),
-        // Directly assigned geofences
-        ...employee.GeofenceAssignment.map((ga) => ({
-          ...ga.Geofence,
-          shopId: ga.Geofence.shopId,
-        })),
-      ]
-
-      // Remove duplicates
-      const uniqueGeofences = Array.from(
-        new Map(assignedGeofences.map((g) => [g.id, g])).values()
+    if (geofenceError) {
+      return NextResponse.json(
+        {
+          error: 'Outside geofence',
+          message: geofenceError,
+          distance: geofenceResult.distance,
+          geofenceId: geofenceResult.geofenceId,
+          required: true,
+        },
+        { status: 403 }
       )
-
-      if (uniqueGeofences.length > 0) {
-        // Find nearest geofence
-        const nearest = findNearestGeofence(
-          latitude,
-          longitude,
-          uniqueGeofences.map((g) => ({
-            id: g.id,
-            latitude: g.latitude,
-            longitude: g.longitude,
-            radiusMeters: g.radiusMeters,
-          }))
-        )
-
-        if (nearest.geofence) {
-          const geofenceData = uniqueGeofences.find(
-            (g) => g.id === nearest.geofence!.id
-          )
-
-          geofenceResult = {
-            isWithin: nearest.isWithin,
-            distance: nearest.distance,
-            geofenceId: nearest.geofence.id,
-            shopId: geofenceData?.shopId || null,
-          }
-
-          // Check if geofence is required
-          const isGeofenceRequired = geofenceData?.isRequired ?? true
-
-          if (isGeofenceRequired && !nearest.isWithin) {
-            return NextResponse.json(
-              {
-                error: 'Outside geofence',
-                message: `You are ${nearest.distance} meters from the allowed area. Please move closer to your assigned shop location.`,
-                distance: nearest.distance,
-                geofenceId: nearest.geofence.id,
-                required: true,
-              },
-              { status: 403 }
-            )
-          }
-        }
-      }
     }
 
     // Determine timestamp

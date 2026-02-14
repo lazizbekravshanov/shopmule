@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { RepairOrderStatus } from "@prisma/client"
+import { WorkOrderStatus } from "@prisma/client"
 
 export const createRepairOrderSchema = z.object({
   customerId: z.string().uuid("Invalid customer ID"),
@@ -9,7 +9,7 @@ export const createRepairOrderSchema = z.object({
 })
 
 export const updateRepairOrderSchema = z.object({
-  status: z.nativeEnum(RepairOrderStatus).optional(),
+  status: z.nativeEnum(WorkOrderStatus).optional(),
   internalNotes: z.string().max(5000).optional(),
   customerNotes: z.string().max(5000).optional(),
   isComeback: z.boolean().optional(),

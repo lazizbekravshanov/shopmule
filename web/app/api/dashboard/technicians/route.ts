@@ -4,8 +4,8 @@ import { Role, PunchType, WorkOrderStatus, Prisma } from '@prisma/client';
 
 type TechnicianWithRelations = Prisma.EmployeeProfileGetPayload<{
   include: {
-    PunchRecord: true;
-    WorkOrderAssignment: {
+    PunchRecords: true;
+    WorkOrderAssignments: {
       include: {
         WorkOrder: {
           include: {
@@ -30,7 +30,7 @@ export async function GET() {
         status: 'active',
       },
       include: {
-        PunchRecord: {
+        PunchRecords: {
           where: {
             timestamp: {
               gte: today,
@@ -40,7 +40,7 @@ export async function GET() {
             timestamp: 'desc',
           },
         },
-        WorkOrderAssignment: {
+        WorkOrderAssignments: {
           include: {
             WorkOrder: {
               include: {
@@ -64,7 +64,7 @@ export async function GET() {
 
     const techStatus = technicians.map((tech: TechnicianWithRelations) => {
       // Determine clock status from punch records
-      const punches = tech.PunchRecord;
+      const punches = tech.PunchRecords;
       let status: 'clocked-in' | 'on-break' | 'clocked-out' = 'clocked-out';
       let clockInTime: string | null = null;
       let hoursToday = 0;
@@ -115,8 +115,8 @@ export async function GET() {
       }
 
       // Get current job
-      const currentJob = tech.WorkOrderAssignment.find(
-        (a: (typeof tech.WorkOrderAssignment)[0]) => a.WorkOrder?.status === WorkOrderStatus.IN_PROGRESS
+      const currentJob = tech.WorkOrderAssignments.find(
+        (a: (typeof tech.WorkOrderAssignments)[0]) => a.WorkOrder?.status === WorkOrderStatus.IN_PROGRESS
       );
 
       // Build current job display string with safe fallbacks

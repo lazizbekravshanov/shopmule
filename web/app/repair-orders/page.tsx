@@ -8,15 +8,13 @@ import { BackButton } from "@/components/dashboard/back-button"
 
 export default async function RepairOrdersPage() {
   const session = await requireAuth()
-  const shopId = session.user.shopId
 
-  const repairOrders = await prisma.repairOrder.findMany({
-    where: { shopId },
+  const workOrders = await prisma.workOrder.findMany({
     include: {
-      customer: true,
-      vehicle: true,
+      Customer: true,
+      Vehicle: true,
     },
-    orderBy: { openedAt: "desc" },
+    orderBy: { createdAt: "desc" },
     take: 50,
   })
 
@@ -53,13 +51,13 @@ export default async function RepairOrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {repairOrders.map((ro) => (
+              {workOrders.map((ro) => (
                 <TableRow key={ro.id}>
                   <TableCell className="font-medium">RO-{ro.id.slice(0, 8)}</TableCell>
-                  <TableCell>{ro.customer.name}</TableCell>
+                  <TableCell>{ro.Customer?.name || "Unknown"}</TableCell>
                   <TableCell>
-                    {ro.vehicle
-                      ? `${ro.vehicle.make} ${ro.vehicle.model} (${ro.vehicle.vin.slice(0, 8)})`
+                    {ro.Vehicle
+                      ? `${ro.Vehicle.make} ${ro.Vehicle.model} (${ro.Vehicle.vin.slice(0, 8)})`
                       : "N/A"}
                   </TableCell>
                   <TableCell>
@@ -67,7 +65,7 @@ export default async function RepairOrdersPage() {
                       {ro.status}
                     </span>
                   </TableCell>
-                  <TableCell>{new Date(ro.openedAt).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(ro.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Link href={`/repair-orders/${ro.id}`}>
                       <Button variant="outline" size="sm">View</Button>

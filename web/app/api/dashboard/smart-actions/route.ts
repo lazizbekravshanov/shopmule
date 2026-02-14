@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { WorkOrderStatus, PaymentStatus } from '@prisma/client';
+import { WorkOrderStatus, InvoiceStatus } from '@prisma/client';
 
 interface SmartAction {
   id: string;
@@ -109,7 +109,7 @@ export async function GET() {
     const overdueInvoices = await prisma.invoice.count({
       where: {
         status: {
-          in: [PaymentStatus.UNPAID, PaymentStatus.PARTIAL],
+          in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIAL],
         },
         createdAt: {
           lt: thirtyDaysAgo,
@@ -160,7 +160,7 @@ export async function GET() {
           gte: oneDayAgo,
         },
         Invoice: {
-          status: PaymentStatus.PAID,
+          status: InvoiceStatus.PAID,
         },
       },
       include: {

@@ -30,21 +30,6 @@ export async function GET(request: Request) {
       orderBy: { clockIn: "desc" },
       take: limit,
       skip: offset,
-      include: {
-        job: {
-          select: {
-            id: true,
-            jobNumber: true,
-            vehicle: {
-              select: {
-                make: true,
-                model: true,
-                year: true,
-              },
-            },
-          },
-        },
-      },
     })
 
     // Calculate durations and format response
@@ -68,15 +53,7 @@ export async function GET(request: Request) {
         clockIn: entry.clockIn.toISOString(),
         clockOut: entry.clockOut?.toISOString() || null,
         duration,
-        job: entry.job
-          ? {
-              id: entry.job.id,
-              jobNumber: entry.job.jobNumber,
-              vehicle: entry.job.vehicle
-                ? `${entry.job.vehicle.year} ${entry.job.vehicle.make} ${entry.job.vehicle.model}`
-                : null,
-            }
-          : null,
+        jobId: entry.jobId || null,
       }
     })
 

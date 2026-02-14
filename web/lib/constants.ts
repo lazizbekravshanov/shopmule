@@ -1,4 +1,4 @@
-import { RepairOrderStatus, Role, InvoiceStatus } from "@prisma/client"
+import { WorkOrderStatus, Role, InvoiceStatus } from "@prisma/client"
 
 export const APP_NAME = "ShopMule"
 export const APP_DESCRIPTION = "Modern SaaS for trucking service centers"
@@ -9,14 +9,16 @@ export const MAX_PAGE_SIZE = 100
 
 // Role display names
 export const ROLE_LABELS: Record<Role, string> = {
+  OWNER: "Owner",
   ADMIN: "Administrator",
   MANAGER: "Manager",
-  TECH: "Technician",
-  VIEWER: "Viewer",
+  SERVICE_ADVISOR: "Service Advisor",
+  MECHANIC: "Mechanic",
+  FRONT_DESK: "Front Desk",
 }
 
-// Repair order status config
-export const REPAIR_ORDER_STATUS_CONFIG: Record<RepairOrderStatus, {
+// Work order status config
+export const WORK_ORDER_STATUS_CONFIG: Record<WorkOrderStatus, {
   label: string
   color: string
   bgColor: string
@@ -25,6 +27,16 @@ export const REPAIR_ORDER_STATUS_CONFIG: Record<RepairOrderStatus, {
     label: "Draft",
     color: "text-gray-700",
     bgColor: "bg-gray-100",
+  },
+  ESTIMATE: {
+    label: "Estimate",
+    color: "text-slate-700",
+    bgColor: "bg-slate-100",
+  },
+  ESTIMATE_SENT: {
+    label: "Estimate Sent",
+    color: "text-sky-700",
+    bgColor: "bg-sky-100",
   },
   AWAITING_APPROVAL: {
     label: "Awaiting Approval",
@@ -41,20 +53,45 @@ export const REPAIR_ORDER_STATUS_CONFIG: Record<RepairOrderStatus, {
     color: "text-purple-700",
     bgColor: "bg-purple-100",
   },
-  READY_TO_INVOICE: {
-    label: "Ready to Invoice",
-    color: "text-orange-700",
-    bgColor: "bg-orange-100",
+  WAITING_ON_PARTS: {
+    label: "Waiting on Parts",
+    color: "text-amber-700",
+    bgColor: "bg-amber-100",
   },
-  INVOICED: {
-    label: "Invoiced",
+  QUALITY_CHECK: {
+    label: "Quality Check",
+    color: "text-teal-700",
+    bgColor: "bg-teal-100",
+  },
+  READY_FOR_PICKUP: {
+    label: "Ready for Pickup",
+    color: "text-emerald-700",
+    bgColor: "bg-emerald-100",
+  },
+  COMPLETED: {
+    label: "Completed",
     color: "text-green-700",
     bgColor: "bg-green-100",
   },
-  CLOSED: {
-    label: "Closed",
+  INVOICED: {
+    label: "Invoiced",
+    color: "text-indigo-700",
+    bgColor: "bg-indigo-100",
+  },
+  CANCELLED: {
+    label: "Cancelled",
+    color: "text-red-700",
+    bgColor: "bg-red-100",
+  },
+  ARCHIVED: {
+    label: "Archived",
     color: "text-gray-500",
     bgColor: "bg-gray-50",
+  },
+  DIAGNOSED: {
+    label: "Diagnosed",
+    color: "text-cyan-700",
+    bgColor: "bg-cyan-100",
   },
 }
 
@@ -64,12 +101,22 @@ export const INVOICE_STATUS_CONFIG: Record<InvoiceStatus, {
   color: string
   bgColor: string
 }> = {
-  UNPAID: {
-    label: "Unpaid",
-    color: "text-red-700",
-    bgColor: "bg-red-100",
+  DRAFT: {
+    label: "Draft",
+    color: "text-gray-700",
+    bgColor: "bg-gray-100",
   },
-  PARTIALLY_PAID: {
+  SENT: {
+    label: "Sent",
+    color: "text-blue-700",
+    bgColor: "bg-blue-100",
+  },
+  VIEWED: {
+    label: "Viewed",
+    color: "text-sky-700",
+    bgColor: "bg-sky-100",
+  },
+  PARTIAL: {
     label: "Partially Paid",
     color: "text-yellow-700",
     bgColor: "bg-yellow-100",
@@ -78,6 +125,31 @@ export const INVOICE_STATUS_CONFIG: Record<InvoiceStatus, {
     label: "Paid",
     color: "text-green-700",
     bgColor: "bg-green-100",
+  },
+  OVERDUE: {
+    label: "Overdue",
+    color: "text-red-700",
+    bgColor: "bg-red-100",
+  },
+  VOID: {
+    label: "Void",
+    color: "text-gray-500",
+    bgColor: "bg-gray-50",
+  },
+  REFUNDED: {
+    label: "Refunded",
+    color: "text-purple-700",
+    bgColor: "bg-purple-100",
+  },
+  COLLECTIONS: {
+    label: "Collections",
+    color: "text-orange-700",
+    bgColor: "bg-orange-100",
+  },
+  UNPAID: {
+    label: "Unpaid",
+    color: "text-red-700",
+    bgColor: "bg-red-100",
   },
 }
 

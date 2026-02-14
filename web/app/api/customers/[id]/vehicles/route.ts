@@ -44,7 +44,7 @@ export async function POST(
     const data = createVehicleSchema.parse(body)
 
     // Check if VIN already exists
-    const existingVehicle = await prisma.vehicle.findUnique({
+    const existingVehicle = await prisma.vehicle.findFirst({
       where: { vin: data.vin },
     })
 
@@ -57,12 +57,13 @@ export async function POST(
 
     const vehicle = await prisma.vehicle.create({
       data: {
+        tenantId: customer.tenantId,
         customerId: customerId,
         vin: data.vin,
         make: data.make,
         model: data.model,
         year: data.year || null,
-        mileage: data.mileage || null,
+        currentMileage: data.mileage || null,
         unitNumber: data.unitNumber || null,
         licensePlate: data.licensePlate || null,
       },

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Linkedin, Twitter, Mail } from 'lucide-react';
+import { Linkedin, Mail } from 'lucide-react';
 
 const team = [
   {
@@ -104,14 +104,6 @@ export function TeamSection() {
                       className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
                     >
                       <Linkedin className="w-5 h-5" />
-                    </a>
-                  )}
-                  {member.twitter && (
-                    <a
-                      href={member.twitter}
-                      className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-                    >
-                      <Twitter className="w-5 h-5" />
                     </a>
                   )}
                 </div>

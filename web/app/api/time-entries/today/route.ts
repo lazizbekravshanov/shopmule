@@ -9,22 +9,23 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  // Find employee profile for this user
+  const employee = await prisma.employeeProfile.findUnique({
+    where: { userId: session.user.id },
+  })
+
+  if (!employee) {
+    return NextResponse.json({ error: "Employee profile not found" }, { status: 404 })
+  }
+
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
   const entries = await prisma.timeEntry.findMany({
     where: {
-      shopId: session.user.shopId,
-      techId: session.user.id,
+      employeeId: employee.id,
       clockIn: {
         gte: today,
-      },
-    },
-    include: {
-      repairOrder: {
-        include: {
-          customer: true,
-        },
       },
     },
     orderBy: { clockIn: "desc" },

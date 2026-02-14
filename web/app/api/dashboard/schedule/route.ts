@@ -9,7 +9,7 @@ type WorkOrderWithRelations = Prisma.WorkOrderGetPayload<{
         Customer: true;
       };
     };
-    WorkOrderAssignment: {
+    Assignments: {
       include: {
         EmployeeProfile: true;
       };
@@ -32,7 +32,7 @@ export async function GET() {
             Customer: true,
           },
         },
-        WorkOrderAssignment: {
+        Assignments: {
           include: {
             EmployeeProfile: true,
           },
@@ -66,7 +66,7 @@ export async function GET() {
         vehicle: vehicleStr,
         type: wo.description?.split(' ').slice(0, 3).join(' ') || 'Service',
         status: wo.status,
-        technician: wo.WorkOrderAssignment[0]?.EmployeeProfile?.name || 'Unassigned',
+        technician: wo.Assignments[0]?.EmployeeProfile?.name || 'Unassigned',
         bay: `Bay ${(index % 4) + 1}`,
         createdAt: wo.createdAt,
       };

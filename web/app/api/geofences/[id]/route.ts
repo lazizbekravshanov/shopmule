@@ -18,7 +18,7 @@ export async function GET(
             address: true,
           },
         },
-        GeofenceAssignment: {
+        GeofenceAssignments: {
           include: {
             EmployeeProfile: {
               select: {
@@ -32,7 +32,7 @@ export async function GET(
         },
         _count: {
           select: {
-            PunchRecord: true,
+            PunchRecords: true,
           },
         },
       },
@@ -123,7 +123,7 @@ export async function PATCH(
             name: true,
           },
         },
-        GeofenceAssignment: {
+        GeofenceAssignments: {
           include: {
             EmployeeProfile: {
               select: {

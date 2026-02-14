@@ -9,12 +9,12 @@ export async function GET(request: NextRequest) {
     // Get all employees with their latest punch
     const employees = await prisma.employeeProfile.findMany({
       where: shopId ? {
-        ShopAssignment: {
+        ShopAssignments: {
           some: { shopId },
         },
       } : undefined,
       include: {
-        ShopAssignment: {
+        ShopAssignments: {
           include: {
             Shop: {
               select: {
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
             name: employee.name,
             role: employee.role,
             photoUrl: employee.photoUrl,
-            shops: employee.ShopAssignment.map((sa) => sa.Shop),
+            shops: employee.ShopAssignments.map((sa) => sa.Shop),
           },
           status: isOnBreak ? 'ON_BREAK' : isClockedIn ? 'CLOCKED_IN' : 'CLOCKED_OUT',
           isClockedIn: isClockedIn || false,

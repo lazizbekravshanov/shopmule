@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { RepairOrderStatus } from "@prisma/client"
+import { WorkOrderStatus } from "@prisma/client"
 import crypto from "crypto"
 
 export async function GET(request: Request) {
@@ -42,70 +42,89 @@ export async function GET(request: Request) {
     start.setHours(0, 0, 0, 0)
   }
 
-  const openPunches = await prisma.shiftPunch.findMany({
-    where: {
-      shopId: shop.id,
-      clockOutAt: null,
-    },
-    include: {
-      user: true,
-    },
+  // Get employees currently clocked in via PunchRecord
+  const shopEmployees = await prisma.shopAssignment.findMany({
+    where: { shopId: shop.id },
+    select: { employeeId: true },
   })
+  const employeeIds = shopEmployees.map((e) => e.employeeId)
 
-  const clockedIn = openPunches.map((punch) => {
-    const duration = Math.floor((now.getTime() - punch.clockInAt.getTime()) / 60000)
-    return {
-      user_id: punch.userId,
-      name: punch.user.name || punch.user.email,
-      duration_minutes: duration,
+  // For each employee, check if their latest punch is CLOCK_IN or BREAK_END
+  const clockedIn: Array<{ user_id: string; name: string; duration_minutes: number }> = []
+  for (const empId of employeeIds) {
+    const lastPunch = await prisma.punchRecord.findFirst({
+      where: { employeeId: empId },
+      orderBy: { timestamp: "desc" },
+      include: { EmployeeProfile: { select: { name: true } } },
+    })
+    if (lastPunch && (lastPunch.type === "CLOCK_IN" || lastPunch.type === "BREAK_END")) {
+      // Find original clock-in for duration
+      const clockInPunch = await prisma.punchRecord.findFirst({
+        where: { employeeId: empId, type: "CLOCK_IN" },
+        orderBy: { timestamp: "desc" },
+      })
+      const duration = clockInPunch
+        ? Math.floor((now.getTime() - clockInPunch.timestamp.getTime()) / 60000)
+        : 0
+      clockedIn.push({
+        user_id: empId,
+        name: lastPunch.EmployeeProfile.name,
+        duration_minutes: duration,
+      })
     }
-  })
+  }
 
-  const activeOrders = await prisma.repairOrder.findMany({
+  const activeOrders = await prisma.workOrder.findMany({
     where: {
-      shopId: shop.id,
-      status: RepairOrderStatus.IN_PROGRESS,
+      tenantId: shop.tenantId!,
+      status: WorkOrderStatus.IN_PROGRESS,
     },
     include: {
-      customer: true,
-      vehicle: true,
+      Customer: true,
+      Vehicle: true,
     },
-    orderBy: { openedAt: "desc" },
+    orderBy: { createdAt: "desc" },
     take: 10,
   })
 
-  const techs = await prisma.user.findMany({
+  // Technician leaderboard
+  const techs = await prisma.employeeProfile.findMany({
     where: {
-      shopId: shop.id,
-      role: "TECH",
+      tenantId: shop.tenantId!,
+      role: "MECHANIC",
     },
   })
 
   const leaderboard = await Promise.all(
     techs.map(async (tech) => {
-      const clockedPunches = await prisma.shiftPunch.findMany({
+      // Clock hours from PunchRecords
+      const punches = await prisma.punchRecord.findMany({
         where: {
-          shopId: shop.id,
-          userId: tech.id,
-          clockInAt: {
-            gte: start,
-          },
+          employeeId: tech.id,
+          type: "CLOCK_IN",
+          timestamp: { gte: start },
         },
       })
 
       let clockedSeconds = 0
-      for (const punch of clockedPunches) {
-        const end = punch.clockOutAt || now
-        clockedSeconds += Math.max(0, (end.getTime() - punch.clockInAt.getTime()) / 1000)
+      for (const punch of punches) {
+        const clockOut = await prisma.punchRecord.findFirst({
+          where: {
+            employeeId: tech.id,
+            type: "CLOCK_OUT",
+            timestamp: { gt: punch.timestamp },
+          },
+          orderBy: { timestamp: "asc" },
+        })
+        const end = clockOut?.timestamp || now
+        clockedSeconds += Math.max(0, (end.getTime() - punch.timestamp.getTime()) / 1000)
       }
 
+      // Wrench time from TimeEntry
       const wrenchEntries = await prisma.timeEntry.findMany({
         where: {
-          shopId: shop.id,
-          techId: tech.id,
-          clockIn: {
-            gte: start,
-          },
+          employeeId: tech.id,
+          clockIn: { gte: start },
         },
       })
 
@@ -115,20 +134,18 @@ export async function GET(request: Request) {
         wrenchSeconds += Math.max(0, (end.getTime() - entry.clockIn.getTime()) / 1000)
       }
 
-      const laborLines = await prisma.laborLine.findMany({
+      // Billed hours from WorkOrderLabor
+      const laborEntries = await prisma.workOrderLabor.findMany({
         where: {
-          shopId: shop.id,
-          techId: tech.id,
-          repairOrder: {
-            openedAt: {
-              gte: start,
-            },
+          employeeId: tech.id,
+          WorkOrder: {
+            createdAt: { gte: start },
           },
         },
       })
 
-      const billedHours = laborLines.reduce(
-        (sum, line) => sum + Number(line.billedHours),
+      const billedHours = laborEntries.reduce(
+        (sum, line) => sum + Number(line.hours),
         0
       )
 
@@ -139,7 +156,7 @@ export async function GET(request: Request) {
 
       return {
         tech_id: tech.id,
-        name: tech.name || tech.email,
+        name: tech.name,
         clocked_hours: clockedHours,
         wrench_hours: wrenchHours,
         billed_hours: billedHours,
@@ -149,19 +166,18 @@ export async function GET(request: Request) {
     })
   )
 
-  const closedOrders = await prisma.repairOrder.findMany({
+  const closedOrders = await prisma.workOrder.findMany({
     where: {
-      shopId: shop.id,
-      closedAt: {
-        gte: start,
-      },
+      tenantId: shop.tenantId!,
+      status: WorkOrderStatus.COMPLETED,
+      actualEnd: { gte: start },
     },
   })
 
   const durations = closedOrders
-    .filter((order) => order.inProgressAt && order.closedAt)
+    .filter((order) => order.actualStart && order.actualEnd)
     .map((order) => {
-      return (order.closedAt!.getTime() - order.inProgressAt!.getTime()) / 60000
+      return (order.actualEnd!.getTime() - order.actualStart!.getTime()) / 60000
     })
 
   const avgMinutes = durations.length > 0
@@ -174,8 +190,8 @@ export async function GET(request: Request) {
       count: activeOrders.length,
       top: activeOrders.map((order) => ({
         id: order.id,
-        customer__name: order.customer.name,
-        unit__vin: order.vehicle?.vin || null,
+        customer__name: order.Customer.displayName,
+        unit__vin: order.Vehicle?.vin || null,
         status: order.status,
       })),
     },
@@ -183,7 +199,6 @@ export async function GET(request: Request) {
     throughput: {
       jobs_closed: closedOrders.length,
       average_in_progress_to_closed_minutes: avgMinutes,
-      comebacks: closedOrders.filter((o) => o.isComeback).length,
     },
   })
 }

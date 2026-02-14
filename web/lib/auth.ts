@@ -54,6 +54,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          tenantId: user.tenantId,
+          shopId: user.tenantId, // alias for backwards compat
         }
       }
     })
@@ -96,6 +98,8 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.role = user.role
         token.name = user.name
+        token.tenantId = user.tenantId
+        token.shopId = user.shopId
       }
       return token
     },
@@ -104,6 +108,8 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string
         session.user.role = token.role as Role
         session.user.name = token.name as string
+        session.user.tenantId = (token.tenantId as string) || null
+        session.user.shopId = (token.shopId as string) || null
       }
       return session
     }

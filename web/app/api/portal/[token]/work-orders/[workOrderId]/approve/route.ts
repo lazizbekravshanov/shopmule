@@ -77,7 +77,7 @@ export async function POST(
 
     // Audit log: Customer approved estimate via portal
     await logAudit({
-      action: 'APPROVE',
+      action: 'UPDATE',
       entityType: 'WorkOrder',
       entityId: workOrderId,
       oldValues: { status: workOrder.status },
