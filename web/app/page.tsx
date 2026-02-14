@@ -28,6 +28,9 @@ import {
   MarketOpportunity,
   TeamSection,
   CompetitorComparison,
+  MobileShowcase,
+  BuiltForTrucking,
+  AnnouncementBar,
 } from '@/components/landing';
 
 export default function LandingPage() {
@@ -35,6 +38,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white">
       <ScrollProgress />
       <SmoothScroll />
+      <AnnouncementBar />
       <Navigation />
       <main id="main-content" role="main">
         <Hero />
@@ -44,6 +48,8 @@ export default function LandingPage() {
         <StatsCounter />
         <ProblemSolution />
         <FeaturesBento />
+        <MobileShowcase />
+        <BuiltForTrucking />
         <VideoDemo />
         <Integrations />
         <HowItWorks />

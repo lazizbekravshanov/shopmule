@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
+import { TextStreamChatTransport } from 'ai'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -49,11 +50,12 @@ export function AICopilot() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // @ts-expect-error AI SDK type mismatch
-  const { messages, sendMessage, status, error, reload } = useChat({
+  const { messages, sendMessage, regenerate, status, error } = useChat({
     id: 'shopmule-copilot',
-    api: '/api/ai/chat',
-    fetch: (url: string, options: RequestInit) => fetch(url, { ...options, credentials: 'include' }),
+    transport: new TextStreamChatTransport({
+      api: '/api/ai/chat',
+      credentials: 'include',
+    }),
   })
 
   const isLoading = status === 'streaming' || status === 'submitted'
@@ -78,8 +80,7 @@ export function AICopilot() {
 
     const message = inputValue.trim()
     setInputValue('')
-    // @ts-expect-error AI SDK type mismatch
-    await sendMessage({ content: message })
+    await sendMessage({ text: message })
   }
 
   const handleQuickAction = async (prompt: string) => {
@@ -89,8 +90,7 @@ export function AICopilot() {
       return
     }
     setInputValue('')
-    // @ts-expect-error AI SDK type mismatch
-    await sendMessage({ content: prompt })
+    await sendMessage({ text: prompt })
   }
 
   // Floating button when closed
@@ -165,7 +165,7 @@ export function AICopilot() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => reload()}
+                  onClick={() => regenerate()}
                   className="gap-2"
                 >
                   <RefreshCw className="h-3 w-3" />
@@ -243,29 +243,29 @@ export function AICopilot() {
                           if (part.type === 'text') {
                             return <span key={i}>{part.text}</span>
                           }
-                          if (part.type === 'tool-invocation') {
-                            const toolName = part.toolInvocation.toolName
-                            const friendlyNames: Record<string, string> = {
-                              searchCustomers: 'Searching customers',
-                              searchVehicles: 'Looking up vehicles',
-                              getDashboardStats: 'Checking shop stats',
-                              getWorkOrders: 'Finding work orders',
-                              createWorkOrder: 'Creating work order',
-                              updateWorkOrderStatus: 'Updating status',
-                              checkInventory: 'Checking inventory',
-                              getTodaysSchedule: 'Getting schedule',
-                              getRecommendations: 'Analyzing shop data',
-                              quickSearch: 'Searching...',
-                            }
+                          const friendlyNames: Record<string, string> = {
+                            searchCustomers: 'Searching customers',
+                            searchVehicles: 'Looking up vehicles',
+                            getDashboardStats: 'Checking shop stats',
+                            getWorkOrders: 'Finding work orders',
+                            createWorkOrder: 'Creating work order',
+                            updateWorkOrderStatus: 'Updating status',
+                            checkInventory: 'Checking inventory',
+                            getTodaysSchedule: 'Getting schedule',
+                            getRecommendations: 'Analyzing shop data',
+                            quickSearch: 'Searching...',
+                          }
+                          const toolName = ('toolName' in part ? (part.toolName as string) : part.type.replace('tool-', ''))
+                          if (friendlyNames[toolName]) {
                             return (
                               <div key={i} className="flex items-center gap-2 my-2 py-2 px-3 rounded-lg bg-white/50 dark:bg-neutral-700/50 text-xs text-neutral-600 dark:text-neutral-400">
                                 <Loader2 className="h-3 w-3 animate-spin text-orange-500" />
-                                <span>{friendlyNames[toolName] || toolName}</span>
+                                <span>{friendlyNames[toolName]}</span>
                               </div>
                             )
                           }
                           return null
-                        }) || message.content}
+                        })}
                       </div>
                     </div>
                     {message.role === 'user' && (

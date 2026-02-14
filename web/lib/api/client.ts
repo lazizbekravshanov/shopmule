@@ -1,11 +1,10 @@
 import type {
   Customer,
   Vehicle,
-  RepairOrder,
-  User,
+  WorkOrder,
   Part,
   TimeEntry,
-  ShiftPunch
+  PunchRecord,
 } from "@prisma/client"
 
 export class ApiError extends Error {
@@ -61,39 +60,34 @@ export const api = {
     },
   },
 
-  // Repair Orders
-  repairOrders: {
-    list: async (): Promise<RepairOrder[]> => {
-      const response = await fetch("/api/repair-orders")
-      return handleResponse<RepairOrder[]>(response)
+  // Work Orders (formerly Repair Orders)
+  workOrders: {
+    list: async (): Promise<WorkOrder[]> => {
+      const response = await fetch("/api/work-orders")
+      return handleResponse<WorkOrder[]>(response)
     },
-    create: async (data: CreateRepairOrderInput): Promise<RepairOrder> => {
-      const response = await fetch("/api/repair-orders", {
+    create: async (data: CreateWorkOrderInput): Promise<WorkOrder> => {
+      const response = await fetch("/api/work-orders", {
         method: "POST",
         headers: defaultHeaders,
         body: JSON.stringify(data),
       })
-      return handleResponse<RepairOrder>(response)
+      return handleResponse<WorkOrder>(response)
     },
   },
 
   // Time Entries
   timeEntries: {
-    current: async (): Promise<TimeEntry | null> => {
-      const response = await fetch("/api/time-entries/current")
-      const data = await handleResponse<{ timeEntry: TimeEntry | null }>(response)
-      return data.timeEntry
-    },
     today: async (): Promise<TimeEntry[]> => {
       const response = await fetch("/api/time-entries/today")
       const data = await handleResponse<{ entries: TimeEntry[] }>(response)
       return data.entries
     },
-    start: async (repairOrderId: string, notes?: string): Promise<TimeEntry> => {
+    start: async (workOrderId?: string, notes?: string): Promise<TimeEntry> => {
       const response = await fetch("/api/time-entries/start", {
         method: "POST",
         headers: defaultHeaders,
-        body: JSON.stringify({ repairOrderId, notes }),
+        body: JSON.stringify({ workOrderId, notes }),
       })
       const data = await handleResponse<{ timeEntry: TimeEntry }>(response)
       return data.timeEntry
@@ -109,30 +103,6 @@ export const api = {
     },
   },
 
-  // Attendance
-  attendance: {
-    status: async (): Promise<AttendanceStatus> => {
-      const response = await fetch("/api/attendance/status")
-      return handleResponse<AttendanceStatus>(response)
-    },
-    clockIn: async (): Promise<ShiftPunch> => {
-      const response = await fetch("/api/attendance/clock-in", {
-        method: "POST",
-        headers: defaultHeaders,
-      })
-      const data = await handleResponse<{ punch: ShiftPunch }>(response)
-      return data.punch
-    },
-    clockOut: async (): Promise<ShiftPunch> => {
-      const response = await fetch("/api/attendance/clock-out", {
-        method: "POST",
-        headers: defaultHeaders,
-      })
-      const data = await handleResponse<{ punch: ShiftPunch }>(response)
-      return data.punch
-    },
-  },
-
   // TV Dashboard
   tv: {
     dashboard: async (): Promise<TvDashboardData> => {
@@ -143,16 +113,11 @@ export const api = {
 }
 
 // Input types
-export interface CreateRepairOrderInput {
-  customerId: string
+export interface CreateWorkOrderInput {
   vehicleId: string
-  internalNotes?: string
-  customerNotes?: string
-}
-
-export interface AttendanceStatus {
-  isClockedIn: boolean
-  currentPunch: ShiftPunch | null
+  description: string
+  notes?: string
+  checklist?: string
 }
 
 export interface TvDashboardData {

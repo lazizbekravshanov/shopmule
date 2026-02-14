@@ -8,7 +8,7 @@ export const aiTools = {
   // Search customers
   searchCustomers: tool({
     description: 'Search for customers by name, email, phone, or company name. Use this whenever someone mentions a customer.',
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string().describe('Search query - name, email, phone, or company'),
     }),
     execute: async ({ query }: { query: string }) => {
@@ -67,7 +67,7 @@ export const aiTools = {
   // Search vehicles
   searchVehicles: tool({
     description: 'Search for vehicles by VIN, make, model, year, or license plate. Use this when looking for a specific vehicle.',
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string().describe('Search query - VIN, make, model, year, or license plate'),
     }),
     execute: async ({ query }: { query: string }) => {
@@ -120,7 +120,7 @@ export const aiTools = {
   // Get dashboard stats
   getDashboardStats: tool({
     description: 'Get current shop statistics - work orders, revenue, inventory alerts. Use this for general status questions.',
-    parameters: z.object({}),
+    inputSchema: z.object({}),
     execute: async () => {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
@@ -197,7 +197,7 @@ export const aiTools = {
   // Get work orders
   getWorkOrders: tool({
     description: 'Get work orders list. Can filter by status or search by customer/vehicle.',
-    parameters: z.object({
+    inputSchema: z.object({
       status: z.enum(['DRAFT', 'DIAGNOSED', 'APPROVED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional()
         .describe('Filter by status'),
       customerName: z.string().optional().describe('Filter by customer name'),
@@ -246,7 +246,7 @@ export const aiTools = {
   // Create work order
   createWorkOrder: tool({
     description: 'Create a new work order. Need vehicle ID and description of work.',
-    parameters: z.object({
+    inputSchema: z.object({
       vehicleId: z.string().describe('The vehicle ID (get this from searchVehicles first)'),
       description: z.string().describe('Description of the work to be done'),
     }),
@@ -300,7 +300,7 @@ export const aiTools = {
   // Update work order status
   updateWorkOrderStatus: tool({
     description: 'Update work order status. Use this to move jobs through the workflow.',
-    parameters: z.object({
+    inputSchema: z.object({
       workOrderId: z.string().describe('The work order ID'),
       status: z.enum(['DRAFT', 'DIAGNOSED', 'APPROVED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
         .describe('New status'),
@@ -333,7 +333,7 @@ export const aiTools = {
   // Check inventory
   checkInventory: tool({
     description: 'Check parts inventory. Can search by name/SKU or just show low stock items.',
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string().optional().describe('Search by part name or SKU'),
       lowStockOnly: z.boolean().optional().describe('Only show items that need reordering'),
     }),
@@ -396,7 +396,7 @@ export const aiTools = {
   // Get today's schedule
   getTodaysSchedule: tool({
     description: 'Get today\'s work schedule - active jobs, what\'s coming up, who\'s working on what.',
-    parameters: z.object({}),
+    inputSchema: z.object({}),
     execute: async () => {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
@@ -463,7 +463,7 @@ export const aiTools = {
   // Get recommendations
   getRecommendations: tool({
     description: 'Get smart recommendations - what needs attention, what to prioritize.',
-    parameters: z.object({
+    inputSchema: z.object({
       focus: z.enum(['all', 'urgent', 'revenue', 'inventory']).optional()
         .describe('What to focus on'),
     }),
@@ -595,7 +595,7 @@ export const aiTools = {
   // Quick search - searches everything
   quickSearch: tool({
     description: 'Search across customers, vehicles, and work orders at once. Use for general "find" requests.',
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string().describe('What to search for'),
     }),
     execute: async ({ query }: { query: string }) => {

@@ -26,3 +26,6 @@ export { CaseStudies } from './case-studies';
 export { MarketOpportunity } from './market-opportunity';
 export { TeamSection } from './team-section';
 export { CompetitorComparison } from './competitor-comparison';
+export { MobileShowcase } from './mobile-showcase';
+export { BuiltForTrucking } from './built-for-trucking';
+export { AnnouncementBar } from './announcement-bar';

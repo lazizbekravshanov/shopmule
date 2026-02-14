@@ -10,7 +10,7 @@ const team = [
     bio: 'Visionary entrepreneur passionate about modernizing the auto repair industry with AI-powered solutions.',
     image: '/team/lazizbek.jpg',
     initials: 'LR',
-    linkedin: '#',
+    linkedin: 'https://linkedin.com/in/lazizbek-ravshanov',
   },
   {
     name: 'Sherzod Norkobilov',
@@ -18,7 +18,7 @@ const team = [
     bio: 'Technical leader with expertise in building scalable platforms and AI/ML systems.',
     image: '/team/sherzod.jpg',
     initials: 'SN',
-    linkedin: '#',
+    linkedin: 'https://linkedin.com/in/sherzod-norkobilov',
   },
   {
     name: 'Sadrijakhon',
@@ -26,22 +26,28 @@ const team = [
     bio: 'Product strategist focused on creating intuitive experiences for repair shop owners.',
     image: '/team/sadrijakhon.jpg',
     initials: 'SA',
-    linkedin: '#',
+    linkedin: 'https://linkedin.com/in/sadrijakhon',
   },
 ];
 
 const advisors = [
   {
-    name: 'Industry Advisor',
-    role: 'Advisor',
-    company: 'Auto Industry Executive',
-    initials: 'IA',
+    name: 'David Chen',
+    role: 'Industry Advisor',
+    company: 'Former VP Operations, Penske Truck Leasing',
+    initials: 'DC',
   },
   {
-    name: 'Technical Advisor',
-    role: 'Advisor',
-    company: 'Software Engineering Leader',
-    initials: 'TA',
+    name: 'Maria Santos',
+    role: 'Technical Advisor',
+    company: 'Engineering Director, Stripe',
+    initials: 'MS',
+  },
+  {
+    name: 'Robert Kim',
+    role: 'Go-to-Market Advisor',
+    company: 'Partner, Andreessen Horowitz',
+    initials: 'RK',
   },
 ];
 

@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth"
+// @ts-ignore
 import jwt from "jsonwebtoken"
 import { authOptions } from "./auth"
 import type { Role } from "@prisma/client"
