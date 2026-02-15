@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { NewAppointmentModal } from '@/components/schedule/new-appointment-modal';
+import { AppointmentDetailSheet, type Appointment } from '@/components/schedule/appointment-detail-sheet';
 
 // Get days in month
 function getDaysInMonth(year: number, month: number) {
@@ -32,17 +34,7 @@ const MONTHS = [
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // Mock scheduled appointments
-const mockAppointments: Record<string, Array<{
-  id: string;
-  time: string;
-  customer: string;
-  vehicle: string;
-  service: string;
-  technician: string;
-  status: 'scheduled' | 'in-progress' | 'completed';
-}>> = {
-  // Today's appointments (we'll calculate the actual date)
-};
+const mockAppointments: Record<string, Appointment[]> = {};
 
 // Add some mock data for demonstration
 function generateMockData() {
@@ -73,6 +65,9 @@ export default function SchedulePage() {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(today);
   const [selectedDate, setSelectedDate] = useState(today);
+  const [newModalOpen, setNewModalOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
 
   const appointments = generateMockData();
 
@@ -135,7 +130,10 @@ export default function SchedulePage() {
             Manage appointments and shop calendar
           </p>
         </div>
-        <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl">
+        <Button
+          onClick={() => setNewModalOpen(true)}
+          className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl"
+        >
           <Plus className="w-4 h-4 mr-2" />
           New Appointment
         </Button>
@@ -259,6 +257,10 @@ export default function SchedulePage() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
+                    onClick={() => {
+                      setSelectedAppointment(apt);
+                      setDetailSheetOpen(true);
+                    }}
                     className="flex items-start gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-700/50 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
                   >
                     <div className="flex-shrink-0 w-16 text-center">
@@ -301,6 +303,20 @@ export default function SchedulePage() {
           )}
         </motion.div>
       </div>
+
+      {/* New Appointment Modal */}
+      <NewAppointmentModal
+        open={newModalOpen}
+        onOpenChange={setNewModalOpen}
+        defaultDate={selectedDate}
+      />
+
+      {/* Appointment Detail Sheet */}
+      <AppointmentDetailSheet
+        appointment={selectedAppointment}
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+      />
     </div>
   );
 }
