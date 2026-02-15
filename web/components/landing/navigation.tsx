@@ -34,7 +34,7 @@ export function Navigation() {
         animate={{ y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300',
+          'sticky top-0 left-0 right-0 z-50 h-16 transition-all duration-300',
           isScrolled
             ? 'bg-white/80 backdrop-blur-xl border-b border-neutral-200/50 shadow-sm'
             : 'bg-transparent'

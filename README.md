@@ -264,6 +264,105 @@ docker compose -f docker-compose.yml up --build
 
 ---
 
+## 🔌 Developer Portal & API Integration
+
+ShopMule exposes a REST API for third-party integrations. If you want to build on top of ShopMule or connect your service, start here.
+
+**Full docs:** Visit `/dev` in the app or see [web/app/dev/page.tsx](web/app/dev/page.tsx).
+
+### API Base URL
+
+```
+https://api.shopmule.com/v2
+```
+
+### Authentication
+
+All API requests require a Bearer token:
+
+```bash
+curl https://api.shopmule.com/v2/work-orders \
+  -H "Authorization: Bearer sk_live_your_api_key"
+```
+
+Get your API key from **Settings > API Keys** in the dashboard.
+
+### SDKs
+
+```bash
+# Node.js / TypeScript
+npm install @shopmule/sdk
+
+# Python
+pip install shopmule
+
+# CLI
+npm install -g @shopmule/cli
+```
+
+### Quick Example
+
+```typescript
+import ShopMule from '@shopmule/sdk';
+
+const client = new ShopMule({
+  apiKey: process.env.SHOPMULE_API_KEY,
+});
+
+// Create a work order
+const wo = await client.workOrders.create({
+  customerId: 'cus_abc123',
+  vehicleId: 'veh_xyz789',
+  description: 'Oil change + tire rotation',
+});
+
+// Listen for webhook events
+client.webhooks.on('work_order.completed', async (event) => {
+  console.log(`Work order ${event.data.id} completed`);
+});
+```
+
+### API Resources
+
+| Resource | Endpoints |
+|----------|-----------|
+| **Work Orders** | CRUD + status transitions |
+| **Customers** | CRUD + vehicle management |
+| **Invoices** | Create, send, record payments |
+| **Inventory** | Parts CRUD + stock history |
+| **AI Agents** | Diagnose, estimate, summarize (Beta) |
+
+### Webhooks
+
+Subscribe to real-time events in **Settings > Webhooks**:
+
+| Event | Description |
+|-------|-------------|
+| `work_order.created` | New work order created |
+| `work_order.status_changed` | Work order transitions status |
+| `work_order.completed` | Work order marked complete |
+| `invoice.created` | Invoice generated |
+| `invoice.paid` | Payment recorded |
+| `customer.created` | New customer added |
+| `inventory.low_stock` | Part stock below threshold |
+| `ai.job_completed` | Async AI job finished |
+
+All payloads are signed — verify using your webhook secret.
+
+### Sandbox
+
+Use `sk_test_*` keys for development. Sandbox data resets daily at midnight UTC. No billing impact.
+
+### Rate Limits
+
+| Plan | Rate | Burst | Daily |
+|------|------|-------|-------|
+| Free | 60 req/min | 10 req/sec | 1,000 |
+| Pro | 600 req/min | 50 req/sec | 50,000 |
+| Enterprise | Custom | Custom | Unlimited |
+
+---
+
 ## 🤝 Contributing
 
 1. Follow the coding style in existing files
@@ -276,4 +375,4 @@ docker compose -f docker-compose.yml up --build
 
 ## 📄 License
 
-[Your License Here]
+Proprietary. All rights reserved.
