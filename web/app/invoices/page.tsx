@@ -54,6 +54,7 @@ import {
 } from '@/lib/queries/invoices';
 import { type Invoice } from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { InvoicePreviewSheet } from '@/components/invoice/invoice-preview-sheet';
 
 const statusOptions = [
   { label: 'Unpaid', value: 'UNPAID' },
@@ -371,6 +372,13 @@ function InvoiceActions({ invoice }: { invoice: Invoice }) {
 
 export default function InvoicesPage() {
   const { data: invoices, isLoading, refetch, isFetching } = useInvoices();
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [previewSheetOpen, setPreviewSheetOpen] = useState(false);
+
+  const handleRowClick = (row: Invoice) => {
+    setSelectedInvoiceId(row.id);
+    setPreviewSheetOpen(true);
+  };
 
   // Calculate stats
   const totalInvoices = invoices?.length || 0;
@@ -455,9 +463,16 @@ export default function InvoicesPage() {
                 options: statusOptions,
               },
             ]}
+            onRowClick={handleRowClick}
           />
         )}
       </div>
+
+      <InvoicePreviewSheet
+        invoiceId={selectedInvoiceId}
+        open={previewSheetOpen}
+        onOpenChange={setPreviewSheetOpen}
+      />
     </div>
   );
 }

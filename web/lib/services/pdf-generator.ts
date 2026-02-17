@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 
-interface InvoiceData {
+export interface InvoiceData {
   invoiceNumber: string;
   invoiceDate: string;
   dueDate: string;
@@ -58,6 +58,17 @@ interface InvoiceData {
   }>;
   amountPaid: number;
   balanceDue: number;
+
+  // Miscellaneous charges
+  miscItems?: Array<{
+    description: string;
+    amount: number;
+  }>;
+  subtotalMisc?: number;
+
+  // Payment terms & footer
+  paymentTerms?: string;
+  footerText?: string;
 
   // Notes
   notes?: string;
@@ -174,6 +185,9 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
 
   addDetail('Date:', data.invoiceDate);
   addDetail('Due Date:', data.dueDate);
+  if (data.paymentTerms) {
+    addDetail('Terms:', data.paymentTerms);
+  }
   addDetail('Work Order:', data.workOrderId);
 
   y = Math.max(y, detailY) + 10;
@@ -296,6 +310,38 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
     y += 5;
   }
 
+  // Miscellaneous Items Table
+  if (data.miscItems && data.miscItems.length > 0) {
+    doc.setTextColor(...mutedColor);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('OTHER CHARGES', margin, y);
+    y += 8;
+
+    // Table header
+    doc.setFillColor(248, 248, 249);
+    doc.rect(margin, y - 4, pageWidth - margin * 2, 8, 'F');
+
+    doc.setTextColor(...mutedColor);
+    doc.setFontSize(8);
+    doc.text('Description', margin + 2, y);
+    doc.text('Amount', pageWidth - margin - 2, y, { align: 'right' });
+
+    y += 8;
+
+    doc.setTextColor(...textColor);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+
+    for (const item of data.miscItems) {
+      doc.text(item.description, margin + 2, y);
+      doc.text(formatCurrency(item.amount), pageWidth - margin - 2, y, { align: 'right' });
+      y += 6;
+    }
+
+    y += 5;
+  }
+
   drawLine(y);
   y += 10;
 
@@ -319,6 +365,9 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
   doc.setFontSize(10);
   addTotalRow('Subtotal (Labor):', formatCurrency(data.subtotalLabor));
   addTotalRow('Subtotal (Parts):', formatCurrency(data.subtotalParts));
+  if (data.subtotalMisc && data.subtotalMisc > 0) {
+    addTotalRow('Subtotal (Other):', formatCurrency(data.subtotalMisc));
+  }
   addTotalRow(`Tax (${(data.taxRate * 100).toFixed(1)}%):`, formatCurrency(data.tax));
 
   if (data.discount > 0) {
@@ -385,7 +434,7 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.text(
-    'Thank you for your business! Payment is due within 30 days.',
+    data.footerText || 'Thank you for your business! Payment is due within 30 days.',
     pageWidth / 2,
     footerY,
     { align: 'center' }
