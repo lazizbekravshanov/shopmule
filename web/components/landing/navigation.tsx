@@ -43,11 +43,11 @@ export function Navigation() {
         <div className="max-w-7xl mx-auto px-6 h-full">
           <div className="flex items-center justify-between h-full">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200 shadow-lg shadow-orange-500/20">
-                <span className="text-white font-bold text-sm">SM</span>
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="w-8 h-8 bg-neutral-900 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xs">SM</span>
               </div>
-              <span className="font-bold text-xl text-neutral-900">ShopMule</span>
+              <span className="font-semibold text-lg text-neutral-900">ShopMule</span>
             </Link>
 
             {/* Desktop Nav */}
@@ -83,11 +83,10 @@ export function Navigation() {
               </Link>
               <Button
                 asChild
-                className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-10 px-6 text-sm font-semibold shadow-sm shadow-orange-500/20 hover:shadow-md hover:shadow-orange-500/30 transition-all duration-200"
+                className="bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg h-9 px-5 text-sm font-medium transition-colors duration-200"
               >
                 <Link href="/login">
                   Get Started
-                  <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
               </Button>
             </div>
@@ -152,11 +151,10 @@ export function Navigation() {
                 </Link>
                 <Button
                   asChild
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-12 text-base font-semibold"
+                  className="w-full bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl h-12 text-base font-medium"
                 >
                   <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
                     Get Started
-                    <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>
                 </Button>
               </div>

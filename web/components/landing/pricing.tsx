@@ -110,14 +110,14 @@ export function PricingSection() {
               className={cn(
                 'rounded-3xl p-8 flex flex-col relative',
                 tier.popular
-                  ? 'bg-neutral-900 text-white ring-2 ring-orange-500'
+                  ? 'bg-neutral-900 text-white ring-1 ring-neutral-700'
                   : 'bg-neutral-50'
               )}
             >
               {/* Popular Badge */}
               {tier.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="bg-orange-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-lg">
+                  <span className="bg-neutral-900 text-neutral-300 text-xs font-medium px-3 py-1 rounded-full border border-neutral-700">
                     Most Popular
                   </span>
                 </div>

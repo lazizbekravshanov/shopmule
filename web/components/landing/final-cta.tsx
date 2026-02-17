@@ -490,7 +490,7 @@ export function FinalCTA() {
               <button
                 type="submit"
                 disabled={!isValid || isSubmitting}
-                className="w-full h-14 bg-orange-500 hover:bg-orange-600 disabled:bg-neutral-200 disabled:text-neutral-400 text-white font-medium rounded-full transition-all duration-300 flex items-center justify-center gap-2 text-base shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/25"
+                className="w-full h-12 bg-neutral-900 hover:bg-neutral-800 disabled:bg-neutral-200 disabled:text-neutral-400 text-white font-medium rounded-full transition-colors duration-200 flex items-center justify-center gap-2 text-base"
               >
                 {isSubmitting ? (
                   <>
