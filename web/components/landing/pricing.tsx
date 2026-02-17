@@ -9,45 +9,47 @@ import { cn } from '@/lib/utils';
 
 const tiers = [
   {
-    name: 'Starter',
-    description: 'For small shops',
-    monthlyPrice: 49,
-    yearlyPrice: 39,
+    name: 'Shop',
+    description: '1–3 bay operation',
+    monthlyPrice: 149,
+    yearlyPrice: 119,
     features: [
-      'Up to 3 technicians',
+      'Up to 5 technicians',
       'Unlimited work orders',
-      'Basic invoicing',
-      'Time tracking',
+      'Invoicing & online payments',
+      'Time tracking per job',
+      'Parts inventory',
       'Email support',
     ],
     popular: false,
   },
   {
-    name: 'Professional',
-    description: 'For growing shops',
-    monthlyPrice: 99,
-    yearlyPrice: 79,
+    name: 'Pro',
+    description: 'Growing multi-bay shops',
+    monthlyPrice: 299,
+    yearlyPrice: 249,
     features: [
-      'Up to 10 technicians',
-      'Everything in Starter',
+      'Up to 15 technicians',
+      'Everything in Shop',
+      'Fleet accounts',
       'Digital inspections',
-      'Inventory management',
       'Advanced reporting',
-      'Priority support',
+      'Phone & chat support',
     ],
     popular: true,
   },
   {
     name: 'Enterprise',
-    description: 'For multi-location',
-    monthlyPrice: 249,
-    yearlyPrice: 199,
+    description: 'Multi-location operations',
+    monthlyPrice: 599,
+    yearlyPrice: 499,
     features: [
       'Unlimited technicians',
-      'Everything in Professional',
-      'Multi-location support',
-      'Custom integrations',
+      'Everything in Pro',
+      'Multi-location management',
+      'API access & integrations',
       'Dedicated account manager',
+      'Custom onboarding',
     ],
     popular: false,
   },
@@ -71,7 +73,7 @@ export function PricingSection() {
             Simple, transparent pricing.
           </h2>
           <p className="mt-6 text-xl text-neutral-500">
-            No hidden fees. No surprises. Cancel anytime.
+            Pays for itself after one recovered invoice.
           </p>
 
           {/* Billing Toggle - Apple style: pill design */}
