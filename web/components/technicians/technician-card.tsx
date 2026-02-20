@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Clock,
@@ -145,7 +146,7 @@ function StatusBadge({ status }: { status: TechnicianData['status'] }) {
 }
 
 export function TechnicianCard({ tech, index }: { tech: TechnicianData; index: number }) {
-  const [showActions, setShowActions] = useState(false)
+  const router = useRouter()
 
   const initials = tech.name
     .split(' ')
@@ -159,7 +160,8 @@ export function TechnicianCard({ tech, index }: { tech: TechnicianData; index: n
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-neutral-300 hover:shadow-sm transition-all"
+      onClick={() => router.push(`/technicians/${tech.id}`)}
+      className="bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-neutral-300 hover:shadow-sm transition-all cursor-pointer"
     >
       {/* Header */}
       <div className="p-4 border-b border-neutral-100">

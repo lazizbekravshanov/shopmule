@@ -1,4 +1,4 @@
-import { PrismaClient, Role, WorkOrderStatus, CustomerType, CustomerSource, PaymentTerms, InvoiceStatus, AppointmentStatus, AppointmentType, PartStatus, LineItemType, LineItemStatus, WorkOrderPriority, PunchMethod } from "@prisma/client"
+import { PrismaClient, Role, WorkOrderStatus, CustomerType, CustomerSource, PaymentTerms, InvoiceStatus, AppointmentStatus, AppointmentType, PartStatus, LineItemType, LineItemStatus, WorkOrderPriority, PunchMethod, PayType } from "@prisma/client"
 import bcrypt from "bcryptjs"
 
 const prisma = new PrismaClient()
@@ -115,11 +115,11 @@ async function main() {
   // Mechanics/Technicians
   const mechHash = await bcrypt.hash("mechanic123", 12)
   const techNames = [
-    { name: "John Martinez", email: "john@shopmule.com", rate: 35, specializations: ["Diesel", "Heavy Duty", "Electrical"] },
-    { name: "Carlos Rodriguez", email: "carlos@shopmule.com", rate: 32, specializations: ["Brakes", "Suspension", "Alignment"] },
-    { name: "Mike Chen", email: "mike.c@shopmule.com", rate: 30, specializations: ["Engine", "Transmission", "Diagnostics"] },
-    { name: "David Kim", email: "david@shopmule.com", rate: 28, specializations: ["AC/Heating", "Electrical", "Hybrid"] },
-    { name: "James Wilson", email: "james@shopmule.com", rate: 26, specializations: ["Oil Change", "Tires", "General Maintenance"] },
+    { name: "John Martinez", email: "john@shopmule.com", rate: 35, specializations: ["Diesel", "Heavy Duty", "Electrical"], payType: PayType.HOURLY, hireDate: new Date("2022-03-15"), phone: "555-TECH-001" },
+    { name: "Carlos Rodriguez", email: "carlos@shopmule.com", rate: 32, specializations: ["Brakes", "Suspension", "Alignment"], payType: PayType.HOURLY, hireDate: new Date("2022-06-01"), phone: "555-TECH-002" },
+    { name: "Mike Chen", email: "mike.c@shopmule.com", rate: 30, specializations: ["Engine", "Transmission", "Diagnostics"], payType: PayType.FLAT_RATE, hireDate: new Date("2023-01-10"), phone: "555-TECH-003" },
+    { name: "David Kim", email: "david@shopmule.com", rate: 28, specializations: ["AC/Heating", "Electrical", "Hybrid"], payType: PayType.HOURLY, hireDate: new Date("2023-05-20"), phone: "555-TECH-004" },
+    { name: "James Wilson", email: "james@shopmule.com", rate: 26, specializations: ["Oil Change", "Tires", "General Maintenance"], payType: PayType.HOURLY, hireDate: new Date("2024-02-01"), phone: "555-TECH-005" },
   ]
 
   const technicians: { id: string; name: string }[] = []
@@ -131,6 +131,7 @@ async function main() {
         passwordHash: mechHash,
         name: tech.name,
         role: Role.MECHANIC,
+        phone: tech.phone,
       },
     })
     const profile = await prisma.employeeProfile.create({
@@ -140,13 +141,56 @@ async function main() {
         name: tech.name,
         role: Role.MECHANIC,
         payRate: tech.rate,
+        payType: tech.payType,
+        overtimeRate: tech.rate * 1.5,
         status: "active",
         specializations: tech.specializations,
+        hireDate: tech.hireDate,
+        phoneNumber: tech.phone,
       },
     })
     technicians.push({ id: profile.id, name: tech.name })
   }
   console.log("Created", technicians.length, "technicians")
+
+  // ==========================================
+  // TECHNICIAN CERTIFICATIONS
+  // ==========================================
+  const certsData = [
+    // John Martinez - Diesel specialist
+    { employeeIdx: 0, name: "ASE T2 - Diesel Engines", issuingOrg: "ASE", certNumber: "ASE-T2-78432", level: "expert", issuedDate: new Date("2022-06-15"), expiryDate: new Date("2027-06-15") },
+    { employeeIdx: 0, name: "ASE T4 - Brakes", issuingOrg: "ASE", certNumber: "ASE-T4-78433", level: "advanced", issuedDate: new Date("2023-01-10"), expiryDate: new Date("2028-01-10") },
+    { employeeIdx: 0, name: "Cummins ISX Certified", issuingOrg: "Cummins", certNumber: "CUM-ISX-2201", level: "expert", issuedDate: new Date("2023-03-20"), expiryDate: new Date("2026-03-20") },
+    // Carlos Rodriguez - Brakes/Suspension
+    { employeeIdx: 1, name: "ASE A4 - Suspension & Steering", issuingOrg: "ASE", certNumber: "ASE-A4-65210", level: "expert", issuedDate: new Date("2022-08-01"), expiryDate: new Date("2027-08-01") },
+    { employeeIdx: 1, name: "ASE A5 - Brakes", issuingOrg: "ASE", certNumber: "ASE-A5-65211", level: "advanced", issuedDate: new Date("2022-08-01"), expiryDate: new Date("2027-08-01") },
+    { employeeIdx: 1, name: "Hunter Alignment Certified", issuingOrg: "Hunter Engineering", certNumber: "HEC-ALN-4401", level: "advanced", issuedDate: new Date("2023-09-15"), expiryDate: new Date("2025-09-15") },
+    // Mike Chen - Engine/Transmission
+    { employeeIdx: 2, name: "ASE A1 - Engine Repair", issuingOrg: "ASE", certNumber: "ASE-A1-91002", level: "expert", issuedDate: new Date("2023-04-01"), expiryDate: new Date("2028-04-01") },
+    { employeeIdx: 2, name: "ASE A2 - Automatic Transmission", issuingOrg: "ASE", certNumber: "ASE-A2-91003", level: "advanced", issuedDate: new Date("2023-04-01"), expiryDate: new Date("2028-04-01") },
+    // David Kim - AC/Electrical
+    { employeeIdx: 3, name: "ASE A6 - Electrical/Electronic", issuingOrg: "ASE", certNumber: "ASE-A6-44501", level: "advanced", issuedDate: new Date("2023-07-10"), expiryDate: new Date("2028-07-10") },
+    { employeeIdx: 3, name: "ASE A7 - Heating & AC", issuingOrg: "ASE", certNumber: "ASE-A7-44502", level: "advanced", issuedDate: new Date("2023-07-10"), expiryDate: new Date("2028-07-10") },
+    { employeeIdx: 3, name: "EPA Section 608 Certification", issuingOrg: "EPA", certNumber: "EPA-608-UNV-8891", level: "expert", issuedDate: new Date("2022-01-15"), expiryDate: null },
+    // James Wilson - General
+    { employeeIdx: 4, name: "ASE G1 - Maintenance & Light Repair", issuingOrg: "ASE", certNumber: "ASE-G1-22100", level: "basic", issuedDate: new Date("2024-03-01"), expiryDate: new Date("2029-03-01") },
+  ]
+
+  for (const certData of certsData) {
+    await prisma.technicianCertification.create({
+      data: {
+        employeeId: technicians[certData.employeeIdx].id,
+        name: certData.name,
+        issuingOrg: certData.issuingOrg,
+        certNumber: certData.certNumber,
+        level: certData.level,
+        issuedDate: certData.issuedDate,
+        expiryDate: certData.expiryDate,
+        isActive: true,
+      },
+    })
+  }
+  console.log("Created", certsData.length, "technician certifications")
 
   // ==========================================
   // VENDORS
@@ -687,6 +731,7 @@ async function main() {
   console.log(`  - ${invoices.length} Invoices`)
   console.log(`  - ${appointmentsData.length} Appointments`)
   console.log(`  - ${vendors.length} Vendors`)
+  console.log(`  - ${certsData.length} Technician Certifications`)
 
   console.log("\n🔐 Login credentials:")
   console.log(`  Owner: ${adminEmail} / ${process.env.ADMIN_PASSWORD ? '[from env]' : 'admin123'}`)

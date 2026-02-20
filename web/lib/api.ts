@@ -77,14 +77,66 @@ export interface User {
   role: string;
 }
 
+export interface CertificationData {
+  id: string;
+  name: string;
+  issuingOrg?: string | null;
+  certNumber?: string | null;
+  level?: string | null;
+  issuedDate?: string | null;
+  expiryDate?: string | null;
+  isActive: boolean;
+}
+
 export interface Employee {
   id: string;
   name: string;
   role: string;
   payRate: number;
+  payType?: string;
+  overtimeRate?: number | null;
   status: string;
   userId: string;
+  email?: string;
+  phoneNumber?: string | null;
+  photoUrl?: string | null;
+  specializations?: string[];
+  hireDate?: string | null;
+  address?: string | null;
+  emergencyContact?: string | null;
+  emergencyPhone?: string | null;
+  notes?: string | null;
+  certifications?: CertificationData[];
+  recentWorkOrders?: {
+    id: string;
+    workOrderNumber: string;
+    description: string;
+    status: string;
+    createdAt: string;
+    vehicle?: { make: string; model: string; year?: number; unitNumber?: string } | null;
+  }[];
+  stats?: {
+    todayHours: number;
+    weekHours: number;
+    jobsCompleted: number;
+    billableEfficiency: number;
+    revenueGenerated: number;
+  };
   user?: User;
+  createdAt?: string;
+}
+
+export interface EmployeePerformance {
+  period: string;
+  periodStart: string;
+  totalWorkHours: number;
+  billableHours: number;
+  billableEfficiency: number;
+  jobsCompleted: number;
+  avgJobTime: number;
+  revenueGenerated: number;
+  overtimeHours: number;
+  dailyBreakdown: { date: string; hours: number }[];
 }
 
 export interface Customer {
@@ -547,12 +599,41 @@ export const api = {
       }),
   },
   employees: {
-    list: () => request<Employee[]>('/employees'),
+    list: (params?: { role?: string; status?: string; search?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.role) searchParams.set('role', params.role);
+      if (params?.status) searchParams.set('status', params.status);
+      if (params?.search) searchParams.set('search', params.search);
+      const query = searchParams.toString();
+      return request<Employee[]>(`/employees${query ? `?${query}` : ''}`);
+    },
+    get: (id: string) => request<Employee>(`/employees/${id}`),
     create: (payload: Partial<Employee> & { email: string; password: string }) =>
       request<Employee>('/employees', {
         method: 'POST',
         body: JSON.stringify(payload),
       }),
+    update: (id: string, payload: Partial<Employee>) =>
+      request<Employee>(`/employees/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      }),
+    delete: (id: string) =>
+      request<{ success: boolean }>(`/employees/${id}`, { method: 'DELETE' }),
+    certifications: {
+      list: (id: string) => request<CertificationData[]>(`/employees/${id}/certifications`),
+      add: (id: string, payload: Omit<CertificationData, 'id' | 'isActive'>) =>
+        request<CertificationData>(`/employees/${id}/certifications`, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        }),
+      remove: (id: string, certId: string) =>
+        request<{ success: boolean }>(`/employees/${id}/certifications/${certId}`, {
+          method: 'DELETE',
+        }),
+    },
+    performance: (id: string, period?: string) =>
+      request<EmployeePerformance>(`/employees/${id}/performance${period ? `?period=${period}` : ''}`),
   },
   time: {
     clockIn: (payload: { employeeId: string }) =>

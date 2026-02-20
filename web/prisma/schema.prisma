@@ -817,18 +817,31 @@ model ServiceTemplateLine {
 // EMPLOYEE PROFILES
 // ==========================================
 
+enum PayType {
+  HOURLY
+  FLAT_RATE
+  SALARY
+}
+
 model EmployeeProfile {
   id                  String                @id @default(cuid())
   tenantId            String?
   name                String
   role                Role
   payRate             Float
+  payType             PayType               @default(HOURLY)
+  overtimeRate        Float?
   status              String                @default("active")
   userId              String                @unique
   pin                 String?
   photoUrl            String?
   phoneNumber         String?
   specializations     String[]              @default([])
+  hireDate            DateTime?
+  address             String?
+  emergencyContact    String?
+  emergencyPhone      String?
+  notes               String?
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   deletedAt           DateTime?
@@ -846,9 +859,27 @@ model EmployeeProfile {
   AdvisedWorkOrders   WorkOrder[]           @relation("ServiceAdvisor")
   LineItems           WorkOrderLine[]       @relation("LineItemTechnician")
   Appointments        Appointment[]         @relation("AppointmentTechnician")
+  Certifications      TechnicianCertification[]
 
   @@index([tenantId])
   @@index([userId])
+}
+
+model TechnicianCertification {
+  id           String          @id @default(cuid())
+  employeeId   String
+  name         String
+  issuingOrg   String?
+  certNumber   String?
+  level        String?
+  issuedDate   DateTime?
+  expiryDate   DateTime?
+  isActive     Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+
+  Employee     EmployeeProfile @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
 }
 
 // ==========================================
