@@ -7,6 +7,7 @@ import { ArrowLeft, Truck, User, FileText, DollarSign, Wrench, Package, CreditCa
 import { LaborTimerSection } from '@/components/work-order/labor-timer-section';
 import { InspectionPanel } from '@/components/work-order/inspection-panel';
 import { DeferredWorkPanel } from '@/components/work-order/deferred-work-panel';
+import { PartsPicker } from '@/components/work-order/parts-picker';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
@@ -113,6 +114,7 @@ export default function WorkOrderDetailPage() {
   const { data: workOrder, isLoading, refetch } = useWorkOrder(id);
   const updateStatus = useUpdateWorkOrderStatus();
 
+  const [partsPickerOpen, setPartsPickerOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -324,8 +326,28 @@ export default function WorkOrderDetailPage() {
                 <Package className="h-4 w-4" />
                 <span className="text-sm font-medium">Parts</span>
               </div>
-              <PartsStatusToggle workOrderId={id} current={workOrder.partsStatus} />
+              <div className="flex items-center gap-2">
+                <PartsStatusToggle workOrderId={id} current={workOrder.partsStatus} />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs gap-1"
+                  onClick={() => setPartsPickerOpen((o) => !o)}
+                >
+                  <Package className="h-3 w-3" />
+                  {partsPickerOpen ? 'Close Catalog' : 'Add Parts'}
+                </Button>
+              </div>
             </div>
+
+            {partsPickerOpen && (
+              <div className="mb-4">
+                <PartsPicker
+                  workOrderId={id}
+                  onClose={() => setPartsPickerOpen(false)}
+                />
+              </div>
+            )}
             {workOrder.partsUsed && workOrder.partsUsed.length > 0 ? (
               <div className="space-y-3">
                 {workOrder.partsUsed.map((part, idx) => (

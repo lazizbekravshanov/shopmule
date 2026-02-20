@@ -44,6 +44,7 @@ import {
   type ItemStatus,
 } from '@/lib/inspection-templates';
 import { cn } from '@/lib/utils';
+import { offlineQueue } from '@/lib/offline-queue';
 
 // ─── Status config ─────────────────────────────────────────────────────────
 
@@ -322,6 +323,24 @@ export function InspectionPanel({
         ...inspection,
         completedAt: complete ? new Date().toISOString() : inspection.completedAt,
       };
+      const body = JSON.stringify({ checklist: JSON.stringify(toSave) });
+
+      // Offline: queue the save and update local state optimistically
+      if (!navigator.onLine) {
+        offlineQueue.enqueue({
+          url: `/api/work-orders/${workOrderId}`,
+          method: 'PATCH',
+          body,
+          headers: { 'Content-Type': 'application/json' },
+          label: complete ? 'Complete inspection' : 'Save inspection draft',
+        });
+        setInspection(toSave);
+        toast({ title: 'Offline — inspection queued', description: 'Will sync when reconnected' });
+        if (complete) setCollapsed(true);
+        setSaving(false);
+        return;
+      }
+
       try {
         await api.workOrders.patch(workOrderId, { checklist: JSON.stringify(toSave) });
         setInspection(toSave);

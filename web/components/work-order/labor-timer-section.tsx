@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
+import { offlineQueue } from '@/lib/offline-queue';
 import {
   Dialog,
   DialogContent,
@@ -134,6 +135,17 @@ export function LaborTimerSection({
 
   const handleStart = useCallback(
     (laborId: string) => {
+      if (!navigator.onLine) {
+        offlineQueue.enqueue({
+          url: `/api/work-orders/${workOrderId}/labor/${laborId}`,
+          method: 'PATCH',
+          body: JSON.stringify({ action: 'start' }),
+          headers: { 'Content-Type': 'application/json' },
+          label: 'Start labor timer',
+        });
+        toast({ title: 'Offline — timer queued', description: 'Will sync when reconnected' });
+        return;
+      }
       startTimer.mutate(
         { workOrderId, laborId },
         {
@@ -150,6 +162,17 @@ export function LaborTimerSection({
 
   const handleStop = useCallback(
     (laborId: string) => {
+      if (!navigator.onLine) {
+        offlineQueue.enqueue({
+          url: `/api/work-orders/${workOrderId}/labor/${laborId}`,
+          method: 'PATCH',
+          body: JSON.stringify({ action: 'stop' }),
+          headers: { 'Content-Type': 'application/json' },
+          label: 'Stop labor timer',
+        });
+        toast({ title: 'Offline — timer stop queued', description: 'Will sync when reconnected' });
+        return;
+      }
       stopTimer.mutate(
         { workOrderId, laborId },
         {

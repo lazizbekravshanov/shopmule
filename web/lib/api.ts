@@ -213,6 +213,20 @@ export interface Part {
   vendor?: Vendor;
 }
 
+export interface PartSearchResult {
+  inventory: Part[];
+  catalog: {
+    sku: string;
+    name: string;
+    category: string;
+    supplier: string;
+    brand: string;
+    cost: number;
+    price: number;
+    notes?: string;
+  }[];
+}
+
 export interface Vendor {
   id: string;
   name: string;
@@ -408,11 +422,21 @@ export const api = {
       request(`/work-orders/${workOrderId}/labor/${laborId}`, {
         method: 'DELETE',
       }),
-    addParts: (id: string, payload: { partId: string; quantity: number; unitPrice: number; markupPct?: number }) =>
+    addParts: (
+      id: string,
+      payload: (
+        | { partId: string; quantity: number; unitPrice: number; markupPct?: number }
+        | { sku: string; name: string; category?: string; brand?: string; supplier?: string; quantity: number; unitPrice: number; markupPct?: number }
+      )
+    ) =>
       request(`/work-orders/${id}/parts`, {
         method: 'POST',
         body: JSON.stringify(payload),
       }),
+  },
+  parts: {
+    search: (q: string) =>
+      request<PartSearchResult>(`/parts/search?q=${encodeURIComponent(q)}`),
   },
   deferred: {
     list: (vehicleId: string) =>
