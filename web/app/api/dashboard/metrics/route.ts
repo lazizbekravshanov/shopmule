@@ -6,19 +6,22 @@ import { prisma } from '@/lib/db'
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session?.user.tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const tenantId = session.user.tenantId
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
 
-    // Run all queries in parallel for performance
+    // Run ALL queries in parallel — no serial queries after this block
     const [
       currentMonthRevenue,
       lastMonthRevenue,
+      laborRevenue,
+      totalTechnicians,
       activeJobs,
       totalJobs,
       partsOnOrder,
@@ -29,59 +32,45 @@ export async function GET() {
     ] = await Promise.all([
       // Current month revenue (from paid invoices)
       prisma.invoice.aggregate({
-        where: {
-          status: 'PAID',
-          createdAt: { gte: startOfMonth },
-        },
+        where: { tenantId, status: 'PAID', createdAt: { gte: startOfMonth } },
         _sum: { total: true },
       }),
 
       // Last month revenue for comparison
       prisma.invoice.aggregate({
-        where: {
-          status: 'PAID',
-          createdAt: {
-            gte: startOfLastMonth,
-            lte: endOfLastMonth,
-          },
-        },
+        where: { tenantId, status: 'PAID', createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } },
         _sum: { total: true },
+      }),
+
+      // Labor revenue this month (for margin calc) — merged into Promise.all
+      prisma.invoice.aggregate({
+        where: { tenantId, status: 'PAID', createdAt: { gte: startOfMonth } },
+        _sum: { subtotalLabor: true },
+      }),
+
+      // Total active technicians — merged into Promise.all
+      prisma.employeeProfile.count({
+        where: { tenantId, status: 'active' },
       }),
 
       // Active work orders (in progress)
       prisma.workOrder.count({
-        where: {
-          status: { in: ['IN_PROGRESS', 'DIAGNOSED', 'APPROVED'] },
-        },
+        where: { tenantId, status: { in: ['IN_PROGRESS', 'DIAGNOSED', 'APPROVED'] } },
       }),
 
       // Total work orders this month
       prisma.workOrder.count({
-        where: {
-          createdAt: { gte: startOfMonth },
-        },
+        where: { tenantId, createdAt: { gte: startOfMonth } },
       }),
 
-      // Parts on order (stock below reorder point)
+      // Parts below reorder point
       prisma.part.count({
-        where: {
-          stock: { lte: prisma.part.fields.reorderPoint },
-          status: 'ACTIVE',
-        },
-      }).catch(() =>
-        // Fallback if status field doesn't exist
-        prisma.part.count({
-          where: {
-            stock: { lt: 5 }, // Simple fallback
-          },
-        })
-      ),
+        where: { tenantId, stock: { lt: 5 } },
+      }),
 
-      // Low stock parts
+      // Low stock parts (for detail list)
       prisma.part.findMany({
-        where: {
-          stock: { lte: 5 },
-        },
+        where: { tenantId, stock: { lte: 5 } },
         select: { id: true, name: true, stock: true, reorderPoint: true },
         take: 10,
       }),
@@ -89,10 +78,9 @@ export async function GET() {
       // Overdue invoices (unpaid, created more than 30 days ago)
       prisma.invoice.findMany({
         where: {
+          tenantId,
           status: 'UNPAID',
-          createdAt: {
-            lt: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
-          },
+          createdAt: { lt: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) },
         },
         select: { id: true, total: true, createdAt: true },
       }),
@@ -101,29 +89,17 @@ export async function GET() {
       prisma.punchRecord.findMany({
         where: {
           type: 'CLOCK_IN',
-          timestamp: {
-            gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
-          },
+          timestamp: { gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) },
         },
-        select: {
-          employeeId: true,
-          timestamp: true,
-        },
+        select: { employeeId: true, timestamp: true },
         distinct: ['employeeId'],
       }),
 
       // Active customers this month (with work orders)
       prisma.customer.count({
         where: {
-          Vehicles: {
-            some: {
-              WorkOrders: {
-                some: {
-                  createdAt: { gte: startOfMonth },
-                },
-              },
-            },
-          },
+          tenantId,
+          Vehicles: { some: { WorkOrders: { some: { tenantId, createdAt: { gte: startOfMonth } } } } },
         },
       }),
     ])
@@ -135,21 +111,9 @@ export async function GET() {
       ? Math.round(((currentRevenue - lastRevenue) / lastRevenue) * 100)
       : 0
 
-    // Calculate margin (simplified: labor revenue / total revenue)
-    const laborRevenue = await prisma.invoice.aggregate({
-      where: {
-        status: 'PAID',
-        createdAt: { gte: startOfMonth },
-      },
-      _sum: { subtotalLabor: true },
-    })
     const laborRev = laborRevenue._sum.subtotalLabor || 0
     const margin = currentRevenue > 0 ? Math.round((laborRev / currentRevenue) * 100) : 0
 
-    // Total technicians
-    const totalTechnicians = await prisma.employeeProfile.count({
-      where: { status: 'active' },
-    })
     const activeTechnicians = technicianStats.length
     const techUtilization = totalTechnicians > 0
       ? Math.round((activeTechnicians / totalTechnicians) * 100)

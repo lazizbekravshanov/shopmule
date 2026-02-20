@@ -15,6 +15,7 @@ interface MobileAuthPayload {
 interface AuthResult {
   authenticated: boolean
   user?: MobileAuthPayload
+  tenantId?: string | null
   error?: string
 }
 
@@ -75,6 +76,7 @@ export async function verifyMobileAuth(request: Request): Promise<AuthResult> {
     if (session?.user?.id) {
       return {
         authenticated: true,
+        tenantId: session.user.tenantId ?? null,
         user: {
           id: session.user.id,
           email: session.user.email || "",

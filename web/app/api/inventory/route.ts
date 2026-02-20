@@ -18,11 +18,14 @@ const createPartSchema = z.object({
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session?.user.tenantId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const tenantId = session.user.tenantId
+
     const parts = await prisma.part.findMany({
+      where: { tenantId },
       orderBy: { name: "asc" },
       include: {
         Vendor: true,

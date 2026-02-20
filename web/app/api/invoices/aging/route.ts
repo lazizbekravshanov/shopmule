@@ -12,12 +12,14 @@ function daysSince(date: Date): number {
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user.tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const tenantId = session.user.tenantId;
+
     const openInvoices = await prisma.invoice.findMany({
-      where: { status: { in: ['UNPAID', 'PARTIAL'] } },
+      where: { tenantId, status: { in: ['UNPAID', 'PARTIAL'] } },
       select: {
         id: true,
         total: true,

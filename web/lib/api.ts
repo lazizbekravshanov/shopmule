@@ -310,6 +310,25 @@ export interface InvoiceAgingSummary {
   overdueInvoices: InvoiceAgingOverdue[];
 }
 
+export interface ReportBreakdown {
+  summary: {
+    totalRevenue: number;
+    invoiceCount: number;
+    avgTicket: number;
+    laborRevenue: number;
+    partsRevenue: number;
+    laborPct: number;
+    partsPct: number;
+    revenueChange: number;
+    prevRevenue: number;
+  };
+  monthly: { month: string; revenue: number; labor: number; parts: number }[];
+  techPerformance: { name: string; hours: number; revenue: number }[];
+  range: string;
+  from: string;
+  to: string;
+}
+
 export interface TimeEntry {
   id: string;
   employeeId: string;
@@ -556,6 +575,8 @@ export const api = {
       const query = searchParams.toString();
       return request<{ total: number; count: number }>(`/reports/revenue${query ? `?${query}` : ''}`);
     },
+    breakdown: (range: string) =>
+      request<ReportBreakdown>(`/reports/breakdown?range=${encodeURIComponent(range)}`),
     productivity: (employeeId: string) =>
       request<{ totalHours: number }>(`/reports/productivity/${employeeId}`),
     payroll: (employeeId: string) =>

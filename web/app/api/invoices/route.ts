@@ -10,15 +10,23 @@ const createInvoiceSchema = z.object({
   discount: z.number().min(0).optional().default(0),
 })
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session?.user.tenantId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const tenantId = session.user.tenantId
+    const { searchParams } = new URL(request.url)
+    const take = Math.min(500, Math.max(1, parseInt(searchParams.get("limit") ?? "200", 10) || 200))
+    const skip = Math.max(0, parseInt(searchParams.get("offset") ?? "0", 10) || 0)
+
     const invoices = await prisma.invoice.findMany({
+      where: { tenantId },
       orderBy: { createdAt: "desc" },
+      take,
+      skip,
       include: {
         Customer: true,
         WorkOrder: {

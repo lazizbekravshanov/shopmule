@@ -5,6 +5,7 @@ export const reportKeys = {
   all: ['reports'] as const,
   revenue: (params?: { from?: string; to?: string }) =>
     [...reportKeys.all, 'revenue', params] as const,
+  breakdown: (range: string) => [...reportKeys.all, 'breakdown', range] as const,
   productivity: (employeeId: string) =>
     [...reportKeys.all, 'productivity', employeeId] as const,
   payroll: (employeeId: string) => [...reportKeys.all, 'payroll', employeeId] as const,
@@ -14,6 +15,14 @@ export function useRevenueReport(params?: { from?: string; to?: string }) {
   return useQuery({
     queryKey: reportKeys.revenue(params),
     queryFn: () => api.reports.revenue(params),
+  });
+}
+
+export function useBreakdownReport(range: string) {
+  return useQuery({
+    queryKey: reportKeys.breakdown(range),
+    queryFn: () => api.reports.breakdown(range),
+    staleTime: 2 * 60_000,
   });
 }
 
