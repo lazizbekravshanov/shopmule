@@ -161,5 +161,11 @@
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-neutral-800 to-neutral-600;
   }
+
+  /* Dot grid background for landing page */
+  .bg-dot-grid {
+    background-image: radial-gradient(circle, #d4d4d4 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
 }
 

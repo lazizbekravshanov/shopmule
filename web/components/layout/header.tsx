@@ -39,12 +39,12 @@ export function Header() {
             <span className="sr-only">Toggle menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-56 p-0 bg-neutral-50">
-          <div className="flex h-14 items-center border-b border-neutral-200 px-4">
-            <div className="w-7 h-7 bg-primary-500 rounded flex items-center justify-center mr-2">
+        <SheetContent side="left" className="w-56 p-0 bg-neutral-900 border-neutral-800">
+          <div className="flex h-14 items-center border-b border-neutral-800 px-4">
+            <div className="w-7 h-7 bg-[#ee7a14] rounded-lg flex items-center justify-center mr-2">
               <MuleIcon className="h-4 w-4 text-white" />
             </div>
-            <span className="font-semibold text-neutral-900">ShopMule</span>
+            <span className="font-semibold text-white">ShopMule</span>
           </div>
           <div className="py-4">
             <SidebarNav />

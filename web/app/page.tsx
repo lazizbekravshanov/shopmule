@@ -16,7 +16,7 @@ import {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white bg-dot-grid">
       <Navigation />
       <main id="main-content" role="main">
         <Hero />

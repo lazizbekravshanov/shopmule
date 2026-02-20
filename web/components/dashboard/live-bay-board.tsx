@@ -78,8 +78,8 @@ export function LiveBayBoard() {
       <div className="px-5 py-4 border-b border-neutral-100 dark:border-neutral-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-              <Truck className="w-4 h-4 text-white" aria-hidden="true" />
+            <div className="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center">
+              <Truck className="w-4 h-4 text-neutral-600 dark:text-neutral-300" aria-hidden="true" />
             </div>
             <div>
               <h3 className="font-semibold text-neutral-900 dark:text-neutral-100 text-sm">Live Bay Status</h3>

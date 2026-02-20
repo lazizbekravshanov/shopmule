@@ -107,10 +107,10 @@ export function SidebarNav({ collapsed = false }: SidebarNavProps) {
         className={cn(
           'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
           isQuickAction
-            ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm shadow-orange-500/20'
+            ? 'bg-[#ee7a14] hover:bg-[#d96a0a] text-white shadow-sm shadow-orange-500/20'
             : isActive
-            ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 shadow-sm'
-            : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-white/60 dark:hover:bg-neutral-800/60',
+            ? 'bg-white/10 text-white'
+            : 'text-neutral-400 hover:text-white hover:bg-white/5',
           collapsed && 'justify-center px-2'
         )}
       >
@@ -150,7 +150,7 @@ export function SidebarNav({ collapsed = false }: SidebarNavProps) {
         {navGroups.map((group) => (
           <div key={group.label}>
             {!collapsed && (
-              <h4 className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              <h4 className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
                 {group.label}
               </h4>
             )}
@@ -162,7 +162,7 @@ export function SidebarNav({ collapsed = false }: SidebarNavProps) {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="px-3 pt-4 mt-4 border-t border-neutral-200 dark:border-neutral-700 space-y-1">
+      <div className="px-3 pt-4 mt-4 border-t border-neutral-800 space-y-1">
         {bottomNav.map((item) => renderNavItem(item))}
       </div>
     </div>

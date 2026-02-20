@@ -46,29 +46,29 @@ const iconMap: Record<string, React.ElementType> = {
 
 const typeColors: Record<ActivityItem['type'], { bg: string; text: string; dot: string }> = {
   work_order: {
-    bg: 'bg-blue-100 dark:bg-blue-900/30',
-    text: 'text-blue-600 dark:text-blue-400',
-    dot: 'bg-blue-500',
+    bg: 'bg-neutral-100 dark:bg-neutral-700/50',
+    text: 'text-neutral-600 dark:text-neutral-300',
+    dot: 'bg-neutral-400 dark:bg-neutral-500',
   },
   invoice: {
-    bg: 'bg-purple-100 dark:bg-purple-900/30',
-    text: 'text-purple-600 dark:text-purple-400',
-    dot: 'bg-purple-500',
+    bg: 'bg-neutral-100 dark:bg-neutral-700/50',
+    text: 'text-neutral-600 dark:text-neutral-300',
+    dot: 'bg-neutral-400 dark:bg-neutral-500',
   },
   payment: {
-    bg: 'bg-green-100 dark:bg-green-900/30',
-    text: 'text-green-600 dark:text-green-400',
-    dot: 'bg-green-500',
+    bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+    text: 'text-emerald-600 dark:text-emerald-400',
+    dot: 'bg-emerald-500',
   },
   customer: {
-    bg: 'bg-indigo-100 dark:bg-indigo-900/30',
-    text: 'text-indigo-600 dark:text-indigo-400',
-    dot: 'bg-indigo-500',
+    bg: 'bg-neutral-100 dark:bg-neutral-700/50',
+    text: 'text-neutral-600 dark:text-neutral-300',
+    dot: 'bg-neutral-400 dark:bg-neutral-500',
   },
   technician: {
-    bg: 'bg-amber-100 dark:bg-amber-900/30',
-    text: 'text-amber-600 dark:text-amber-400',
-    dot: 'bg-amber-500',
+    bg: 'bg-neutral-100 dark:bg-neutral-700/50',
+    text: 'text-neutral-600 dark:text-neutral-300',
+    dot: 'bg-neutral-400 dark:bg-neutral-500',
   },
 };
 
@@ -100,8 +100,8 @@ export function RecentActivity() {
       {/* Header */}
       <div className="px-5 py-4 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-            <Activity className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center">
+            <Activity className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
           </div>
           <div>
             <h3 className="font-semibold text-neutral-900 dark:text-neutral-100 text-sm">

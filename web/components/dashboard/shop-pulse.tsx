@@ -192,7 +192,7 @@ export function ShopPulse() {
             trend={metrics?.revenue.change && metrics.revenue.change > 0 ? 'up' : metrics?.revenue.change && metrics.revenue.change < 0 ? 'down' : 'neutral'}
             trendValue={metrics?.revenue.change ? `${metrics.revenue.change > 0 ? '+' : ''}${metrics.revenue.change}% vs last month` : '—'}
             icon={DollarSign}
-            iconColor="text-green-500"
+            iconColor="text-neutral-500"
             delay={0}
             tooltip={`Last month: ${formatCurrency(metrics?.revenue.lastMonth ?? 0)}`}
           />
@@ -202,7 +202,7 @@ export function ShopPulse() {
             trend="neutral"
             trendValue={`${metrics?.jobs.total ?? 0} this month`}
             icon={Briefcase}
-            iconColor="text-blue-500"
+            iconColor="text-neutral-500"
             delay={0.05}
           />
           <Metric
@@ -211,7 +211,7 @@ export function ShopPulse() {
             trend={metrics?.margin.trend}
             trendValue={metrics?.margin.trend === 'up' ? 'Healthy' : metrics?.margin.trend === 'down' ? 'Needs attention' : 'Stable'}
             icon={BarChart3}
-            iconColor="text-purple-500"
+            iconColor="text-neutral-500"
             delay={0.1}
           />
           <Metric
@@ -220,7 +220,7 @@ export function ShopPulse() {
             trend="up"
             trendValue="Active this month"
             icon={Users}
-            iconColor="text-indigo-500"
+            iconColor="text-neutral-500"
             delay={0.15}
           />
           <Metric
@@ -229,7 +229,7 @@ export function ShopPulse() {
             trend={metrics?.inventory.partsOnOrder && metrics.inventory.partsOnOrder > 5 ? 'down' : 'neutral'}
             trendValue={metrics?.inventory.partsOnOrder && metrics.inventory.partsOnOrder > 0 ? 'Need reorder' : 'Stock OK'}
             icon={Package}
-            iconColor="text-amber-500"
+            iconColor="text-neutral-500"
             delay={0.2}
             alert={!!metrics?.inventory.partsOnOrder && metrics.inventory.partsOnOrder > 5}
             tooltip={metrics?.inventory.lowStock?.map(p => p.name).join(', ')}
@@ -240,7 +240,7 @@ export function ShopPulse() {
             trend={metrics?.invoices.overdueCount && metrics.invoices.overdueCount > 0 ? 'down' : 'up'}
             trendValue={`${metrics?.invoices.overdueCount ?? 0} invoices`}
             icon={AlertTriangle}
-            iconColor="text-red-500"
+            iconColor="text-neutral-500"
             delay={0.25}
             alert={!!metrics?.invoices.overdueCount && metrics.invoices.overdueCount > 0}
           />
@@ -256,7 +256,7 @@ export function ShopPulse() {
             }
             trendValue={`${metrics?.technicians.active ?? 0}/${metrics?.technicians.total ?? 0} active`}
             icon={Clock}
-            iconColor="text-teal-500"
+            iconColor="text-neutral-500"
             delay={0.3}
           />
         </div>

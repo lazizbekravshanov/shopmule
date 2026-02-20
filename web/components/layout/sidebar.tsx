@@ -14,14 +14,14 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'relative hidden h-screen border-r border-neutral-200/80 dark:border-neutral-800 bg-neutral-100/50 dark:bg-neutral-900 transition-all duration-300 ease-in-out lg:flex lg:flex-col',
+        'relative hidden h-screen border-r border-neutral-800 bg-neutral-900 transition-all duration-300 ease-in-out lg:flex lg:flex-col',
         sidebarCollapsed ? 'w-[72px]' : 'w-64'
       )}
     >
       {/* Logo - Apple style: Clean, centered, prominent */}
       <div
         className={cn(
-          'flex h-16 items-center border-b border-neutral-200/80 dark:border-neutral-800 px-5',
+          'flex h-16 items-center border-b border-neutral-800 px-5',
           sidebarCollapsed && 'justify-center px-3'
         )}
       >
@@ -30,7 +30,7 @@ export function Sidebar() {
             <MuleIcon className="h-5 w-5 text-white" />
           </div>
           {!sidebarCollapsed && (
-            <span className="font-semibold text-lg text-neutral-900 dark:text-neutral-100 tracking-tight">
+            <span className="font-semibold text-lg text-white tracking-tight">
               ShopMule
             </span>
           )}
@@ -48,7 +48,7 @@ export function Sidebar() {
           variant="ghost"
           size="sm"
           className={cn(
-            'w-full justify-center text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50 rounded-xl h-10 transition-all duration-300',
+            'w-full justify-center text-neutral-500 hover:text-neutral-300 hover:bg-white/5 rounded-xl h-10 transition-all duration-300',
             sidebarCollapsed && 'px-0'
           )}
           onClick={toggleSidebar}
