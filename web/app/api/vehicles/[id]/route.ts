@@ -38,6 +38,11 @@ export async function GET(
       )
     }
 
+    // Enforce tenant ownership when tenantId is available on the session
+    if (authResult.tenantId && vehicle.tenantId !== authResult.tenantId) {
+      return NextResponse.json({ error: "Vehicle not found" }, { status: 404 })
+    }
+
     // Transform response
     const response = {
       id: vehicle.id,

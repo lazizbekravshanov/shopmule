@@ -21,22 +21,23 @@ export async function POST(
   try {
     // Verify authentication (supports both session and Bearer token)
     const authResult = await verifyMobileAuth(request)
-    if (!authResult.authenticated) {
+    if (!authResult.authenticated || !authResult.tenantId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const tenantId = authResult.tenantId
     const { id: customerId } = await params
 
     if (!isValidId(customerId)) {
       return NextResponse.json({ error: "Invalid customer ID" }, { status: 400 })
     }
 
-    // Verify customer exists
+    // Verify customer exists and belongs to this tenant
     const customer = await prisma.customer.findUnique({
       where: { id: customerId },
     })
 
-    if (!customer) {
+    if (!customer || customer.tenantId !== tenantId) {
       return NextResponse.json({ error: "Customer not found" }, { status: 404 })
     }
 

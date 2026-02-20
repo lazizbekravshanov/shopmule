@@ -4,8 +4,18 @@ import bcrypt from "bcryptjs"
 
 export async function POST(request: Request) {
   try {
+    // Only allow in development OR when SEED_SECRET is provided and matches
+    const seedSecret = process.env.SEED_SECRET
+    if (process.env.NODE_ENV === "production" && !seedSecret) {
+      return NextResponse.json({ error: "Not available" }, { status: 404 })
+    }
+
     const body = await request.json()
-    const { email, password } = body
+    const { email, password, secret } = body
+
+    if (process.env.NODE_ENV === "production" && seedSecret && secret !== seedSecret) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
 
     if (!email || !password) {
       return NextResponse.json(

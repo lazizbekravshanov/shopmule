@@ -363,7 +363,8 @@ export async function POST(request: Request) {
       include: { Customer: true },
     })
 
-    if (!vehicle) {
+    const callerTenantId = authResult.tenantId ?? undefined
+    if (!vehicle || (callerTenantId && vehicle.tenantId !== callerTenantId)) {
       return NextResponse.json({ error: "Vehicle not found" }, { status: 404 })
     }
 

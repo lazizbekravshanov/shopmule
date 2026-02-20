@@ -63,13 +63,14 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session?.user.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    const tenantId = session.user.tenantId
     const { id: vehicleId } = await params
     if (!isValidId(vehicleId)) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
 
     const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } })
-    if (!vehicle) return NextResponse.json({ error: 'Vehicle not found' }, { status: 404 })
+    if (!vehicle || vehicle.tenantId !== tenantId) return NextResponse.json({ error: 'Vehicle not found' }, { status: 404 })
 
     const body = await request.json()
     const data = createSchema.parse(body)

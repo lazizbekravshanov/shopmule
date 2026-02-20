@@ -9,10 +9,11 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session?.user.tenantId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const tenantId = session.user.tenantId
     const { id } = await params
 
     const invoice = await prisma.invoice.findUnique({
@@ -38,7 +39,7 @@ export async function GET(
       },
     })
 
-    if (!invoice) {
+    if (!invoice || invoice.tenantId !== tenantId) {
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 })
     }
 
