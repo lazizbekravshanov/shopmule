@@ -22,45 +22,40 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-32 bg-neutral-50 relative">
+    <section id="how-it-works" className="py-32 bg-white border-t border-neutral-100">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Section Header - Apple style: centered */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-20"
+          transition={{ duration: 0.5 }}
+          className="mb-20"
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-neutral-900 tracking-tight">
             Get started in minutes.
           </h2>
-          <p className="mt-6 text-xl text-neutral-500 max-w-2xl mx-auto">
+          <p className="mt-4 text-xl text-neutral-500">
             No complicated setup. No training required.
           </p>
         </motion.div>
 
-        {/* Steps - Apple style: clean, spacious cards */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-neutral-100">
           {steps.map((step, index) => (
             <motion.div
               key={step.number}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.15 }}
-              className="relative text-center"
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className="py-10 md:py-0 md:px-10 first:md:pl-0 last:md:pr-0"
             >
-              {/* Step Number - Large, gradient */}
-              <span className="inline-block text-8xl font-bold bg-gradient-to-b from-neutral-200 to-neutral-100 bg-clip-text text-transparent">
+              <span className="text-xs font-mono font-semibold text-neutral-400 tracking-widest">
                 {step.number}
               </span>
-
-              {/* Content */}
-              <h3 className="mt-2 text-2xl font-semibold text-neutral-900">
+              <h3 className="mt-3 text-2xl font-semibold text-neutral-900">
                 {step.title}
               </h3>
-              <p className="mt-4 text-neutral-500 leading-relaxed max-w-xs mx-auto">
+              <p className="mt-3 text-neutral-500 leading-relaxed">
                 {step.description}
               </p>
             </motion.div>

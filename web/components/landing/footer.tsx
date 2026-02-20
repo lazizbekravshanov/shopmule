@@ -29,7 +29,7 @@ export function Footer() {
           {/* Logo & Description */}
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-sm">
+              <div className="w-8 h-8 bg-[#ee7a14] rounded-lg flex items-center justify-center">
                 <MuleIcon className="w-5 h-5 text-white" />
               </div>
               <span className="font-semibold text-lg text-neutral-900">ShopMule</span>

@@ -45,37 +45,37 @@ const features = [
 
 export function FeaturesBento() {
   return (
-    <section id="features" className="py-32 bg-white">
+    <section id="features" className="py-32 bg-neutral-950">
       <div className="max-w-6xl mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-20"
+          transition={{ duration: 0.5 }}
+          className="mb-16"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-neutral-900 tracking-tight">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight">
             Built for the shop floor.
             <br />
-            <span className="text-neutral-400">Not the boardroom.</span>
+            <span className="text-neutral-500">Not the boardroom.</span>
           </h2>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-neutral-800">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.08 }}
-              className="bg-neutral-50 rounded-2xl p-8 group hover:bg-neutral-100/80 transition-colors duration-300"
+              transition={{ duration: 0.4, delay: index * 0.06 }}
+              className="bg-neutral-950 p-8 group hover:bg-neutral-900 transition-colors duration-200"
             >
-              <div className="w-11 h-11 flex items-center justify-center rounded-xl bg-white text-neutral-700 shadow-sm">
-                <feature.icon className="w-5 h-5" strokeWidth={1.5} />
+              <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-neutral-900 group-hover:bg-neutral-800 transition-colors border border-neutral-800">
+                <feature.icon className="w-5 h-5 text-neutral-400" strokeWidth={1.5} />
               </div>
 
-              <h3 className="mt-5 text-lg font-semibold text-neutral-900">
+              <h3 className="mt-5 text-base font-semibold text-white">
                 {feature.title}
               </h3>
               <p className="mt-2 text-sm text-neutral-500 leading-relaxed">
