@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
@@ -52,5 +52,50 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching fleet accounts:', error)
     return NextResponse.json({ error: 'Failed to fetch fleet accounts' }, { status: 500 })
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user.tenantId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const tenantId = session.user.tenantId
+    const body = await request.json()
+    const {
+      companyName,
+      paymentTerms = 'NET_30',
+      discountRatePercent = 0,
+      creditLimit = 0,
+      notes = '',
+    } = body
+
+    if (!companyName?.trim()) {
+      return NextResponse.json({ error: 'Company name is required' }, { status: 400 })
+    }
+
+    const count = await prisma.fleetAccount.count({ where: { tenantId } })
+    const accountNumber = `FL-${String(count + 1).padStart(4, '0')}`
+
+    const account = await prisma.fleetAccount.create({
+      data: {
+        tenantId,
+        companyName: companyName.trim(),
+        accountNumber,
+        status: 'ACTIVE',
+        paymentTerms,
+        discountRatePercent: parseFloat(discountRatePercent) || 0,
+        creditLimit: parseFloat(creditLimit) || 0,
+        currentBalance: 0,
+        notes,
+      },
+    })
+
+    return NextResponse.json({ success: true, account }, { status: 201 })
+  } catch (error) {
+    console.error('Error creating fleet account:', error)
+    return NextResponse.json({ error: 'Failed to create fleet account' }, { status: 500 })
   }
 }
