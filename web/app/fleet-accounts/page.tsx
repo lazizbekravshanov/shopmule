@@ -1,257 +1,238 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import {
   Building2,
   Plus,
   Search,
   Car,
-  DollarSign,
-  FileText,
-  ChevronRight,
-  Users,
   TrendingUp,
+  ChevronRight,
+  Briefcase,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 
-// Mock fleet account data
-const fleetAccounts = [
-  {
-    id: '1',
-    name: 'ABC Logistics',
-    vehicleCount: 45,
-    activeJobs: 3,
-    monthlySpend: 12500,
-    status: 'active',
-    contactName: 'James Wilson',
-    contactEmail: 'james@abclogistics.com',
-    discount: 15,
-  },
-  {
-    id: '2',
-    name: 'Metro Delivery Services',
-    vehicleCount: 28,
-    activeJobs: 1,
-    monthlySpend: 8200,
-    status: 'active',
-    contactName: 'Maria Garcia',
-    contactEmail: 'maria@metrodelivery.com',
-    discount: 12,
-  },
-  {
-    id: '3',
-    name: 'City Plumbing Co.',
-    vehicleCount: 12,
-    activeJobs: 0,
-    monthlySpend: 3400,
-    status: 'active',
-    contactName: 'Robert Chen',
-    contactEmail: 'robert@cityplumbing.com',
-    discount: 10,
-  },
-  {
-    id: '4',
-    name: 'Express Couriers',
-    vehicleCount: 67,
-    activeJobs: 5,
-    monthlySpend: 18900,
-    status: 'active',
-    contactName: 'Sarah Johnson',
-    contactEmail: 'sarah@expresscouriers.com',
-    discount: 18,
-  },
-  {
-    id: '5',
-    name: 'Sunrise Construction',
-    vehicleCount: 23,
-    activeJobs: 2,
-    monthlySpend: 6700,
-    status: 'pending',
-    contactName: 'Michael Brown',
-    contactEmail: 'michael@sunriseconstruction.com',
-    discount: 10,
-  },
-];
+interface FleetAccount {
+  id: string;
+  companyName: string;
+  accountNumber: string;
+  status: string;
+  paymentTerms: string;
+  discountRatePercent: number;
+  creditLimit: number;
+  currentBalance: number;
+  customerCount: number;
+  vehicleCount: number;
+  activeJobCount: number;
+}
+
+const statusLabels: Record<string, { label: string; cls: string }> = {
+  ACTIVE: { label: 'Active', cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  ON_HOLD: { label: 'On Hold', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+  SUSPENDED: { label: 'Suspended', cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+  CLOSED: { label: 'Closed', cls: 'bg-neutral-100 text-neutral-500' },
+};
 
 export default function FleetAccountsPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredAccounts = fleetAccounts.filter((account) =>
-    account.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const { data: accounts, isLoading, isError, refetch, isFetching } = useQuery<FleetAccount[]>({
+    queryKey: ['fleet-accounts'],
+    queryFn: async () => {
+      const res = await fetch('/api/fleet-accounts');
+      if (!res.ok) throw new Error('Failed to fetch fleet accounts');
+      return res.json();
+    },
+    staleTime: 60_000,
+  });
+
+  const filtered = (accounts ?? []).filter((a) =>
+    a.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    a.accountNumber.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const totalVehicles = fleetAccounts.reduce((sum, a) => sum + a.vehicleCount, 0);
-  const totalMonthlyRevenue = fleetAccounts.reduce((sum, a) => sum + a.monthlySpend, 0);
-  const activeAccounts = fleetAccounts.filter((a) => a.status === 'active').length;
+  const totalVehicles = (accounts ?? []).reduce((s, a) => s + a.vehicleCount, 0);
+  const totalBalance = (accounts ?? []).reduce((s, a) => s + a.currentBalance, 0);
+  const activeCount = (accounts ?? []).filter((a) => a.status === 'ACTIVE').length;
 
   return (
     <div className="space-y-8 pb-8">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
-      >
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-neutral-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl font-semibold text-neutral-900 dark:text-white tracking-tight">
             Fleet Accounts
           </h1>
           <p className="text-neutral-500 dark:text-neutral-400 mt-1">
             Manage B2B and commercial fleet customers
           </p>
         </div>
-        <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Fleet Account
-        </Button>
-      </motion.div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isFetching} className="border-neutral-200">
+            <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
+          </Button>
+          <Button className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Fleet Account
+          </Button>
+        </div>
+      </div>
 
       {/* Stats */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="grid gap-6 md:grid-cols-3"
-      >
-        <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-              <Building2 className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+      {!isLoading && (
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-neutral-900 dark:text-white">{activeCount}</p>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">Active Accounts</p>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-semibold text-neutral-900 dark:text-white">
-                {activeAccounts}
-              </p>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">Active Accounts</p>
+          </div>
+          <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                <Car className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-neutral-900 dark:text-white">{totalVehicles}</p>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">Total Vehicles</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-neutral-900 dark:text-white">{formatCurrency(totalBalance)}</p>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">Outstanding Balance</p>
+              </div>
             </div>
           </div>
         </div>
-
-        <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <Car className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-semibold text-neutral-900 dark:text-white">
-                {totalVehicles}
-              </p>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">Total Vehicles</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-semibold text-neutral-900 dark:text-white">
-                ${totalMonthlyRevenue.toLocaleString()}
-              </p>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">Monthly Revenue</p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+      )}
 
       {/* Search */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-          <Input
-            type="text"
-            placeholder="Search fleet accounts..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 rounded-xl border-neutral-200 dark:border-neutral-700"
-          />
-        </div>
-      </motion.div>
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+        <Input
+          type="text"
+          placeholder="Search fleet accounts..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 border-neutral-200 dark:border-neutral-700"
+        />
+      </div>
 
       {/* Accounts List */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden"
-      >
-        <div className="divide-y divide-neutral-200 dark:divide-neutral-700">
-          {filteredAccounts.map((account, index) => (
-            <motion.div
-              key={account.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 + index * 0.05 }}
-              className="flex items-center gap-6 p-6 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors cursor-pointer group"
-            >
-              {/* Company Icon */}
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-700 dark:to-neutral-600 flex items-center justify-center flex-shrink-0">
-                <Building2 className="w-7 h-7 text-neutral-600 dark:text-neutral-300" />
-              </div>
-
-              {/* Company Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-1">
-                  <h3 className="font-semibold text-neutral-900 dark:text-white truncate">
-                    {account.name}
-                  </h3>
-                  <span className={cn(
-                    'px-2 py-0.5 rounded-full text-xs font-medium',
-                    account.status === 'active'
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                      : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
-                  )}>
-                    {account.status === 'active' ? 'Active' : 'Pending'}
-                  </span>
+      <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+        {isLoading ? (
+          <div className="divide-y divide-neutral-100 dark:divide-neutral-700">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-6 p-6">
+                <Skeleton className="w-14 h-14 rounded-xl flex-shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-3 w-32" />
                 </div>
-                <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                  {account.contactName} &bull; {account.contactEmail}
-                </p>
-              </div>
-
-              {/* Stats */}
-              <div className="hidden md:flex items-center gap-8">
-                <div className="text-center">
-                  <p className="text-lg font-semibold text-neutral-900 dark:text-white">
-                    {account.vehicleCount}
-                  </p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Vehicles</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-lg font-semibold text-neutral-900 dark:text-white">
-                    {account.activeJobs}
-                  </p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Active Jobs</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-lg font-semibold text-neutral-900 dark:text-white">
-                    ${account.monthlySpend.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Monthly</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-lg font-semibold text-orange-600 dark:text-orange-400">
-                    {account.discount}%
-                  </p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Discount</p>
+                <div className="hidden md:flex gap-8">
+                  <Skeleton className="h-10 w-16" />
+                  <Skeleton className="h-10 w-16" />
+                  <Skeleton className="h-10 w-16" />
                 </div>
               </div>
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Failed to load fleet accounts</p>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>Retry</Button>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center mb-4">
+              <Building2 className="w-8 h-8 text-neutral-400" />
+            </div>
+            <h3 className="font-semibold text-neutral-900 dark:text-white mb-1">
+              {searchQuery ? 'No matching accounts' : 'No fleet accounts yet'}
+            </h3>
+            <p className="text-sm text-neutral-500 max-w-xs mb-4">
+              {searchQuery ? 'Try a different search term.' : 'Add your first commercial fleet customer to get started.'}
+            </p>
+            {!searchQuery && (
+              <Button className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Fleet Account
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="divide-y divide-neutral-100 dark:divide-neutral-700">
+            {filtered.map((account) => {
+              const s = statusLabels[account.status] ?? { label: account.status, cls: 'bg-neutral-100 text-neutral-500' };
+              return (
+                <div
+                  key={account.id}
+                  className="flex items-center gap-6 p-6 hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors cursor-pointer group"
+                >
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-700 dark:to-neutral-600 flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-7 h-7 text-neutral-600 dark:text-neutral-300" />
+                  </div>
 
-              {/* Arrow */}
-              <ChevronRight className="w-5 h-5 text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 group-hover:translate-x-1 transition-all flex-shrink-0" />
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className="font-semibold text-neutral-900 dark:text-white truncate">
+                        {account.companyName}
+                      </h3>
+                      <span className={cn('px-2 py-0.5 rounded-full text-xs font-medium', s.cls)}>{s.label}</span>
+                    </div>
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                      {account.accountNumber} &bull; {account.paymentTerms.replace('_', ' ')}
+                      {account.discountRatePercent > 0 && ` · ${account.discountRatePercent}% discount`}
+                    </p>
+                  </div>
+
+                  <div className="hidden md:flex items-center gap-8">
+                    <div className="text-center">
+                      <p className="text-lg font-semibold text-neutral-900 dark:text-white">{account.vehicleCount}</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Vehicles</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-semibold text-neutral-900 dark:text-white">{account.activeJobCount}</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Active Jobs</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-semibold text-neutral-900 dark:text-white">{formatCurrency(account.currentBalance)}</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">Balance</p>
+                    </div>
+                    {account.discountRatePercent > 0 && (
+                      <div className="text-center">
+                        <p className="text-lg font-semibold text-orange-600 dark:text-orange-400">{account.discountRatePercent}%</p>
+                        <p className="text-xs text-neutral-500 dark:text-neutral-400">Discount</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <ChevronRight className="w-5 h-5 text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

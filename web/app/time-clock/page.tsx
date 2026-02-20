@@ -205,7 +205,19 @@ export default function TimeClockPage() {
       if (!response.ok) throw new Error('Failed to fetch');
       return response.json();
     },
-    refetchInterval: 60000, // Refetch every minute
+    refetchInterval: 60000,
+  });
+
+  // Fetch real-time attendance status
+  const { data: whoData } = useQuery({
+    queryKey: ['attendance', 'whos-working'],
+    queryFn: async () => {
+      const res = await fetch('/api/attendance/whos-working');
+      if (!res.ok) throw new Error('Failed to fetch');
+      return res.json();
+    },
+    refetchInterval: 30000,
+    staleTime: 15000,
   });
 
   // Mutation for approving/rejecting punches
@@ -247,11 +259,25 @@ export default function TimeClockPage() {
   // Get the selected employee's name
   const selectedEmployeeName = employees?.find(e => e.id === selectedEmployee)?.name || 'Select Employee';
 
-  // Generate sample data based on employees
-  const activeTechs = useMemo(() =>
-    employees ? generateSampleActiveTechs(employees) : [],
-    [employees]
-  );
+  // Build real active techs from attendance API
+  const activeTechs = useMemo((): ActiveTech[] => {
+    if (!whoData?.employees) return employees ? generateSampleActiveTechs(employees) : [];
+    const allWorking = [
+      ...(whoData.employees.clockedIn ?? []),
+      ...(whoData.employees.onBreak ?? []),
+    ];
+    return allWorking.map((e: any) => ({
+      id: e.employee.id,
+      name: e.employee.name,
+      clockedInAt: e.currentShift?.clockInTime ?? undefined,
+      status: e.isOnBreak ? ('on_break' as const) : ('working' as const),
+      currentJob: undefined,
+      totalHoursToday: e.currentShift?.duration?.minutes
+        ? Math.round((e.currentShift.duration.minutes / 60) * 10) / 10
+        : 0,
+      isOvertime: e.currentShift?.duration?.minutes > 480,
+    }));
+  }, [whoData, employees]);
 
   const timelines = useMemo(() =>
     employees ? generateSampleTimelines(employees) : [],
@@ -263,15 +289,38 @@ export default function TimeClockPage() {
     [selectedEmployeeName]
   );
 
-  // Current clock status for selected employee
-  const currentStatus = useMemo(() => {
-    if (!selectedEmployee) return 'clocked_out' as const;
+  // Current clock status — prefer real data from attendance API
+  const currentStatus = useMemo((): 'clocked_in' | 'on_break' | 'clocked_out' => {
+    if (!selectedEmployee) return 'clocked_out';
+    if (whoData?.employees) {
+      const allEmp = [
+        ...(whoData.employees.clockedIn ?? []),
+        ...(whoData.employees.onBreak ?? []),
+        ...(whoData.employees.clockedOut ?? []),
+      ];
+      const found = allEmp.find((e: any) => e.employee.id === selectedEmployee);
+      if (found) {
+        if (found.isOnBreak) return 'on_break';
+        if (found.isClockedIn) return 'clocked_in';
+        return 'clocked_out';
+      }
+    }
     const activeTech = activeTechs.find(t => t.id === selectedEmployee);
-    if (!activeTech) return 'clocked_out' as const;
-    return activeTech.status === 'on_break' ? 'on_break' as const : 'clocked_in' as const;
-  }, [selectedEmployee, activeTechs]);
+    if (!activeTech) return 'clocked_out';
+    return activeTech.status === 'on_break' ? 'on_break' : 'clocked_in';
+  }, [selectedEmployee, activeTechs, whoData]);
 
-  const clockedInAt = activeTechs.find(t => t.id === selectedEmployee)?.clockedInAt;
+  const clockedInAt = useMemo(() => {
+    if (selectedEmployee && whoData?.employees) {
+      const allEmp = [
+        ...(whoData.employees.clockedIn ?? []),
+        ...(whoData.employees.onBreak ?? []),
+      ];
+      const found = allEmp.find((e: any) => e.employee.id === selectedEmployee);
+      if (found?.currentShift?.clockInTime) return found.currentShift.clockInTime;
+    }
+    return activeTechs.find(t => t.id === selectedEmployee)?.clockedInAt;
+  }, [selectedEmployee, activeTechs, whoData]);
 
   const handleClockIn = () => {
     if (selectedEmployee) {

@@ -29,9 +29,10 @@ interface NewAppointmentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultDate?: Date;
+  onSuccess?: () => void;
 }
 
-export function NewAppointmentModal({ open, onOpenChange, defaultDate }: NewAppointmentModalProps) {
+export function NewAppointmentModal({ open, onOpenChange, defaultDate, onSuccess }: NewAppointmentModalProps) {
   const { toast } = useToast();
   const { data: customers, isLoading: customersLoading } = useCustomers();
 
@@ -90,13 +91,34 @@ export function NewAppointmentModal({ open, onOpenChange, defaultDate }: NewAppo
 
     setSubmitting(true);
     try {
-      // TODO: Wire to API endpoint when available
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const [hours, minutes] = time.split(':').map(Number);
+      const scheduledStart = new Date(date);
+      scheduledStart.setHours(hours, minutes, 0, 0);
+      const scheduledEnd = new Date(scheduledStart.getTime() + 60 * 60 * 1000); // 1 hour default
+
+      const res = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId,
+          vehicleId: vehicleId || null,
+          scheduledStart: scheduledStart.toISOString(),
+          scheduledEnd: scheduledEnd.toISOString(),
+          durationMinutes: 60,
+          notes: service.trim() + (notes.trim() ? `\n${notes.trim()}` : ''),
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error ?? 'Failed to create appointment');
+      }
 
       toast({
         title: 'Appointment scheduled',
         description: `Scheduled for ${date.toLocaleDateString()} at ${time}`,
       });
+      onSuccess?.();
       onOpenChange(false);
     } catch (error) {
       toast({

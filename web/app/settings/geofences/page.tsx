@@ -99,6 +99,7 @@ export default function GeofencesPage() {
       const json = await res.json();
       return json.geofences as Geofence[];
     },
+    staleTime: 60_000,
   });
 
   // Fetch shops for default
@@ -110,6 +111,7 @@ export default function GeofencesPage() {
       const json = await res.json();
       return json.shops || [];
     },
+    staleTime: 300_000, // shops rarely change
   });
 
   // Create mutation

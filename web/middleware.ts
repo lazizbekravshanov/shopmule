@@ -14,6 +14,12 @@ const protectedRoutes = [
   "/settings",
   "/reports",
   "/tv",
+  "/schedule",
+  "/fleet-accounts",
+  "/time-clock",
+  "/repair-orders",
+  "/integrations",
+  "/help",
 ]
 
 // Routes that are always public
@@ -53,6 +59,8 @@ const selfAuthApiRoutes = [
   "/api/shops",      // Shop management
   "/api/geofences",  // Geofence management
   "/api/timesheets", // Timesheet data
+  "/api/fleet-accounts", // Fleet account management
+  "/api/appointments",   // Appointment scheduling
 ]
 
 // In-memory rate limiter store
