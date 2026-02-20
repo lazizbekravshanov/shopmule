@@ -109,13 +109,16 @@ export interface Vehicle {
   customerId: string;
 }
 
+export type PartsStatus = 'WAITING' | 'ORDERED' | 'IN_STOCK';
+
 export interface WorkOrder {
   id: string;
   vehicleId: string;
   status: 'DIAGNOSED' | 'APPROVED' | 'IN_PROGRESS' | 'COMPLETED';
   description: string;
-  checklist?: string;
-  notes?: string;
+  checklist?: string | null;
+  notes?: string | null;
+  partsStatus?: PartsStatus | null;
   laborHours: number;
   partsTotal: number;
   laborRate: number;
@@ -156,8 +159,45 @@ export interface WorkOrderLabor {
   id: string;
   hours: number;
   rate: number;
-  note?: string;
+  note?: string | null;
+  startedAt?: string | null;
+  stoppedAt?: string | null;
+  actualHours?: number | null;
   employee?: Employee;
+}
+
+export interface DeferredWorkItem {
+  id: string;
+  vehicleId: string;
+  description: string;
+  category?: string | null;
+  estimatedCost?: number | null;
+  declinedAt: string;
+  declinedReason?: string | null;
+  status: 'PENDING' | 'SCHEDULED' | 'COMPLETED' | 'DISMISSED';
+  resolvedAt?: string | null;
+  sourceWorkOrderId?: string | null;
+  resolvedWorkOrderId?: string | null;
+  createdAt: string;
+}
+
+export interface ServiceTemplateLine {
+  id?: string;
+  type: 'LABOR' | 'PART' | 'SUBLET' | 'FEE' | 'NOTE';
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  laborHours?: number | null;
+}
+
+export interface ServiceTemplate {
+  id: string;
+  name: string;
+  description?: string | null;
+  category?: string | null;
+  flatRatePrice?: number | null;
+  laborHours?: number | null;
+  lines: ServiceTemplateLine[];
 }
 
 export interface Part {
@@ -230,6 +270,30 @@ export interface GeneratePaymentLinkData {
 export interface GeneratePaymentLinkResponse {
   success: true;
   data: GeneratePaymentLinkData;
+}
+
+export interface InvoiceAgingBucket {
+  count: number;
+  total: number;
+  invoiceIds: string[];
+}
+
+export interface InvoiceAgingOverdue {
+  id: string;
+  balance: number;
+  age: number;
+  customer: { id: string; name: string; phone?: string | null; email?: string | null } | null;
+}
+
+export interface InvoiceAgingSummary {
+  buckets: {
+    current: InvoiceAgingBucket;
+    overdue31: InvoiceAgingBucket;
+    overdue61: InvoiceAgingBucket;
+    overdue90: InvoiceAgingBucket;
+  };
+  totalOutstanding: number;
+  overdueInvoices: InvoiceAgingOverdue[];
 }
 
 export interface TimeEntry {
@@ -311,16 +375,89 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ employeeId }),
       }),
-    addLabor: (id: string, payload: { employeeId: string; hours: number; rate: number; note?: string }) =>
+    patch: (id: string, payload: { checklist?: string | null; notes?: string; partsStatus?: PartsStatus | null }) =>
+      request<{ id: string; checklist: string | null; notes: string | null; partsStatus: PartsStatus | null }>(`/work-orders/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      }),
+    addLabor: (id: string, payload: { employeeId?: string; hours: number; rate: number; note?: string }) =>
       request(`/work-orders/${id}/labor`, {
         method: 'POST',
         body: JSON.stringify(payload),
+      }),
+    startLaborTimer: (workOrderId: string, laborId: string) =>
+      request(`/work-orders/${workOrderId}/labor/${laborId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ action: 'start' }),
+      }),
+    stopLaborTimer: (workOrderId: string, laborId: string) =>
+      request(`/work-orders/${workOrderId}/labor/${laborId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ action: 'stop' }),
+      }),
+    updateLabor: (
+      workOrderId: string,
+      laborId: string,
+      payload: { hours?: number; rate?: number; note?: string }
+    ) =>
+      request(`/work-orders/${workOrderId}/labor/${laborId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      }),
+    deleteLabor: (workOrderId: string, laborId: string) =>
+      request(`/work-orders/${workOrderId}/labor/${laborId}`, {
+        method: 'DELETE',
       }),
     addParts: (id: string, payload: { partId: string; quantity: number; unitPrice: number; markupPct?: number }) =>
       request(`/work-orders/${id}/parts`, {
         method: 'POST',
         body: JSON.stringify(payload),
       }),
+  },
+  deferred: {
+    list: (vehicleId: string) =>
+      request<DeferredWorkItem[]>(`/vehicles/${vehicleId}/deferred`),
+    create: (
+      vehicleId: string,
+      payload: {
+        description: string;
+        category?: string | null;
+        estimatedCost?: number | null;
+        declinedReason?: string | null;
+        sourceWorkOrderId?: string | null;
+      }
+    ) =>
+      request<DeferredWorkItem>(`/vehicles/${vehicleId}/deferred`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+    patch: (
+      id: string,
+      payload: {
+        status?: 'PENDING' | 'SCHEDULED' | 'COMPLETED' | 'DISMISSED';
+        resolvedWorkOrderId?: string | null;
+      }
+    ) =>
+      request<{ id: string; status: string; resolvedAt: string | null }>(`/deferred/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      }),
+  },
+  templates: {
+    list: () => request<ServiceTemplate[]>('/templates'),
+    get: (id: string) => request<ServiceTemplate>(`/templates/${id}`),
+    create: (payload: Omit<ServiceTemplate, 'id'>) =>
+      request<ServiceTemplate>('/templates', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+    update: (id: string, payload: Partial<Omit<ServiceTemplate, 'id'>>) =>
+      request<ServiceTemplate>(`/templates/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      }),
+    delete: (id: string) =>
+      request<{ success: boolean }>(`/templates/${id}`, { method: 'DELETE' }),
   },
   inventory: {
     list: () => request<Part[]>('/inventory'),
@@ -358,6 +495,12 @@ export const api = {
     generatePaymentLink: (invoiceId: string) =>
       request<GeneratePaymentLinkResponse>(`/invoices/${invoiceId}/payment-link`, {
         method: 'POST',
+      }),
+    aging: () => request<InvoiceAgingSummary>('/invoices/aging'),
+    sendReminder: (invoiceId: string, channels: ('email' | 'sms')[] = ['email', 'sms']) =>
+      request<{ success: boolean }>(`/invoices/${invoiceId}/send-payment-link`, {
+        method: 'POST',
+        body: JSON.stringify({ channels }),
       }),
   },
   employees: {

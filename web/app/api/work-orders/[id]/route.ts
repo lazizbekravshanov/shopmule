@@ -60,6 +60,7 @@ export async function GET(
       description: workOrder.description,
       checklist: workOrder.checklist,
       notes: workOrder.notes,
+      partsStatus: workOrder.partsStatus ?? null,
       laborHours: workOrder.laborTotal,
       partsTotal: workOrder.partsTotal,
       laborRate: workOrder.laborRate,
@@ -89,6 +90,9 @@ export async function GET(
         hours: l.hours,
         rate: l.rate,
         note: l.note,
+        startedAt: l.startedAt?.toISOString() ?? null,
+        stoppedAt: l.stoppedAt?.toISOString() ?? null,
+        actualHours: l.actualHours ?? null,
         employee: l.EmployeeProfile
           ? {
               id: l.EmployeeProfile.id,
@@ -126,5 +130,68 @@ export async function GET(
       { error: "Failed to fetch work order" },
       { status: 500 }
     )
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { id } = await params
+
+    if (!isValidId(id)) {
+      return NextResponse.json({ error: "Invalid ID format" }, { status: 400 })
+    }
+
+    const existing = await prisma.workOrder.findUnique({ where: { id } })
+    if (!existing) {
+      return NextResponse.json({ error: "Work order not found" }, { status: 404 })
+    }
+
+    const body = await request.json()
+    const updateData: Record<string, unknown> = {}
+
+    // Only allow patching safe fields
+    if (body.checklist !== undefined) {
+      if (body.checklist !== null && typeof body.checklist !== "string") {
+        return NextResponse.json({ error: "checklist must be a string or null" }, { status: 400 })
+      }
+      if (body.checklist && body.checklist.length > 50000) {
+        return NextResponse.json({ error: "checklist too large" }, { status: 400 })
+      }
+      updateData.checklist = body.checklist
+    }
+
+    if (body.notes !== undefined) {
+      if (typeof body.notes !== "string") {
+        return NextResponse.json({ error: "notes must be a string" }, { status: 400 })
+      }
+      updateData.notes = body.notes
+    }
+
+    if (body.partsStatus !== undefined) {
+      const valid = ['WAITING', 'ORDERED', 'IN_STOCK', null]
+      if (!valid.includes(body.partsStatus)) {
+        return NextResponse.json({ error: "partsStatus must be WAITING, ORDERED, IN_STOCK, or null" }, { status: 400 })
+      }
+      updateData.partsStatus = body.partsStatus
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 })
+    }
+
+    const updated = await prisma.workOrder.update({ where: { id }, data: updateData })
+
+    return NextResponse.json({ id: updated.id, checklist: updated.checklist, notes: updated.notes, partsStatus: updated.partsStatus ?? null })
+  } catch (error) {
+    console.error("Error patching work order:", error)
+    return NextResponse.json({ error: "Failed to update work order" }, { status: 500 })
   }
 }

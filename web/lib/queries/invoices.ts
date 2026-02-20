@@ -1,6 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, type Invoice, type CreatePaymentIntentResponse } from '@/lib/api';
 
+export const agingKeys = {
+  all: ['invoices', 'aging'] as const,
+};
+
 export const invoiceKeys = {
   all: ['invoices'] as const,
   lists: () => [...invoiceKeys.all, 'list'] as const,
@@ -70,5 +74,24 @@ export function useCreatePaymentIntent() {
 export function useGeneratePaymentLink() {
   return useMutation({
     mutationFn: (invoiceId: string) => api.invoices.generatePaymentLink(invoiceId),
+  });
+}
+
+export function useInvoiceAging() {
+  return useQuery({
+    queryKey: agingKeys.all,
+    queryFn: () => api.invoices.aging(),
+    staleTime: 60_000,
+  });
+}
+
+export function useSendReminder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ invoiceId, channels }: { invoiceId: string; channels?: ('email' | 'sms')[] }) =>
+      api.invoices.sendReminder(invoiceId, channels),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: invoiceKeys.lists() });
+    },
   });
 }

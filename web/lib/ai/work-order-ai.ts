@@ -186,7 +186,10 @@ export function computeWorkOrderAI(wo: WorkOrder): WorkOrderAI {
   // Blockers
   const blockers: BlockerType[] = [];
   if (wo.status === 'DIAGNOSED' && !hasLabor) blockers.push('approval');
-  if (!hasParts && wo.status !== 'COMPLETED' && rand() > 0.5) blockers.push('parts');
+  // Use real partsStatus field; fall back to inference only if no status set
+  if (wo.partsStatus === 'WAITING' || wo.partsStatus === 'ORDERED') {
+    blockers.push('parts');
+  }
   if (!hasAssignment && wo.status !== 'COMPLETED') blockers.push('tech');
   if (wo.status === 'DIAGNOSED' && age > 3) blockers.push('customer');
 

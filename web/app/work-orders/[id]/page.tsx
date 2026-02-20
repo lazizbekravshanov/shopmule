@@ -3,11 +3,15 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Truck, User, FileText, DollarSign, Clock, Wrench, Package, CreditCard, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Truck, User, FileText, DollarSign, Wrench, Package, CreditCard, CheckCircle, Loader2 } from 'lucide-react';
+import { LaborTimerSection } from '@/components/work-order/labor-timer-section';
+import { InspectionPanel } from '@/components/work-order/inspection-panel';
+import { DeferredWorkPanel } from '@/components/work-order/deferred-work-panel';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
-import { useWorkOrder, useUpdateWorkOrderStatus } from '@/lib/queries/work-orders';
+import { useWorkOrder, useUpdateWorkOrderStatus, useSetPartsStatus } from '@/lib/queries/work-orders';
+import type { PartsStatus } from '@/lib/api';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import {
@@ -27,6 +31,56 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+
+// ─── Parts Status Toggle ────────────────────────────────────────────────────
+
+const PARTS_OPTIONS: { value: PartsStatus | null; label: string; cls: string }[] = [
+  { value: null,       label: 'No Issue',    cls: 'border-neutral-200 text-neutral-500 bg-white hover:bg-neutral-50' },
+  { value: 'WAITING',  label: 'Waiting',     cls: 'border-amber-300  text-amber-700  bg-amber-50  hover:bg-amber-100' },
+  { value: 'ORDERED',  label: 'Ordered',     cls: 'border-blue-300   text-blue-700   bg-blue-50   hover:bg-blue-100' },
+  { value: 'IN_STOCK', label: 'In Stock',    cls: 'border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100' },
+];
+
+function PartsStatusToggle({ workOrderId, current }: { workOrderId: string; current: PartsStatus | null | undefined }) {
+  const setPartsStatus = useSetPartsStatus();
+  const { toast } = useToast();
+
+  const handleClick = (value: PartsStatus | null) => {
+    if (value === (current ?? null)) return;
+    setPartsStatus.mutate(
+      { workOrderId, partsStatus: value },
+      {
+        onSuccess: () => toast({ title: 'Parts status updated' }),
+        onError: () => toast({ variant: 'destructive', title: 'Failed to update parts status' }),
+      }
+    );
+  };
+
+  return (
+    <div className="flex items-center gap-1.5 flex-wrap">
+      {PARTS_OPTIONS.map((opt) => {
+        const isActive = (current ?? null) === opt.value;
+        return (
+          <button
+            key={String(opt.value)}
+            onClick={() => handleClick(opt.value)}
+            disabled={setPartsStatus.isPending}
+            className={`text-xs px-3 py-1 rounded-full border font-medium transition-all ${opt.cls} ${
+              isActive ? 'ring-2 ring-offset-1 ring-current' : 'opacity-70 hover:opacity-100'
+            }`}
+          >
+            {setPartsStatus.isPending && isActive
+              ? <Loader2 className="inline h-2.5 w-2.5 animate-spin mr-1" />
+              : null}
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 
 const statusColors: Record<string, { bg: string; text: string; border: string }> = {
   DIAGNOSED: { bg: 'bg-neutral-50', text: 'text-neutral-600', border: 'border-neutral-200' },
@@ -242,33 +296,26 @@ export default function WorkOrderDetailPage() {
             )}
           </div>
 
+          {/* Deferred repairs from previous visits */}
+          <DeferredWorkPanel
+            vehicleId={workOrder.vehicleId}
+            workOrderId={id}
+            defaultLaborRate={workOrder.laborRate ?? 125}
+          />
+
+          {/* Vehicle Inspection / VHR */}
+          <InspectionPanel
+            workOrderId={id}
+            checklistRaw={workOrder.checklist}
+            defaultLaborRate={workOrder.laborRate ?? 125}
+          />
+
           {/* Labor Entries */}
-          <div className="bg-white border border-neutral-200 rounded-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-neutral-500">
-                <Clock className="h-4 w-4" />
-                <span className="text-sm font-medium">Labor</span>
-              </div>
-            </div>
-            {workOrder.laborEntries && workOrder.laborEntries.length > 0 ? (
-              <div className="space-y-3">
-                {workOrder.laborEntries.map((entry, idx) => (
-                  <div key={idx} className="flex items-center justify-between py-2 border-b border-neutral-100 last:border-0">
-                    <div>
-                      <div className="font-medium text-neutral-900">{entry.employee?.name || 'Unknown'}</div>
-                      {entry.note && <div className="text-sm text-neutral-500">{entry.note}</div>}
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium">${(entry.hours * entry.rate).toFixed(2)}</div>
-                      <div className="text-sm text-neutral-500">{entry.hours}h @ ${entry.rate}/hr</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-neutral-400 text-sm">No labor entries yet</p>
-            )}
-          </div>
+          <LaborTimerSection
+            workOrderId={id}
+            laborEntries={workOrder.laborEntries ?? []}
+            defaultRate={workOrder.laborRate ?? 125}
+          />
 
           {/* Parts */}
           <div className="bg-white border border-neutral-200 rounded-lg p-6">
@@ -277,6 +324,7 @@ export default function WorkOrderDetailPage() {
                 <Package className="h-4 w-4" />
                 <span className="text-sm font-medium">Parts</span>
               </div>
+              <PartsStatusToggle workOrderId={id} current={workOrder.partsStatus} />
             </div>
             {workOrder.partsUsed && workOrder.partsUsed.length > 0 ? (
               <div className="space-y-3">

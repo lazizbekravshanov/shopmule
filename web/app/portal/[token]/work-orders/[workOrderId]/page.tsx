@@ -12,6 +12,11 @@ import {
   MessageSquare,
   CheckCircle,
   Loader2,
+  ClipboardCheck,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  Minus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,6 +35,8 @@ import {
 import { usePortalData } from '../../layout';
 import { WorkOrderTimeline } from '@/components/portal';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { parseChecklist, inspectionSummary } from '@/lib/inspection-templates';
+import { cn } from '@/lib/utils';
 
 export default function WorkOrderDetailPage() {
   const params = useParams();
@@ -278,6 +285,102 @@ export default function WorkOrderDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Vehicle Health Report (VHR) */}
+      {(() => {
+        const vhr = parseChecklist(workOrder.checklist);
+        if (!vhr || !vhr.completedAt) return null;
+        const summary = inspectionSummary(vhr);
+        const grouped = vhr.items.reduce<Record<string, typeof vhr.items>>((acc, item) => {
+          if (!acc[item.category]) acc[item.category] = [];
+          acc[item.category].push(item);
+          return acc;
+        }, {});
+        return (
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <ClipboardCheck className="h-5 w-5 text-[#ee7a14]" />
+                  Vehicle Health Report
+                </CardTitle>
+                <Badge variant="outline" className="text-[10px]">
+                  {new Date(vhr.completedAt).toLocaleDateString()}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">{vhr.templateName}</p>
+              {/* Summary chips */}
+              <div className="flex items-center gap-2 flex-wrap mt-2">
+                {summary.red > 0 && (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-700 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full">
+                    <XCircle className="h-3.5 w-3.5" /> {summary.red} Repair Needed
+                  </span>
+                )}
+                {summary.yellow > 0 && (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                    <AlertTriangle className="h-3.5 w-3.5" /> {summary.yellow} Monitor
+                  </span>
+                )}
+                {summary.green > 0 && (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> {summary.green} Good
+                  </span>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {Object.entries(grouped).map(([category, items]) => (
+                <div key={category}>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    {category}
+                  </p>
+                  <div className="space-y-1.5">
+                    {items.map((item) => {
+                      const dot =
+                        item.status === 'red'    ? 'bg-red-500'     :
+                        item.status === 'yellow' ? 'bg-amber-400'   :
+                        item.status === 'green'  ? 'bg-emerald-500' :
+                        'bg-neutral-300';
+                      const Icon =
+                        item.status === 'red'    ? XCircle      :
+                        item.status === 'yellow' ? AlertTriangle :
+                        item.status === 'green'  ? CheckCircle2 :
+                        Minus;
+                      const textColor =
+                        item.status === 'red'    ? 'text-red-700'     :
+                        item.status === 'yellow' ? 'text-amber-700'   :
+                        item.status === 'green'  ? 'text-emerald-700' :
+                        'text-muted-foreground';
+                      return (
+                        <div
+                          key={item.id}
+                          className={cn(
+                            'flex items-start gap-2.5 rounded-lg px-3 py-2',
+                            item.status === 'red'    ? 'bg-red-50'     :
+                            item.status === 'yellow' ? 'bg-amber-50'   :
+                            item.status === 'green'  ? 'bg-emerald-50/50' :
+                            'bg-neutral-50',
+                          )}
+                        >
+                          <Icon className={cn('h-4 w-4 mt-0.5 shrink-0', textColor)} />
+                          <div className="flex-1 min-w-0">
+                            <p className={cn('text-sm', item.status === 'red' || item.status === 'yellow' ? 'font-medium' : '')}>
+                              {item.label}
+                            </p>
+                            {item.note && (
+                              <p className="text-xs text-muted-foreground mt-0.5">{item.note}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Error Message */}
       {error && (

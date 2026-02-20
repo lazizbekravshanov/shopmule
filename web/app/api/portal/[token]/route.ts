@@ -138,6 +138,7 @@ export async function GET(
       status: wo.status,
       description: wo.description,
       notes: wo.notes,
+      checklist: wo.checklist ?? null,
       createdAt: wo.createdAt.toISOString(),
       updatedAt: wo.updatedAt.toISOString(),
       vehicle: wo.Vehicle,

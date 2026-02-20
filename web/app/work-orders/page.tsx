@@ -10,11 +10,13 @@ import {
   Columns3,
   GanttChartSquare,
   Sparkles,
+  LayoutTemplate,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWorkOrders } from '@/lib/queries/work-orders';
 import { NewWorkOrderModal } from '@/components/work-orders/new-work-order-modal';
+import { ManageTemplatesSheet } from '@/components/work-orders/manage-templates-sheet';
 import { AIInsightsBar } from '@/components/work-orders/ai-insights-bar';
 import { ShopHealthScoreWidget } from '@/components/work-orders/shop-health-score';
 import { AIActionsView } from '@/components/work-orders/ai-actions-view';
@@ -41,6 +43,7 @@ const viewModes: { key: ViewMode; label: string; icon: React.ElementType }[] = [
 export default function WorkOrdersPage() {
   const { data: workOrders, isLoading, refetch, isFetching } = useWorkOrders();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const [activeView, setActiveView] = useState<ViewMode>('ai-actions');
 
   // AI-enriched data — computed from real work order data
@@ -93,6 +96,14 @@ export default function WorkOrdersPage() {
             <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
           </Button>
           <Button
+            variant="outline"
+            onClick={() => setIsTemplatesOpen(true)}
+            className="border-neutral-200 text-neutral-600 gap-1.5"
+          >
+            <LayoutTemplate className="h-4 w-4" />
+            Templates
+          </Button>
+          <Button
             onClick={() => setIsModalOpen(true)}
             className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white border-0"
           >
@@ -103,6 +114,7 @@ export default function WorkOrdersPage() {
       </div>
 
       <NewWorkOrderModal open={isModalOpen} onOpenChange={setIsModalOpen} />
+      <ManageTemplatesSheet open={isTemplatesOpen} onOpenChange={setIsTemplatesOpen} />
 
       {/* Loading State */}
       {isLoading ? (

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, type WorkOrder } from '@/lib/api';
+import { api, type WorkOrder, type PartsStatus } from '@/lib/api';
 
 export const workOrderKeys = {
   all: ['work-orders'] as const,
@@ -79,11 +79,44 @@ export function useAddLabor() {
       ...data
     }: {
       workOrderId: string;
-      employeeId: string;
+      employeeId?: string;
       hours: number;
       rate: number;
       note?: string;
     }) => api.workOrders.addLabor(workOrderId, data),
+    onSuccess: (_, { workOrderId }) => {
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.detail(workOrderId) });
+    },
+  });
+}
+
+export function useStartLaborTimer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ workOrderId, laborId }: { workOrderId: string; laborId: string }) =>
+      api.workOrders.startLaborTimer(workOrderId, laborId),
+    onSuccess: (_, { workOrderId }) => {
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.detail(workOrderId) });
+    },
+  });
+}
+
+export function useStopLaborTimer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ workOrderId, laborId }: { workOrderId: string; laborId: string }) =>
+      api.workOrders.stopLaborTimer(workOrderId, laborId),
+    onSuccess: (_, { workOrderId }) => {
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.detail(workOrderId) });
+    },
+  });
+}
+
+export function useDeleteLabor() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ workOrderId, laborId }: { workOrderId: string; laborId: string }) =>
+      api.workOrders.deleteLabor(workOrderId, laborId),
     onSuccess: (_, { workOrderId }) => {
       queryClient.invalidateQueries({ queryKey: workOrderKeys.detail(workOrderId) });
     },
@@ -106,6 +139,18 @@ export function useAddParts() {
     }) => api.workOrders.addParts(workOrderId, data),
     onSuccess: (_, { workOrderId }) => {
       queryClient.invalidateQueries({ queryKey: workOrderKeys.detail(workOrderId) });
+    },
+  });
+}
+
+export function useSetPartsStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ workOrderId, partsStatus }: { workOrderId: string; partsStatus: PartsStatus | null }) =>
+      api.workOrders.patch(workOrderId, { partsStatus }),
+    onSuccess: (_, { workOrderId }) => {
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.detail(workOrderId) });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.lists() });
     },
   });
 }

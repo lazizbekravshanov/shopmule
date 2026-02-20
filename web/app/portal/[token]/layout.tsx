@@ -34,6 +34,7 @@ interface PortalData {
     status: 'DIAGNOSED' | 'APPROVED' | 'IN_PROGRESS' | 'COMPLETED';
     description: string;
     notes?: string | null;
+    checklist?: string | null;
     createdAt: string;
     updatedAt: string;
     vehicle: {
