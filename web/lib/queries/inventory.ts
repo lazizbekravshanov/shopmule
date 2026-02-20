@@ -12,6 +12,7 @@ export function useInventory() {
   return useQuery({
     queryKey: inventoryKeys.lists(),
     queryFn: () => api.inventory.list(),
+    staleTime: 60_000,
   });
 }
 
@@ -19,6 +20,7 @@ export function useLowStockParts() {
   return useQuery({
     queryKey: inventoryKeys.lowStock(),
     queryFn: () => api.inventory.lowStock(),
+    staleTime: 60_000,
   });
 }
 
@@ -26,6 +28,7 @@ export function useLowStockCount() {
   return useQuery({
     queryKey: inventoryKeys.lowStockCount(),
     queryFn: () => api.inventory.lowStockCount(),
+    staleTime: 60_000,
   });
 }
 
