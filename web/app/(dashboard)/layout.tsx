@@ -1,7 +1,7 @@
 import { AppShell } from '@/components/layout/app-shell';
 import { AICopilotLoader } from '@/components/ai-copilot-dynamic';
 
-export default function DashboardLayout({
+export default function DashboardGroupLayout({
   children,
 }: {
   children: React.ReactNode;
