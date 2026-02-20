@@ -37,7 +37,7 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section id="faq" className="py-32 bg-white">
+    <section id="faq" className="py-32">
       <div className="max-w-3xl mx-auto px-6">
         {/* Section Header - Apple style: centered */}
         <motion.div

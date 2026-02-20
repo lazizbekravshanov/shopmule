@@ -59,7 +59,7 @@ export function PricingSection() {
   const [isYearly, setIsYearly] = useState(true);
 
   return (
-    <section id="pricing" className="py-32 bg-white">
+    <section id="pricing" className="py-32">
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header - Apple style: centered, large */}
         <motion.div
