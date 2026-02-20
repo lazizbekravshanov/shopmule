@@ -131,7 +131,7 @@ export function ShopPulse() {
       if (!res.ok) throw new Error('Failed to fetch metrics');
       return res.json();
     },
-    refetchInterval: 60000, // Refresh every minute
+    refetchInterval: 30000, // Refresh every 30 seconds
     staleTime: 30000,
     retry: 2,
   });

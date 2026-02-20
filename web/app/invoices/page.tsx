@@ -339,6 +339,7 @@ export default function InvoicesPage() {
     },
     {
       id: 'age',
+      accessorFn: (row) => invoiceAge(row.createdAt),
       header: ({ column }) => <DataTableColumnHeader column={column} title="Age" />,
       cell: ({ row }) => (
         <AgeBadge createdAt={row.original.createdAt} status={row.original.status} />
@@ -454,6 +455,16 @@ export default function InvoicesPage() {
           <div className="p-6 space-y-4">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-[400px] w-full" />
+          </div>
+        ) : invoices?.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center mb-4">
+              <FileText className="w-8 h-8 text-neutral-400" />
+            </div>
+            <h3 className="font-semibold text-neutral-900 mb-1">No invoices yet</h3>
+            <p className="text-sm text-neutral-500 max-w-xs">
+              Invoices are created automatically when you complete a work order.
+            </p>
           </div>
         ) : (
           <DataTable

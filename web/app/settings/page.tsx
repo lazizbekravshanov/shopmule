@@ -10,7 +10,9 @@ import {
   Shield,
   Mail,
   Keyboard,
+  ChevronRight,
 } from 'lucide-react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -425,6 +427,19 @@ export default function SettingsPage() {
                 </div>
                 <Button onClick={handleSave} disabled={saving}>
                   Update Password
+                </Button>
+              </div>
+              <div className="border-t pt-6">
+                <h4 className="text-sm font-medium mb-3">Audit Log</h4>
+                <p className="text-sm text-neutral-500 mb-4">
+                  Review a history of all actions taken in your account.
+                </p>
+                <Button variant="outline" asChild>
+                  <Link href="/settings/audit-logs" className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    View Audit Log
+                    <ChevronRight className="h-4 w-4 ml-auto" />
+                  </Link>
                 </Button>
               </div>
               <div className="border-t pt-6">

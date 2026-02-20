@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Plus, Truck, RefreshCw, User, Phone, Mail, MapPin } from 'lucide-react';
+import { MoreHorizontal, Plus, Truck, RefreshCw, User, Phone, Mail, MapPin, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -57,7 +57,8 @@ const columns: ColumnDef<Customer>[] = [
     ),
   },
   {
-    accessorKey: 'vehicles',
+    id: 'vehicles',
+    accessorFn: (row) => row.vehicles?.length ?? 0,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Vehicles" />,
     cell: ({ row }) => {
       const count = row.original.vehicles?.length ?? 0;
@@ -326,6 +327,23 @@ export default function CustomersPage() {
           <div className="p-6 space-y-4">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-[400px] w-full" />
+          </div>
+        ) : customers?.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center mb-4">
+              <Users className="w-8 h-8 text-neutral-400" />
+            </div>
+            <h3 className="font-semibold text-neutral-900 mb-1">No customers yet</h3>
+            <p className="text-sm text-neutral-500 max-w-xs mb-4">
+              Add your first customer to get started managing vehicles and work orders.
+            </p>
+            <Button
+              onClick={() => setCreateOpen(true)}
+              className="bg-[#ee7a14] hover:bg-[#d96a0a] text-white"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Customer
+            </Button>
           </div>
         ) : (
           <DataTable

@@ -48,8 +48,8 @@ export function TodaysSchedule() {
       }
       return json.data as ScheduleItem[];
     },
-    refetchInterval: 60000, // Refresh every minute
-    staleTime: 30000, // Consider data fresh for 30 seconds
+    refetchInterval: 30000, // Refresh every 30 seconds
+    staleTime: 15000,
     retry: 2,
   });
 
