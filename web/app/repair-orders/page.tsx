@@ -9,7 +9,9 @@ import { BackButton } from "@/components/dashboard/back-button"
 export default async function RepairOrdersPage() {
   const session = await requireAuth()
 
+  const tenantId = session.user.tenantId as string;
   const workOrders = await prisma.workOrder.findMany({
+    where: { tenantId },
     include: {
       Customer: true,
       Vehicle: true,

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   Calendar,
@@ -32,13 +33,11 @@ import {
   RevenueKPIs,
   EfficiencyKPIs,
   UtilizationHeatmap,
-  generateSampleHeatmapData,
   ComparativeAnalytics,
-  getSampleComparisonMetrics,
   TechLeaderboard,
   ReportInsights,
-  getSampleInsights,
 } from '@/components/reports';
+import type { HeatmapData, ComparisonMetric, Insight } from '@/components/reports';
 
 const DATE_RANGES = [
   { label: 'Last 7 days',  value: '7d'  },
@@ -113,8 +112,8 @@ export default function ReportsPage() {
   }, [data, activeTab, dateRange]);
 
   // Build TechLeaderboard-compatible rankings from real data
-  const techRankings = (data?.techPerformance ?? []).map((t, i) => ({
-    id:           t.name, // use name as id since we don't have employee id here
+  const techRankings = (data?.techPerformance ?? []).map((t: any, i: number) => ({
+    id:           t.name,
     rank:         i + 1,
     previousRank: i + 1,
     name:         t.name,
@@ -126,10 +125,98 @@ export default function ReportsPage() {
     score:        t.revenue,
   }));
 
-  // Sample data for heatmap / comparative (these need more data from server; use samples as placeholders)
-  const heatmapData         = generateSampleHeatmapData();
-  const comparisonMetrics   = getSampleComparisonMetrics();
-  const insights            = getSampleInsights();
+  // Real comparison metrics derived from breakdown report
+  const comparisonMetrics = useMemo((): ComparisonMetric[] => {
+    if (!s) return [];
+    const totalHours = (data?.techPerformance ?? []).reduce((sum: number, t: any) => sum + t.hours, 0);
+    const prevRevenue = s.revenueChange !== 0
+      ? Math.round((s.totalRevenue / (1 + s.revenueChange / 100)))
+      : s.totalRevenue;
+    return [
+      { label: 'Total Revenue',  current: s.totalRevenue ?? 0,  previous: prevRevenue,  format: 'currency' },
+      { label: 'Avg Ticket',     current: s.avgTicket ?? 0,      previous: 0,            format: 'currency' },
+      { label: 'Labor Revenue',  current: s.laborRevenue ?? 0,   previous: 0,            format: 'currency' },
+      { label: 'Parts Revenue',  current: s.partsRevenue ?? 0,   previous: 0,            format: 'currency' },
+      { label: 'Total Invoices', current: s.invoiceCount ?? 0,   previous: 0,            format: 'number'   },
+      { label: 'Labor Hours',    current: totalHours,             previous: 0,            format: 'hours'    },
+    ];
+  }, [s, data]);
+
+  // Real insights derived from breakdown data
+  const insights = useMemo((): Insight[] => {
+    if (!s) return [];
+    const list: Insight[] = [];
+    if (s.revenueChange >= 10) {
+      list.push({ id: 'rev-up', type: 'success', title: 'Revenue Growing', description: `Revenue is up ${s.revenueChange}% vs the prior period.`, metric: formatCurrency(s.totalRevenue) });
+    } else if (s.revenueChange <= -10) {
+      list.push({ id: 'rev-down', type: 'warning', title: 'Revenue Declined', description: `Revenue dropped ${Math.abs(s.revenueChange)}% vs the prior period.`, metric: `${s.revenueChange}%` });
+    }
+    if ((s.laborPct ?? 0) > 55) {
+      list.push({ id: 'labor', type: 'opportunity', title: 'Strong Labor Utilization', description: `Labor accounts for ${s.laborPct}% of revenue this period.`, metric: `${s.laborPct}%` });
+    }
+    if ((s.avgTicket ?? 0) > 500) {
+      list.push({ id: 'ticket', type: 'success', title: 'High Avg Ticket', description: `Average invoice is ${formatCurrency(s.avgTicket)}.`, metric: formatCurrency(s.avgTicket) });
+    }
+    const top = data?.techPerformance?.[0];
+    if (top) {
+      list.push({ id: 'top-tech', type: 'success', title: 'Top Performer', description: `${top.name} generated ${formatCurrency(top.revenue)} in labor revenue.`, metric: top.name });
+    }
+    if (list.length === 0) {
+      list.push({ id: 'no-data', type: 'recommendation', title: 'No Data Yet', description: 'Start creating invoices and work orders to see insights here.', metric: '' });
+    }
+    return list;
+  }, [s, data]);
+
+  // Fetch this week's timesheets to build a real utilization heatmap
+  const { data: weekTimesheets } = useQuery({
+    queryKey: ['timesheets', 'week-heatmap'],
+    queryFn: () => fetch('/api/timesheets?period=week').then((r) => r.json()),
+    staleTime: 5 * 60_000,
+  });
+
+  const heatmapData = useMemo((): HeatmapData => {
+    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const HOURS = Array.from({ length: 12 }, (_, i) => i + 6);
+    const timesheets: any[] = weekTimesheets?.timesheets ?? [];
+    const totalEmployees = timesheets.length || 1;
+    const slotCounts = new Map<string, number>();
+
+    for (const ts of timesheets) {
+      for (const shift of ts.shifts ?? []) {
+        if (!shift.clockIn) continue;
+        const clockIn = new Date(shift.clockIn.timestamp);
+        const clockOut = shift.clockOut ? new Date(shift.clockOut.timestamp) : new Date();
+        const dayIdx = (clockIn.getDay() + 6) % 7;
+        const dayName = DAYS[dayIdx];
+        const breaks: { start: Date; end: Date }[] = (shift.breaks ?? []).map((b: any) => ({
+          start: new Date(b.start),
+          end: b.end ? new Date(b.end) : new Date(),
+        }));
+        for (const hour of HOURS) {
+          const slotStart = new Date(clockIn); slotStart.setHours(hour, 0, 0, 0);
+          const slotEnd   = new Date(clockIn); slotEnd.setHours(hour + 1, 0, 0, 0);
+          if (slotEnd > clockIn && slotStart < clockOut) {
+            const onBreak = breaks.some((b) => b.start <= slotStart && b.end >= slotEnd);
+            if (!onBreak) {
+              const key = `${dayName}-${hour}`;
+              slotCounts.set(key, (slotCounts.get(key) ?? 0) + 1);
+            }
+          }
+        }
+      }
+    }
+
+    let peakValue = 0; let peakHour = '6 AM'; let peakDay = 'Mon'; let totalUtil = 0;
+    const cells = DAYS.flatMap((day) => HOURS.map((hour) => {
+      const count = slotCounts.get(`${day}-${hour}`) ?? 0;
+      const value = Math.round((count / totalEmployees) * 100);
+      totalUtil += value;
+      if (value > peakValue) { peakValue = value; peakDay = day; peakHour = `${hour > 12 ? hour - 12 : hour} ${hour >= 12 ? 'PM' : 'AM'}`; }
+      return { day, hour, value, techCount: count };
+    }));
+
+    return { cells, avgUtilization: Math.round(totalUtil / cells.length), peakHour, peakDay };
+  }, [weekTimesheets]);
 
   return (
     <div className="space-y-6">

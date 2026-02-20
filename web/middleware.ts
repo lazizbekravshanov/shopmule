@@ -61,6 +61,7 @@ const selfAuthApiRoutes = [
   "/api/timesheets", // Timesheet data
   "/api/fleet-accounts", // Fleet account management
   "/api/appointments",   // Appointment scheduling
+  "/api/tenant",         // Tenant settings
 ]
 
 // In-memory rate limiter store

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import {
   Plus,
   RefreshCw,
@@ -46,38 +47,61 @@ const roleOptions = [
   { label: 'Front Desk', value: 'FRONT_DESK' },
 ];
 
-// Transform API data to TechnicianData format
-function transformToTechnicianData(employees: any[]): TechnicianData[] {
-  return employees.map((emp, index) => ({
-    id: emp.id,
-    name: emp.name,
-    role: emp.role,
-    status: index % 3 === 0 ? 'clocked_in' : index % 3 === 1 ? 'on_break' : 'clocked_out',
-    clockedInAt: index % 3 !== 2 ? new Date(Date.now() - Math.random() * 6 * 60 * 60 * 1000).toISOString() : undefined,
-    currentJob: index % 3 === 0 ? {
-      id: `job-${index}`,
-      vehicle: '2022 Freightliner Cascadia',
-      description: 'Brake system inspection and repair',
-      progress: Math.floor(Math.random() * 80) + 20,
-    } : undefined,
-    efficiency: Math.floor(Math.random() * 40) + 70,
-    efficiencyTrend: Math.random() > 0.5 ? 'up' : Math.random() > 0.5 ? 'down' : 'stable',
-    todayHours: Math.round((Math.random() * 6 + 2) * 10) / 10,
-    weekHours: Math.round((Math.random() * 20 + 25) * 10) / 10,
-    jobsCompleted: Math.floor(Math.random() * 10) + 5,
-    certifications: [
-      { name: 'ASE Master', level: 'expert' as const },
-      { name: 'Diesel', level: 'advanced' as const },
-      { name: 'A/C', level: 'basic' as const },
-    ].slice(0, Math.floor(Math.random() * 3) + 1),
-    payRate: emp.payRate,
-    email: emp.user?.email,
-    phone: '(555) 123-4567',
-  }));
+type WhoEntry = {
+  employee: { id: string; name: string; role: string; photoUrl?: string };
+  status: 'CLOCKED_IN' | 'ON_BREAK' | 'CLOCKED_OUT';
+  currentShift: { clockInTime: string | null; duration: { minutes: number; formatted: string } | null } | null;
+};
+
+// Merge employees list with live attendance data
+function buildTechnicianData(employees: any[], whoData: { employees: { clockedIn: WhoEntry[]; onBreak: WhoEntry[]; clockedOut: WhoEntry[] } } | undefined): TechnicianData[] {
+  if (!employees) return [];
+
+  const statusMap = new Map<string, WhoEntry>();
+  if (whoData) {
+    for (const e of [...whoData.employees.clockedIn, ...whoData.employees.onBreak, ...whoData.employees.clockedOut]) {
+      statusMap.set(e.employee.id, e);
+    }
+  }
+
+  return employees.map((emp) => {
+    const live = statusMap.get(emp.id);
+    const status = live
+      ? live.status === 'CLOCKED_IN' ? 'clocked_in' : live.status === 'ON_BREAK' ? 'on_break' : 'clocked_out'
+      : 'clocked_out';
+
+    const shiftMinutes = live?.currentShift?.duration?.minutes ?? 0;
+    const todayHours = Math.round((shiftMinutes / 60) * 10) / 10;
+    const clockedInAt = live?.currentShift?.clockInTime ?? undefined;
+
+    return {
+      id: emp.id,
+      name: emp.name,
+      role: emp.role,
+      status,
+      clockedInAt,
+      currentJob: undefined,
+      efficiency: 0,
+      efficiencyTrend: 'stable' as const,
+      todayHours,
+      weekHours: 0,
+      jobsCompleted: 0,
+      certifications: [],
+      payRate: emp.payRate,
+      email: emp.user?.email,
+      phone: emp.phone ?? '',
+    };
+  });
 }
 
 export default function TechniciansPage() {
   const { data: employees, isLoading, refetch, isFetching } = useEmployees();
+  const { data: whoData } = useQuery({
+    queryKey: ['whos-working'],
+    queryFn: () => fetch('/api/attendance/whos-working').then((r) => r.json()),
+    refetchInterval: 30_000,
+    staleTime: 15_000,
+  });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -113,7 +137,7 @@ export default function TechniciansPage() {
   };
 
   // Transform and filter data
-  const technicians = employees ? transformToTechnicianData(employees) : [];
+  const technicians = useMemo(() => buildTechnicianData(employees ?? [], whoData), [employees, whoData]);
   const filteredTechnicians = technicians.filter(tech => {
     const matchesSearch = tech.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === 'all' || tech.role === roleFilter;

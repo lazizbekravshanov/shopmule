@@ -39,152 +39,87 @@ import {
 import type { ActiveTech, TechTimeline, WeekData, PunchForReview } from '@/components/time-clock';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-// Generate sample data for demonstration
-function generateSampleActiveTechs(employees: any[]): ActiveTech[] {
-  return employees
-    .filter((_, i) => i % 2 === 0) // Half are clocked in
-    .map((emp, index) => ({
-      id: emp.id,
-      name: emp.name,
-      clockedInAt: new Date(Date.now() - Math.random() * 6 * 60 * 60 * 1000).toISOString(),
-      status: index % 4 === 0 ? 'on_break' as const : 'working' as const,
-      breakStartedAt: index % 4 === 0 ? new Date(Date.now() - 15 * 60 * 1000).toISOString() : undefined,
-      currentJob: index % 4 !== 0 ? {
-        id: `job-${index}`,
-        vehicle: '2022 Freightliner Cascadia',
-        description: 'Engine diagnostics and repair',
-      } : undefined,
-      totalHoursToday: Math.round((Math.random() * 5 + 2) * 10) / 10,
-      isOvertime: Math.random() > 0.8,
-    }));
-}
-
-function generateSampleTimelines(employees: any[]): TechTimeline[] {
-  return employees.map((emp) => {
-    const blocks = [];
-    let currentHour = 6 + Math.floor(Math.random() * 2);
-
-    // Generate 2-4 work blocks
-    for (let i = 0; i < Math.floor(Math.random() * 3) + 2; i++) {
-      const duration = Math.random() * 2 + 1;
-      const today = new Date();
-      today.setHours(currentHour, Math.floor(Math.random() * 60), 0, 0);
-      const endTime = new Date(today);
-      endTime.setHours(currentHour + duration);
-
+function buildTimelinesFromTimesheets(timesheets: any[]): TechTimeline[] {
+  return timesheets.map((ts) => {
+    const blocks: TechTimeline['blocks'] = [];
+    for (const shift of ts.shifts) {
+      if (!shift.clockIn) continue;
       blocks.push({
-        id: `block-${emp.id}-${i}`,
-        type: 'work' as const,
-        startTime: today.toISOString(),
-        endTime: i === 0 && Math.random() > 0.5 ? undefined : endTime.toISOString(),
-        jobId: `job-${i}`,
-        jobName: i === 0 ? 'Brake System Repair' : 'Engine Diagnostics',
+        id: `work-${shift.clockIn.id}`,
+        type: shift.overtimeMinutes > 0 ? 'overtime' : 'work',
+        startTime: shift.clockIn.timestamp,
+        endTime: shift.clockOut?.timestamp ?? undefined,
       });
-
-      currentHour += duration;
-
-      // Add a break
-      if (i < 2 && Math.random() > 0.5) {
-        const breakStart = new Date(today);
-        breakStart.setHours(currentHour, 0, 0, 0);
-        const breakEnd = new Date(breakStart);
-        breakEnd.setMinutes(breakEnd.getMinutes() + 30);
-
+      for (let i = 0; i < shift.breaks.length; i++) {
+        const brk = shift.breaks[i];
         blocks.push({
-          id: `break-${emp.id}-${i}`,
-          type: 'break' as const,
-          startTime: breakStart.toISOString(),
-          endTime: breakEnd.toISOString(),
+          id: `break-${shift.clockIn.id}-${i}`,
+          type: 'break',
+          startTime: brk.start,
+          endTime: brk.end ?? undefined,
         });
-
-        currentHour += 0.5;
       }
     }
-
-    // Add overtime block if applicable
-    if (Math.random() > 0.7 && currentHour > 17) {
-      const overtimeStart = new Date();
-      overtimeStart.setHours(17, 0, 0, 0);
-      blocks.push({
-        id: `ot-${emp.id}`,
-        type: 'overtime' as const,
-        startTime: overtimeStart.toISOString(),
-        endTime: undefined,
-      });
-    }
-
     return {
-      id: emp.id,
-      name: emp.name,
+      id: ts.employee.id,
+      name: ts.employee.name,
       blocks,
-      totalHours: Math.round((currentHour - 6) * 10) / 10,
-      efficiency: Math.floor(Math.random() * 30) + 75,
+      totalHours: Math.round((ts.summary.workMinutes / 60) * 10) / 10,
+      efficiency: 0,
     };
   });
 }
 
-function generateSampleWeekData(employeeName: string): WeekData {
+function buildWeekDataFromShifts(tsData: any): WeekData {
   const today = new Date();
   const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+  startOfWeek.setDate(today.getDate() - ((today.getDay() + 6) % 7)); // Mon
+  startOfWeek.setHours(0, 0, 0, 0);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+  const shifts: any[] = tsData?.shifts ?? [];
+  const daysMap = new Map<string, any>();
+  for (const shift of shifts) {
+    const key = new Date(shift.clockIn.timestamp).toDateString();
+    daysMap.set(key, shift);
+  }
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayName, index) => {
     const date = new Date(startOfWeek);
     date.setDate(startOfWeek.getDate() + index);
     const isToday = date.toDateString() === today.toDateString();
     const isFuture = date > today;
-    const isWeekend = index >= 5;
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-    if (isFuture) {
-      return {
-        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        dayName,
-        status: 'future' as const,
-        breakMinutes: 0,
-        totalHours: 0,
-        isToday: false,
-      };
-    }
+    if (isFuture) return { date: dateStr, dayName, status: 'future' as const, breakMinutes: 0, totalHours: 0, isToday: false };
 
-    if (isWeekend && Math.random() > 0.3) {
-      return {
-        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        dayName,
-        status: 'absent' as const,
-        breakMinutes: 0,
-        totalHours: 0,
-        isToday,
-      };
-    }
+    const shift = daysMap.get(date.toDateString());
+    if (!shift) return { date: dateStr, dayName, status: 'absent' as const, breakMinutes: 0, totalHours: 0, isToday };
 
-    const clockInHour = 6 + Math.floor(Math.random() * 2);
-    const workHours = 8 + Math.random() * 3;
-    const breakMins = Math.floor(Math.random() * 30) + 15;
-    const overtime = workHours > 8 ? workHours - 8 : 0;
-
+    const fmt = (d: string) => new Date(d).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     return {
-      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      date: dateStr,
       dayName,
-      clockIn: `${clockInHour}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')} AM`,
-      clockOut: isToday ? undefined : `${clockInHour + Math.floor(workHours)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')} PM`,
-      breakMinutes: breakMins,
-      totalHours: Math.round(workHours * 10) / 10,
-      status: isToday ? 'incomplete' as const : 'complete' as const,
+      clockIn: fmt(shift.clockIn.timestamp),
+      clockOut: shift.clockOut ? fmt(shift.clockOut.timestamp) : undefined,
+      breakMinutes: shift.breakMinutes,
+      totalHours: Math.round((shift.workMinutes / 60) * 10) / 10,
+      status: (isToday && !shift.isComplete) ? 'incomplete' as const : 'complete' as const,
       isToday,
-      overtime: overtime > 0 ? Math.round(overtime * 10) / 10 : undefined,
+      overtime: shift.overtimeMinutes > 0 ? Math.round((shift.overtimeMinutes / 60) * 10) / 10 : undefined,
     };
   });
 
   const totalHours = days.reduce((sum, d) => sum + d.totalHours, 0);
   const totalOvertime = days.reduce((sum, d) => sum + (d.overtime || 0), 0);
-
   return {
     weekStart: startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    weekEnd: new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    weekEnd: endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     days,
     totalHours: Math.round(totalHours * 10) / 10,
     totalOvertime: Math.round(totalOvertime * 10) / 10,
-    avgEfficiency: Math.floor(Math.random() * 20) + 80,
+    avgEfficiency: 0,
   };
 }
 
@@ -259,9 +194,9 @@ export default function TimeClockPage() {
   // Get the selected employee's name
   const selectedEmployeeName = employees?.find(e => e.id === selectedEmployee)?.name || 'Select Employee';
 
-  // Build real active techs from attendance API
+  // Real-time active techs from attendance API
   const activeTechs = useMemo((): ActiveTech[] => {
-    if (!whoData?.employees) return employees ? generateSampleActiveTechs(employees) : [];
+    if (!whoData?.employees) return [];
     const allWorking = [
       ...(whoData.employees.clockedIn ?? []),
       ...(whoData.employees.onBreak ?? []),
@@ -275,19 +210,35 @@ export default function TimeClockPage() {
       totalHoursToday: e.currentShift?.duration?.minutes
         ? Math.round((e.currentShift.duration.minutes / 60) * 10) / 10
         : 0,
-      isOvertime: e.currentShift?.duration?.minutes > 480,
+      isOvertime: (e.currentShift?.duration?.minutes ?? 0) > 480,
     }));
-  }, [whoData, employees]);
+  }, [whoData]);
+
+  // Today's timelines from real timesheet data
+  const { data: todayTimesheets } = useQuery({
+    queryKey: ['timesheets', 'today'],
+    queryFn: () => fetch('/api/timesheets?period=today').then((r) => r.json()),
+    staleTime: 60_000,
+    refetchInterval: 60_000,
+  });
 
   const timelines = useMemo(() =>
-    employees ? generateSampleTimelines(employees) : [],
-    [employees]
+    buildTimelinesFromTimesheets(todayTimesheets?.timesheets ?? []),
+    [todayTimesheets]
   );
 
-  const weekData = useMemo(() =>
-    generateSampleWeekData(selectedEmployeeName),
-    [selectedEmployeeName]
-  );
+  // Selected employee's weekly timesheet
+  const { data: weekTimesheets } = useQuery({
+    queryKey: ['timesheets', 'week', selectedEmployee],
+    queryFn: () => fetch(`/api/timesheets?period=week&employeeId=${selectedEmployee}`).then((r) => r.json()),
+    enabled: !!selectedEmployee,
+    staleTime: 60_000,
+  });
+
+  const weekData = useMemo((): WeekData => {
+    const empTs = weekTimesheets?.timesheets?.find((ts: any) => ts.employee.id === selectedEmployee);
+    return buildWeekDataFromShifts(empTs);
+  }, [weekTimesheets, selectedEmployee]);
 
   // Current clock status — prefer real data from attendance API
   const currentStatus = useMemo((): 'clocked_in' | 'on_break' | 'clocked_out' => {

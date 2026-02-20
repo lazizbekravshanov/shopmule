@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   User,
@@ -11,6 +11,7 @@ import {
   Mail,
   Keyboard,
   ChevronRight,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -35,13 +36,48 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTheme } from 'next-themes';
 import { useToast } from '@/components/ui/use-toast';
 import { useUIStore } from '@/lib/stores/ui-store';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+async function fetchTenant() {
+  const res = await fetch('/api/tenant');
+  if (!res.ok) throw new Error('Failed to load settings');
+  const data = await res.json();
+  return data.tenant;
+}
+
+async function saveTenant(body: Record<string, unknown>) {
+  const res = await fetch('/api/tenant', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error('Failed to save settings');
+  return res.json();
+}
 
 export default function SettingsPage() {
   const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const { setShortcutsOpen } = useUIStore();
-  const [saving, setSaving] = useState(false);
+  const qc = useQueryClient();
+
+  const { data: tenant, isLoading: tenantLoading } = useQuery({
+    queryKey: ['tenant'],
+    queryFn: fetchTenant,
+    staleTime: 60_000,
+  });
+
+  const mutation = useMutation({
+    mutationFn: saveTenant,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tenant'] });
+      toast({ title: 'Settings saved', description: 'Your settings have been updated.' });
+    },
+    onError: () => {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to save settings.' });
+    },
+  });
 
   // Profile settings
   const [profile, setProfile] = useState({
@@ -50,15 +86,28 @@ export default function SettingsPage() {
     phone: '',
   });
 
-  // Shop settings
+  // Shop settings — initialized from API
   const [shop, setShop] = useState({
-    name: 'ShopMule Demo',
-    address: '123 Main St, Anytown, USA',
-    phone: '(555) 123-4567',
-    email: 'shop@example.com',
-    taxRate: '8.25',
-    laborRate: '95.00',
+    name: '',
+    address: '',
+    phone: '',
+    email: '',
+    taxRate: '',
+    laborRate: '',
   });
+
+  useEffect(() => {
+    if (tenant) {
+      setShop({
+        name: tenant.name ?? '',
+        address: [tenant.address, tenant.city, tenant.state, tenant.zipCode].filter(Boolean).join(', '),
+        phone: tenant.phone ?? '',
+        email: tenant.email ?? '',
+        taxRate: tenant.taxRate != null ? String(tenant.taxRate * 100) : '',
+        laborRate: tenant.settings?.laborRate != null ? String(tenant.settings.laborRate) : '',
+      });
+    }
+  }, [tenant]);
 
   // Notification settings
   const [notifications, setNotifications] = useState({
@@ -68,14 +117,23 @@ export default function SettingsPage() {
     pushNotifications: true,
   });
 
-  const handleSave = async () => {
-    setSaving(true);
-    // Simulate save
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setSaving(false);
+  const handleSaveShop = () => {
+    // Parse address back into parts (simple split on first comma)
+    const parts = shop.address.split(',').map((s) => s.trim());
+    mutation.mutate({
+      name: shop.name,
+      address: parts[0] ?? shop.address,
+      phone: shop.phone,
+      email: shop.email,
+      taxRate: shop.taxRate ? parseFloat(shop.taxRate) / 100 : undefined,
+      laborRate: shop.laborRate || undefined,
+    });
+  };
+
+  const handleSaveProfile = () => {
     toast({
       title: 'Settings saved',
-      description: 'Your settings have been updated successfully.',
+      description: 'Profile settings updated.',
     });
   };
 
@@ -129,9 +187,7 @@ export default function SettingsPage() {
                   <Input
                     id="name"
                     value={profile.name}
-                    onChange={(e) =>
-                      setProfile({ ...profile, name: e.target.value })
-                    }
+                    onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -140,9 +196,7 @@ export default function SettingsPage() {
                     id="email"
                     type="email"
                     value={profile.email}
-                    onChange={(e) =>
-                      setProfile({ ...profile, email: e.target.value })
-                    }
+                    onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -151,16 +205,12 @@ export default function SettingsPage() {
                     id="phone"
                     type="tel"
                     value={profile.phone}
-                    onChange={(e) =>
-                      setProfile({ ...profile, phone: e.target.value })
-                    }
+                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                     placeholder="(555) 000-0000"
                   />
                 </div>
               </div>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? 'Saving...' : 'Save Changes'}
-              </Button>
+              <Button onClick={handleSaveProfile}>Save Changes</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -174,75 +224,75 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="shopName">Shop Name</Label>
-                  <Input
-                    id="shopName"
-                    value={shop.name}
-                    onChange={(e) => setShop({ ...shop, name: e.target.value })}
-                  />
+              {tenantLoading ? (
+                <div className="flex items-center gap-2 text-neutral-500">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading shop settings...
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="shopEmail">Shop Email</Label>
-                  <Input
-                    id="shopEmail"
-                    type="email"
-                    value={shop.email}
-                    onChange={(e) =>
-                      setShop({ ...shop, email: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="shopPhone">Shop Phone</Label>
-                  <Input
-                    id="shopPhone"
-                    type="tel"
-                    value={shop.phone}
-                    onChange={(e) =>
-                      setShop({ ...shop, phone: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="shopAddress">Address</Label>
-                  <Input
-                    id="shopAddress"
-                    value={shop.address}
-                    onChange={(e) =>
-                      setShop({ ...shop, address: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="taxRate">Tax Rate (%)</Label>
-                  <Input
-                    id="taxRate"
-                    type="number"
-                    step="0.01"
-                    value={shop.taxRate}
-                    onChange={(e) =>
-                      setShop({ ...shop, taxRate: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="laborRate">Labor Rate ($/hr)</Label>
-                  <Input
-                    id="laborRate"
-                    type="number"
-                    step="0.01"
-                    value={shop.laborRate}
-                    onChange={(e) =>
-                      setShop({ ...shop, laborRate: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? 'Saving...' : 'Save Changes'}
-              </Button>
+              ) : (
+                <>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="shopName">Shop Name</Label>
+                      <Input
+                        id="shopName"
+                        value={shop.name}
+                        onChange={(e) => setShop({ ...shop, name: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="shopEmail">Shop Email</Label>
+                      <Input
+                        id="shopEmail"
+                        type="email"
+                        value={shop.email}
+                        onChange={(e) => setShop({ ...shop, email: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="shopPhone">Shop Phone</Label>
+                      <Input
+                        id="shopPhone"
+                        type="tel"
+                        value={shop.phone}
+                        onChange={(e) => setShop({ ...shop, phone: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="shopAddress">Address</Label>
+                      <Input
+                        id="shopAddress"
+                        value={shop.address}
+                        onChange={(e) => setShop({ ...shop, address: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="taxRate">Tax Rate (%)</Label>
+                      <Input
+                        id="taxRate"
+                        type="number"
+                        step="0.01"
+                        value={shop.taxRate}
+                        onChange={(e) => setShop({ ...shop, taxRate: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="laborRate">Labor Rate ($/hr)</Label>
+                      <Input
+                        id="laborRate"
+                        type="number"
+                        step="0.01"
+                        value={shop.laborRate}
+                        onChange={(e) => setShop({ ...shop, laborRate: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={handleSaveShop} disabled={mutation.isPending}>
+                    {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save Changes
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -273,10 +323,7 @@ export default function SettingsPage() {
                       id="emailWorkOrders"
                       checked={notifications.emailWorkOrders}
                       onCheckedChange={(checked) =>
-                        setNotifications({
-                          ...notifications,
-                          emailWorkOrders: checked,
-                        })
+                        setNotifications({ ...notifications, emailWorkOrders: checked })
                       }
                     />
                   </div>
@@ -291,10 +338,7 @@ export default function SettingsPage() {
                       id="emailInvoices"
                       checked={notifications.emailInvoices}
                       onCheckedChange={(checked) =>
-                        setNotifications({
-                          ...notifications,
-                          emailInvoices: checked,
-                        })
+                        setNotifications({ ...notifications, emailInvoices: checked })
                       }
                     />
                   </div>
@@ -309,10 +353,7 @@ export default function SettingsPage() {
                       id="emailReminders"
                       checked={notifications.emailReminders}
                       onCheckedChange={(checked) =>
-                        setNotifications({
-                          ...notifications,
-                          emailReminders: checked,
-                        })
+                        setNotifications({ ...notifications, emailReminders: checked })
                       }
                     />
                   </div>
@@ -326,9 +367,7 @@ export default function SettingsPage() {
                 <div className="space-y-4 pl-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="pushNotifications">
-                        Enable Push Notifications
-                      </Label>
+                      <Label htmlFor="pushNotifications">Enable Push Notifications</Label>
                       <p className="text-sm text-neutral-500">
                         Receive real-time updates in your browser
                       </p>
@@ -337,18 +376,12 @@ export default function SettingsPage() {
                       id="pushNotifications"
                       checked={notifications.pushNotifications}
                       onCheckedChange={(checked) =>
-                        setNotifications({
-                          ...notifications,
-                          pushNotifications: checked,
-                        })
+                        setNotifications({ ...notifications, pushNotifications: checked })
                       }
                     />
                   </div>
                 </div>
               </div>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? 'Saving...' : 'Save Changes'}
-              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -425,9 +458,7 @@ export default function SettingsPage() {
                     <Input id="confirmPassword" type="password" />
                   </div>
                 </div>
-                <Button onClick={handleSave} disabled={saving}>
-                  Update Password
-                </Button>
+                <Button>Update Password</Button>
               </div>
               <div className="border-t pt-6">
                 <h4 className="text-sm font-medium mb-3">Audit Log</h4>
@@ -443,9 +474,7 @@ export default function SettingsPage() {
                 </Button>
               </div>
               <div className="border-t pt-6">
-                <h4 className="text-sm font-medium text-red-600 mb-2">
-                  Danger Zone
-                </h4>
+                <h4 className="text-sm font-medium text-red-600 mb-2">Danger Zone</h4>
                 <p className="text-sm text-neutral-500 mb-4">
                   Once you delete your account, there is no going back.
                 </p>
