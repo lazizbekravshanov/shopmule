@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: '%s | ShopMule',
   },
   description:
-    'Streamline your auto body shop with ShopMule. AI-powered work orders, invoicing, customer portal, time tracking, and inventory management. Boost efficiency by 40%.',
+    'AI-powered work orders, invoicing, customer portal, time tracking, and inventory management for auto body and truck repair shops.',
   keywords: [
     'auto body shop software',
     'body shop management',
@@ -129,16 +129,9 @@ export default function RootLayout({
               url: siteUrl,
               offers: {
                 '@type': 'Offer',
-                price: '199',
+                price: '149',
                 priceCurrency: 'USD',
                 priceValidUntil: '2027-12-31',
-              },
-              aggregateRating: {
-                '@type': 'AggregateRating',
-                ratingValue: '4.9',
-                ratingCount: '127',
-                bestRating: '5',
-                worstRating: '1',
               },
               author: {
                 '@type': 'Organization',

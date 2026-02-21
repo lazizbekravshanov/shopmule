@@ -75,6 +75,9 @@ export function PricingSection() {
           <p className="mt-6 text-xl text-neutral-500">
             Pays for itself after one recovered invoice.
           </p>
+          <p className="mt-4 text-sm text-neutral-400 max-w-lg mx-auto">
+            Legacy shop software charges $200–400/mo per user, plus $1,500+ setup fees. ShopMule is a flat monthly rate.
+          </p>
 
           {/* Billing Toggle - Apple style: pill design */}
           <div className="mt-10 inline-flex items-center gap-1 p-1 bg-neutral-100 rounded-full">

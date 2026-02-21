@@ -103,7 +103,7 @@ const features: Feature[] = [
 ];
 
 const pricing = [
-  { name: 'Starting Price', shopmule: '$199/mo', ccc: '$500+/mo', mitchell: '$400+/mo', shopmonkey: '$249/mo' },
+  { name: 'Starting Price', shopmule: 'From $149/mo', ccc: '$500+/mo', mitchell: '$400+/mo', shopmonkey: '$249/mo' },
   { name: 'Implementation', shopmule: 'Free', ccc: '$2,000+', mitchell: '$1,500+', shopmonkey: '$500' },
   { name: 'Contract Length', shopmule: 'Monthly', ccc: 'Annual', mitchell: 'Annual', shopmonkey: 'Monthly' },
 ];

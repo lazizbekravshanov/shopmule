@@ -30,7 +30,7 @@ export function ROICalculator() {
     const totalAnnualBenefit = revenueFromTimeSavings + revenueFromThroughput + recoveredRevenue
 
     // ShopMule cost (Professional plan)
-    const monthlyPlanCost = technicians <= 3 ? 49 : technicians <= 10 ? 99 : 249
+    const monthlyPlanCost = technicians <= 5 ? 149 : technicians <= 15 ? 299 : 599
     const annualCost = monthlyPlanCost * 12
 
     const netBenefit = totalAnnualBenefit - annualCost

@@ -4,26 +4,20 @@ import { motion } from 'framer-motion';
 import {
   TrendingUp,
   Target,
-  Globe,
   Zap,
-  ArrowUpRight,
-  Building2,
   Users,
-  DollarSign,
-  BarChart3,
   CheckCircle2,
   Mail,
   Download,
 } from 'lucide-react';
-import Link from 'next/link';
 import { Navigation } from '@/components/landing/navigation';
 import { Footer } from '@/components/landing/footer';
 
 const metrics = [
-  { label: 'Team Size', value: '5', growth: null },
+  { label: 'Founders', value: '3', growth: null },
   { label: 'Founded', value: '2026', growth: null },
-  { label: 'HQ', value: 'San Francisco', growth: null },
-  { label: 'Origin', value: 'Cincinnati, OH', growth: null },
+  { label: 'HQ', value: 'Cincinnati, OH', growth: null },
+  { label: 'Stage', value: 'Pre-Seed', growth: null },
 ];
 
 const leadership = [
@@ -47,31 +41,30 @@ const leadership = [
 const highlights = [
   {
     icon: Target,
-    title: '$52B TAM',
-    description: 'Massive, underserved market with 88% of shops still on paper or legacy software',
-  },
-  {
-    icon: TrendingUp,
-    title: '340% ARR Growth',
-    description: 'Rapid adoption driven by word-of-mouth and best-in-class product experience',
+    title: '$89.6B TAM',
+    description: 'Massive, underserved market — 303,000+ repair shops in the US, 71% independently owned, and 54% still using paper or spreadsheets',
   },
   {
     icon: Zap,
     title: 'AI-First Platform',
-    description: 'First-mover advantage in AI-powered estimates, reducing time from hours to minutes',
+    description: 'First-mover in AI-powered estimates, auto-generated repair notes, and predictive parts needs — reducing admin from hours to minutes',
   },
   {
-    icon: Globe,
-    title: 'Land & Expand',
-    description: '142% NRR driven by multi-location expansion and upsells to premium features',
+    icon: TrendingUp,
+    title: '~9% CAGR',
+    description: 'Shop management software market projected to grow from ~$1.5B to ~$3.2B by 2033, driven by digital transformation',
+  },
+  {
+    icon: Users,
+    title: '46% Tech Shortage',
+    description: 'Nearly half of shop owners report technician shortage — software that reclaims admin time is a force multiplier',
   },
 ];
 
 const milestones = [
   { year: '2026 Q1', event: 'Founded in Cincinnati, OH' },
-  { year: '2026 Q2', event: 'Seed round led by Lead Venture Partner' },
-  { year: '2026 Q3', event: 'Product launch, first beta shops' },
-  { year: '2026 Q4', event: 'Relocated HQ to San Francisco, CA' },
+  { year: '2026 Q2', event: 'Product development begins — core platform build' },
+  { year: '2026 Q3', event: 'Early access launch, first beta shops onboarded' },
 ];
 
 const useOfFunds = [
@@ -79,12 +72,6 @@ const useOfFunds = [
   { category: 'Sales & Marketing', percentage: 35, description: 'Field sales team, digital marketing' },
   { category: 'Customer Success', percentage: 15, description: 'Onboarding, support, retention' },
   { category: 'G&A', percentage: 5, description: 'Operations, legal, finance' },
-];
-
-const investors = [
-  { name: 'Lead Venture Partner', type: 'Lead Investor' },
-  { name: 'Growth Capital Fund', type: 'Series Seed' },
-  { name: 'Strategic Angels', type: 'Strategic' },
 ];
 
 export function InvestorsContent() {
@@ -101,14 +88,14 @@ export function InvestorsContent() {
             className="text-center max-w-3xl mx-auto"
           >
             <span className="inline-block px-4 py-1.5 bg-neutral-700 text-neutral-300 rounded-full text-sm font-medium mb-6">
-              Series A
+              Seeking Investment
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Modernizing the $52B Commercial Repair Industry
+              Modernizing the $89.6B Auto Repair Industry
             </h1>
             <p className="text-xl text-neutral-300 mb-8">
-              ShopMule is an AI-powered shop management platform for all repair shops—heavy duty trucks,
-              semi-trucks, equipment, and more. Founded in Cincinnati, OH. Headquartered in San Francisco, CA.
+              ShopMule is an AI-powered shop management platform for all repair shops — heavy duty trucks,
+              semi-trucks, equipment, and more. Founded in Cincinnati, OH.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
@@ -205,26 +192,26 @@ export function InvestorsContent() {
                 Market Opportunity
               </h2>
               <p className="text-lg text-neutral-600 mb-6">
-                The commercial repair industry is massive, fragmented, and ripe for disruption.
-                88% of independent shops still rely on paper-based processes or legacy software
-                built in the 1990s.
+                The auto repair industry is massive, fragmented, and ripe for disruption.
+                54% of small and medium service businesses still rely on paper-based processes
+                or spreadsheets.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  <span className="text-neutral-700">150,000+ independent repair shops in the US</span>
+                  <span className="text-neutral-700">303,000+ repair shops in the US (IBISWorld 2025)</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  <span className="text-neutral-700">15% industry CAGR driven by vehicle complexity</span>
+                  <span className="text-neutral-700">~9% CAGR in shop management software market</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  <span className="text-neutral-700">Increasing EV adoption creating new repair needs</span>
+                  <span className="text-neutral-700">71% of shops independently owned — no dominant software vendor</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  <span className="text-neutral-700">Consolidation creating multi-location operators</span>
+                  <span className="text-neutral-700">46% of owners report technician shortage — efficiency tools are critical</span>
                 </div>
               </div>
             </motion.div>
@@ -242,18 +229,18 @@ export function InvestorsContent() {
                     <div className="w-48 h-48 rounded-full bg-neutral-200 border-2 border-neutral-300 flex items-center justify-center">
                       <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white">
                         <div className="text-center">
-                          <div className="text-lg font-bold">$850M</div>
+                          <div className="text-lg font-bold">$450M+</div>
                           <div className="text-xs">SOM</div>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div className="absolute top-4 right-0 text-right">
-                    <div className="text-2xl font-bold text-neutral-700">$52B</div>
+                    <div className="text-2xl font-bold text-neutral-700">$89.6B</div>
                     <div className="text-sm text-neutral-500">TAM</div>
                   </div>
                   <div className="absolute top-20 -right-4 text-right">
-                    <div className="text-xl font-bold text-neutral-600">$8.2B</div>
+                    <div className="text-xl font-bold text-neutral-600">~$1.5B</div>
                     <div className="text-sm text-neutral-500">SAM</div>
                   </div>
                 </div>
@@ -387,38 +374,23 @@ export function InvestorsContent() {
         </div>
       </section>
 
-      {/* Current Investors */}
+      {/* Currently Seeking Investment */}
       <section className="py-20 bg-neutral-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
           >
             <h2 className="text-3xl font-bold text-neutral-900 mb-4">
-              Backed By
+              Currently Seeking Seed Investment
             </h2>
+            <p className="text-lg text-neutral-600 mb-8">
+              We&apos;re raising a seed round to accelerate product development, onboard our first 100 shops,
+              and build out our go-to-market engine. If you&apos;re an investor who understands vertical SaaS
+              and underserved markets, we&apos;d love to talk.
+            </p>
           </motion.div>
-
-          <div className="flex flex-wrap justify-center gap-12">
-            {investors.map((investor, index) => (
-              <motion.div
-                key={investor.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
-              >
-                <div className="w-24 h-24 bg-neutral-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Building2 className="w-10 h-10 text-neutral-400" />
-                </div>
-                <div className="font-semibold text-neutral-900">{investor.name}</div>
-                <div className="text-sm text-neutral-500">{investor.type}</div>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </section>
 

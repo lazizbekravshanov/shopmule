@@ -11,7 +11,7 @@ import {
 const faqs = [
   {
     question: 'How quickly can we get started?',
-    answer: 'Most shops are up and running within 15 minutes. Create your account, add your team, and start tracking work orders immediately.',
+    answer: 'Most shops can get started quickly. Create your account, add your team, and start tracking work orders right away.',
   },
   {
     question: 'Do you offer training?',

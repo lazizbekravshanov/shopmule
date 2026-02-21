@@ -5,45 +5,45 @@ import { TrendingUp, Target, Globe, Zap } from 'lucide-react';
 
 const marketStats = [
   {
-    value: '$52B',
+    value: '$89.6B',
     label: 'Total Addressable Market',
-    sublabel: 'US Commercial Repair Industry',
-    description: 'The repair industry continues to grow with increasing vehicle complexity.',
+    sublabel: 'US Auto Repair Industry Revenue',
+    description: 'The US auto repair industry generates $89.6B annually and continues to grow with increasing vehicle complexity.',
   },
   {
-    value: '$8.2B',
+    value: '~$1.5B',
     label: 'Serviceable Market',
     sublabel: 'Shop Management Software',
-    description: 'Only 12% of shops use modern software. Massive opportunity for disruption.',
+    description: 'The shop management software market is projected to reach ~$3.2B by 2033, growing at ~9% CAGR.',
   },
   {
-    value: '$850M',
+    value: '$450M+',
     label: 'Initial Target Market',
     sublabel: 'Independent Repair Shops',
-    description: '150,000+ independent shops ready for digital transformation.',
+    description: '215,000+ independently owned shops ready for modern software — most still use paper or legacy tools.',
   },
 ];
 
 const growthDrivers = [
   {
     icon: TrendingUp,
-    title: '15% CAGR',
-    description: 'Industry growing steadily as vehicle technology advances',
+    title: '~9% CAGR',
+    description: 'Shop management software market growing steadily through 2033',
   },
   {
     icon: Target,
-    title: '88% Underserved',
-    description: 'Most shops still use paper or outdated software',
+    title: '54% Underserved',
+    description: 'Majority of small/medium service businesses still use paper or spreadsheets',
   },
   {
     icon: Globe,
-    title: 'Global Expansion',
-    description: 'International markets represent 3x domestic opportunity',
+    title: '303K+ Shops',
+    description: '71% independently owned — fragmented market ready for a modern platform',
   },
   {
     icon: Zap,
     title: 'AI Advantage',
-    description: 'First-mover in AI-powered shop management',
+    description: 'First-mover in AI-powered estimates, repair notes, and predictive parts needs',
   },
 ];
 
@@ -111,7 +111,7 @@ export function MarketOpportunity() {
                     className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-orange-500 flex items-center justify-center"
                   >
                     <div className="text-center">
-                      <div className="text-2xl md:text-3xl font-bold">$850M</div>
+                      <div className="text-2xl md:text-3xl font-bold">$450M+</div>
                       <div className="text-xs text-orange-100">SOM</div>
                     </div>
                   </motion.div>
@@ -120,11 +120,11 @@ export function MarketOpportunity() {
 
               {/* Labels */}
               <div className="absolute top-4 right-0 text-right">
-                <div className="text-2xl font-bold text-orange-400">$52B</div>
+                <div className="text-2xl font-bold text-orange-400">$89.6B</div>
                 <div className="text-sm text-neutral-500">TAM</div>
               </div>
               <div className="absolute top-24 -right-8 text-right">
-                <div className="text-xl font-bold text-orange-300">$8.2B</div>
+                <div className="text-xl font-bold text-orange-300">~$1.5B</div>
                 <div className="text-sm text-neutral-500">SAM</div>
               </div>
             </div>
@@ -170,19 +170,16 @@ export function MarketOpportunity() {
           ))}
         </div>
 
-        {/* Bottom Quote */}
+        {/* Source attribution */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="mt-16 text-center"
         >
-          <p className="text-neutral-400 italic max-w-2xl mx-auto">
-            &ldquo;The collision repair industry is undergoing a digital transformation.
-            Companies that provide modern, integrated software solutions are positioned
-            to capture significant market share.&rdquo;
+          <p className="text-xs text-neutral-600">
+            Sources: IBISWorld US Auto Mechanics Industry Report (2025–2026), IoT Analytics (2025), Allied Market Research
           </p>
-          <p className="text-sm text-neutral-500 mt-2">— IBISWorld Industry Report, 2024</p>
         </motion.div>
       </div>
     </section>

@@ -31,14 +31,11 @@ export function Hero() {
     <section className="pt-16 pb-24 md:pt-24 md:pb-32">
       <div className="max-w-7xl mx-auto px-6">
 
-        {/* Traction bar */}
+        {/* Early access pill */}
         <div className="flex items-center justify-center mb-12">
-          <div className="flex items-center gap-6 text-sm text-neutral-500 border border-neutral-200 rounded-full px-6 py-2.5">
-            <span><span className="font-semibold text-neutral-900">500+</span> shops</span>
-            <span className="w-px h-3.5 bg-neutral-200" />
-            <span><span className="font-semibold text-neutral-900">$12.4M</span> revenue tracked</span>
-            <span className="w-px h-3.5 bg-neutral-200" />
-            <span><span className="font-semibold text-neutral-900">4.9★</span> avg rating</span>
+          <div className="inline-flex items-center gap-2 text-sm text-neutral-500 border border-neutral-200 rounded-full px-6 py-2.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            Now in early access — built for heavy truck &amp; fleet repair shops
           </div>
         </div>
 
@@ -75,7 +72,7 @@ export function Hero() {
           </div>
 
           <p className="mt-6 text-sm text-neutral-400">
-            5-minute setup · 14-day free trial · No credit card required
+            Quick setup · 14-day free trial · No credit card required
           </p>
         </div>
 

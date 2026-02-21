@@ -1,52 +1,30 @@
 'use client';
 
-const stats = [
-  { value: '500+', label: 'repair shops' },
-  { value: '$12.4M', label: 'revenue tracked' },
-  { value: '58,000+', label: 'work orders completed' },
-  { value: '42 min', label: 'saved per invoice' },
-  { value: '4.9 / 5', label: 'average rating' },
-  { value: '98%', label: 'annual renewal rate' },
-];
-
-const shops = [
-  'Big Rig Diesel · Houston TX',
-  'Summit Fleet Services · Denver CO',
-  'Iron Horse Repair · Atlanta GA',
-  'CrossCountry Truck Care · Nashville TN',
-  'Midwest Heavy Duty · Kansas City MO',
-  'Pacific Coast Diesel · Portland OR',
+const marketStats = [
+  { value: '303,000+', label: 'repair shops in the US', source: 'IBISWorld 2025' },
+  { value: '$89.6B', label: 'industry revenue', source: 'IBISWorld 2026' },
+  { value: '71%', label: 'independently owned', source: 'IBISWorld' },
+  { value: '~9%', label: 'software market CAGR', source: 'Projected to 2033' },
 ];
 
 export function SocialProof() {
   return (
     <section className="border-t border-b border-neutral-100 bg-neutral-50">
-      {/* Stats strip */}
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8">
-          {stats.map((stat) => (
+      <div className="max-w-6xl mx-auto px-6 py-14">
+        <p className="text-xs text-neutral-400 uppercase tracking-widest font-medium text-center mb-8">
+          A massive, underserved market
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
+          {marketStats.map((stat) => (
             <div key={stat.label} className="text-center">
               <div className="text-2xl font-bold text-neutral-900 tabular-nums">{stat.value}</div>
               <div className="text-xs text-neutral-500 mt-1">{stat.label}</div>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Shop names */}
-      <div className="border-t border-neutral-100 py-6">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
-            <span className="text-[11px] text-neutral-400 uppercase tracking-widest font-medium whitespace-nowrap">
-              Trusted by
-            </span>
-            {shops.map((shop) => (
-              <span key={shop} className="text-xs font-medium text-neutral-400">
-                {shop}
-              </span>
-            ))}
-          </div>
-        </div>
+        <p className="text-[10px] text-neutral-400 text-center mt-6">
+          Sources: IBISWorld US Auto Mechanics Industry Report (2025–2026), IoT Analytics (2025)
+        </p>
       </div>
     </section>
   );

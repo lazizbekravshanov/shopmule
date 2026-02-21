@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Linkedin, Mail } from 'lucide-react';
+import { Linkedin } from 'lucide-react';
 
 const team = [
   {
@@ -27,27 +27,6 @@ const team = [
     image: '/team/sadrijakhon.jpg',
     initials: 'SA',
     linkedin: 'https://linkedin.com/in/sadrijakhon',
-  },
-];
-
-const advisors = [
-  {
-    name: 'David Chen',
-    role: 'Industry Advisor',
-    company: 'Former VP Operations, Penske Truck Leasing',
-    initials: 'DC',
-  },
-  {
-    name: 'Maria Santos',
-    role: 'Technical Advisor',
-    company: 'Engineering Director, Stripe',
-    initials: 'MS',
-  },
-  {
-    name: 'Robert Kim',
-    role: 'Go-to-Market Advisor',
-    company: 'Partner, Andreessen Horowitz',
-    initials: 'RK',
   },
 ];
 
@@ -122,57 +101,23 @@ export function TeamSection() {
           ))}
         </div>
 
-        {/* Advisors */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="border-t border-neutral-200 pt-12"
-        >
-          <h3 className="text-center text-sm font-medium text-neutral-500 uppercase tracking-wide mb-8">
-            Backed by Industry Leaders
-          </h3>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16">
-            {advisors.map((advisor, index) => (
-              <motion.div
-                key={advisor.name}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                className="text-center"
-              >
-                <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-lg font-semibold text-neutral-600">{advisor.initials}</span>
-                </div>
-                <p className="font-medium text-neutral-900">{advisor.name}</p>
-                <p className="text-sm text-neutral-500">{advisor.company}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
         {/* Company Stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 bg-neutral-50 rounded-2xl p-8"
+          className="grid grid-cols-3 gap-8 bg-neutral-50 rounded-2xl p-8 max-w-3xl mx-auto"
         >
           <div className="text-center">
             <div className="text-3xl font-bold text-neutral-900">2026</div>
             <div className="text-sm text-neutral-600">Founded</div>
           </div>
           <div className="text-center">
+            <div className="text-3xl font-bold text-neutral-900">3</div>
+            <div className="text-sm text-neutral-600">Founders</div>
+          </div>
+          <div className="text-center">
             <div className="text-3xl font-bold text-neutral-900">Cincinnati</div>
-            <div className="text-sm text-neutral-600">Origin</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-neutral-900">5</div>
-            <div className="text-sm text-neutral-600">Team Members</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-neutral-900">San Francisco</div>
             <div className="text-sm text-neutral-600">Headquarters</div>
           </div>
         </motion.div>

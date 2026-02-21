@@ -187,8 +187,8 @@ export function FinalCTA() {
             on the table.
           </h2>
           <p className="mt-6 text-xl text-neutral-400 max-w-xl mx-auto leading-relaxed">
-            The average ShopMule customer recovers $87,000 in unbilled
-            labor within the first year. Setup takes 5 minutes.
+            Stop losing revenue to missed charges, forgotten invoices,
+            and unbilled labor.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -552,22 +552,11 @@ export function FinalCTA() {
           )}
         </motion.div>
 
-        {/* Stats */}
+        {/* Trust line */}
         <div className="mt-24 pt-16 border-t border-neutral-800">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-white tabular-nums">500+</div>
-              <div className="text-sm text-neutral-500 mt-2">Shops running on ShopMule</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-white tabular-nums">$12.4M</div>
-              <div className="text-sm text-neutral-500 mt-2">Revenue tracked in 2024</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-white tabular-nums">98%</div>
-              <div className="text-sm text-neutral-500 mt-2">Of customers renew annually</div>
-            </div>
-          </div>
+          <p className="text-center text-neutral-500 text-sm">
+            14-day free trial · No credit card required · Cancel anytime
+          </p>
         </div>
       </div>
     </section>

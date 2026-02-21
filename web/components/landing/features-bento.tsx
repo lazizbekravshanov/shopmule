@@ -6,7 +6,7 @@ import {
   Clock,
   FileText,
   Package,
-  BarChart3,
+  Sparkles,
   Users,
 } from 'lucide-react';
 
@@ -32,9 +32,9 @@ const features = [
     description: 'Track DPF filters, DEF fluid, brake drums — down to the shelf. Get alerts before you run out so you\'re never dead in the water on a Friday rush.',
   },
   {
-    icon: BarChart3,
-    title: 'Shop Performance',
-    description: 'Revenue per tech, average job time, parts margin, outstanding receivables. The numbers you need to run a profitable shop — not vanity metrics.',
+    icon: Sparkles,
+    title: 'AI-Powered Estimates',
+    description: 'Upload photos of the damage and get AI-generated repair estimates in seconds. Auto-generated repair notes, predicted parts needs, and smart labor time suggestions.',
   },
   {
     icon: Users,
