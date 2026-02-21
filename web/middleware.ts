@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { getToken } from "next-auth/jwt"
+import type { Role } from "@prisma/client"
+import { roleHasPermission, type Permission } from "@/lib/auth/permissions"
 
 // Routes that require authentication
 const protectedRoutes = [
@@ -193,13 +195,29 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl)
     }
 
-    // Role-based access control for admin-only routes
-    const adminOnlyRoutes = ["/settings", "/employees"]
-    const userRole = token.role as string
+    // Permission-based route access control (no DB call — role-only check)
+    const ROUTE_PERMISSIONS: Record<string, Permission> = {
+      "/settings": "org:view_settings",
+      "/employees": "users:read",
+      "/technicians": "users:read",
+      "/reports": "reports:view_operational",
+      "/inventory": "inventory:read",
+      "/invoices": "invoices:read",
+      "/fleet-accounts": "customers:read",
+      "/work-orders": "service_orders:read_own",
+      "/customers": "customers:read",
+      "/schedule": "service_orders:read_own",
+      "/time-clock": "time:clock_self",
+      "/integrations": "org:manage_settings",
+    }
 
-    if (adminOnlyRoutes.some(route => pathname.startsWith(route))) {
-      if (userRole !== "ADMIN" && userRole !== "MANAGER") {
-        return NextResponse.redirect(new URL("/dashboard", request.url))
+    const userRole = token.role as Role
+    for (const [route, permission] of Object.entries(ROUTE_PERMISSIONS)) {
+      if (pathname === route || pathname.startsWith(route + "/")) {
+        if (!roleHasPermission(userRole, permission)) {
+          return NextResponse.redirect(new URL("/dashboard", request.url))
+        }
+        break
       }
     }
   }

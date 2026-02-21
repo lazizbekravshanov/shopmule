@@ -1,19 +1,12 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { verifyMobileAuth } from "@/lib/mobile-auth"
+import { withPermission } from "@/lib/auth/with-permission"
+import { P } from "@/lib/auth/permissions"
 import { isValidId } from "@/lib/security"
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string; certId: string }> }
-) {
+export const DELETE = withPermission(P.USERS_UPDATE, async (request, { auth, params }) => {
   try {
-    const authResult = await verifyMobileAuth(request)
-    if (!authResult.authenticated || !authResult.tenantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const tenantId = authResult.tenantId
+    const tenantId = auth.tenantId
     const { id, certId } = await params
 
     if (!isValidId(id) || !isValidId(certId)) {
@@ -44,4 +37,4 @@ export async function DELETE(
       { status: 500 }
     )
   }
-}
+})

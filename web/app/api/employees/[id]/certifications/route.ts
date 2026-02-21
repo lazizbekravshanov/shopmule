@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { verifyMobileAuth } from "@/lib/mobile-auth"
+import { withAuth, withPermission } from "@/lib/auth/with-permission"
+import { P } from "@/lib/auth/permissions"
 import { isValidId } from "@/lib/security"
 import { z } from "zod"
 
@@ -13,17 +14,9 @@ const createCertificationSchema = z.object({
   expiryDate: z.string().optional(),
 })
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withAuth(async (request, { auth, params }) => {
   try {
-    const authResult = await verifyMobileAuth(request)
-    if (!authResult.authenticated || !authResult.tenantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const tenantId = authResult.tenantId
+    const tenantId = auth.tenantId
     const { id } = await params
 
     if (!isValidId(id)) {
@@ -60,19 +53,11 @@ export async function GET(
       { status: 500 }
     )
   }
-}
+})
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const POST = withPermission(P.USERS_UPDATE, async (request, { auth, params }) => {
   try {
-    const authResult = await verifyMobileAuth(request)
-    if (!authResult.authenticated || !authResult.tenantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const tenantId = authResult.tenantId
+    const tenantId = auth.tenantId
     const { id } = await params
 
     if (!isValidId(id)) {
@@ -128,4 +113,4 @@ export async function POST(
       { status: 500 }
     )
   }
-}
+})

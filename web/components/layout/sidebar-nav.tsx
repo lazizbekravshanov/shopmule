@@ -17,7 +17,6 @@ import {
   Settings,
   HelpCircle,
   Plug,
-  Building2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -25,12 +24,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { usePermissions } from '@/lib/hooks/use-permissions';
+import type { Permission } from '@/lib/auth/permissions';
 
 interface NavItem {
   title: string;
   href: string;
   icon: React.ElementType;
   badge?: string;
+  permission?: Permission;
 }
 
 interface NavGroup {
@@ -40,7 +42,7 @@ interface NavGroup {
 
 // Quick Actions - Always visible at top
 const quickActions: NavItem[] = [
-  { title: 'New Work Order', href: '/work-orders/new', icon: Plus },
+  { title: 'New Work Order', href: '/work-orders/new', icon: Plus, permission: 'service_orders:create' },
 ];
 
 // Grouped Navigation
@@ -49,43 +51,43 @@ const navGroups: NavGroup[] = [
     label: 'Operations',
     items: [
       { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { title: 'Work Orders', href: '/work-orders', icon: Wrench },
-      { title: 'Schedule', href: '/schedule', icon: CalendarDays },
+      { title: 'Work Orders', href: '/work-orders', icon: Wrench, permission: 'service_orders:read_own' },
+      { title: 'Schedule', href: '/schedule', icon: CalendarDays, permission: 'service_orders:read_own' },
     ],
   },
   {
     label: 'Finance',
     items: [
-      { title: 'Invoices', href: '/invoices', icon: FileText },
-      { title: 'Reports', href: '/reports', icon: BarChart3 },
+      { title: 'Invoices', href: '/invoices', icon: FileText, permission: 'invoices:read' },
+      { title: 'Reports', href: '/reports', icon: BarChart3, permission: 'reports:view_operational' },
     ],
   },
   {
     label: 'Team',
     items: [
-      { title: 'Technicians', href: '/technicians', icon: UserCog },
-      { title: 'Time Clock', href: '/time-clock', icon: Clock },
+      { title: 'Technicians', href: '/technicians', icon: UserCog, permission: 'users:read' },
+      { title: 'Time Clock', href: '/time-clock', icon: Clock, permission: 'time:clock_self' },
     ],
   },
   {
     label: 'Inventory',
     items: [
-      { title: 'Parts & Supplies', href: '/inventory', icon: Package },
+      { title: 'Parts & Supplies', href: '/inventory', icon: Package, permission: 'inventory:read' },
     ],
   },
   {
     label: 'Customers',
     items: [
-      { title: 'All Customers', href: '/customers', icon: Users },
-      { title: 'Fleet Accounts', href: '/fleet-accounts', icon: Truck },
+      { title: 'All Customers', href: '/customers', icon: Users, permission: 'customers:read' },
+      { title: 'Fleet Accounts', href: '/fleet-accounts', icon: Truck, permission: 'customers:read' },
     ],
   },
 ];
 
 // Bottom Navigation
 const bottomNav: NavItem[] = [
-  { title: 'Settings', href: '/settings', icon: Settings },
-  { title: 'Integrations', href: '/integrations', icon: Plug },
+  { title: 'Settings', href: '/settings', icon: Settings, permission: 'org:view_settings' },
+  { title: 'Integrations', href: '/integrations', icon: Plug, permission: 'org:manage_settings' },
   { title: 'Help & Support', href: '/help', icon: HelpCircle },
 ];
 
@@ -95,6 +97,12 @@ interface SidebarNavProps {
 
 export function SidebarNav({ collapsed = false }: SidebarNavProps) {
   const pathname = usePathname();
+  const { hasPermission } = usePermissions();
+
+  const isVisible = (item: NavItem) => {
+    if (!item.permission) return true;
+    return hasPermission(item.permission);
+  };
 
   const renderNavItem = (item: NavItem, isQuickAction = false) => {
     const isActive =
@@ -142,28 +150,32 @@ export function SidebarNav({ collapsed = false }: SidebarNavProps) {
     <div className="flex flex-col h-full">
       {/* Quick Actions */}
       <div className="px-3 mb-6">
-        {quickActions.map((item) => renderNavItem(item, true))}
+        {quickActions.filter(isVisible).map((item) => renderNavItem(item, true))}
       </div>
 
       {/* Main Navigation Groups */}
       <div className="flex-1 overflow-y-auto px-3 space-y-6">
-        {navGroups.map((group) => (
-          <div key={group.label}>
-            {!collapsed && (
-              <h4 className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
-                {group.label}
-              </h4>
-            )}
-            <div className="space-y-1">
-              {group.items.map((item) => renderNavItem(item))}
+        {navGroups.map((group) => {
+          const visibleItems = group.items.filter(isVisible);
+          if (visibleItems.length === 0) return null;
+          return (
+            <div key={group.label}>
+              {!collapsed && (
+                <h4 className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+                  {group.label}
+                </h4>
+              )}
+              <div className="space-y-1">
+                {visibleItems.map((item) => renderNavItem(item))}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Bottom Navigation */}
       <div className="px-3 pt-4 mt-4 border-t border-neutral-800 space-y-1">
-        {bottomNav.map((item) => renderNavItem(item))}
+        {bottomNav.filter(isVisible).map((item) => renderNavItem(item))}
       </div>
     </div>
   );

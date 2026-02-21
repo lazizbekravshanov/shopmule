@@ -112,6 +112,52 @@ async function main() {
   })
   console.log("Created service advisors")
 
+  // Service Manager
+  const smHash = await bcrypt.hash("manager123", 12)
+  const serviceManager = await prisma.user.create({
+    data: {
+      tenantId: tenant.id,
+      email: "lisa@shopmule.com",
+      passwordHash: smHash,
+      name: "Lisa Service Manager",
+      role: Role.SERVICE_MANAGER,
+    },
+  })
+  await prisma.employeeProfile.create({
+    data: {
+      tenantId: tenant.id,
+      userId: serviceManager.id,
+      name: "Lisa Service Manager",
+      role: Role.SERVICE_MANAGER,
+      payRate: 30,
+      status: "active",
+    },
+  })
+  console.log("Created service manager")
+
+  // Parts Manager
+  const pmHash = await bcrypt.hash("parts123", 12)
+  const partsManager = await prisma.user.create({
+    data: {
+      tenantId: tenant.id,
+      email: "rick@shopmule.com",
+      passwordHash: pmHash,
+      name: "Rick Parts Manager",
+      role: Role.PARTS_MANAGER,
+    },
+  })
+  await prisma.employeeProfile.create({
+    data: {
+      tenantId: tenant.id,
+      userId: partsManager.id,
+      name: "Rick Parts Manager",
+      role: Role.PARTS_MANAGER,
+      payRate: 26,
+      status: "active",
+    },
+  })
+  console.log("Created parts manager")
+
   // Mechanics/Technicians
   const mechHash = await bcrypt.hash("mechanic123", 12)
   const techNames = [
@@ -716,12 +762,27 @@ async function main() {
   console.log("Created punch records for today")
 
   // ==========================================
+  // PERMISSION OVERRIDES (sample)
+  // ==========================================
+  // Give first technician (John Martinez) the ability to read invoices
+  await prisma.permissionOverride.create({
+    data: {
+      userId: (await prisma.user.findFirst({ where: { email: "john@shopmule.com" } }))!.id,
+      permission: "invoices:read",
+      granted: true,
+      grantedBy: admin.id,
+      reason: "Senior tech needs to review invoice estimates",
+    },
+  })
+  console.log("Created sample permission override")
+
+  // ==========================================
   // SUMMARY
   // ==========================================
   console.log("\n✅ Comprehensive seed completed!")
   console.log("\n📊 Summary:")
   console.log(`  - 1 Tenant: ${tenant.name}`)
-  console.log(`  - ${7 + technicians.length} Users (1 owner, 2 service advisors, ${technicians.length} technicians)`)
+  console.log(`  - ${9 + technicians.length} Users (1 owner, 2 service advisors, 1 service manager, 1 parts manager, ${technicians.length} technicians)`)
   console.log(`  - ${customers.length} Customers (${customers.filter(c => !c.fleetAccountId).length} retail, ${customers.filter(c => c.fleetAccountId).length} fleet)`)
   console.log(`  - ${fleetAccounts.length} Fleet Accounts`)
   console.log(`  - ${vehicles.length} Vehicles`)
@@ -733,9 +794,13 @@ async function main() {
   console.log(`  - ${vendors.length} Vendors`)
   console.log(`  - ${certsData.length} Technician Certifications`)
 
+  console.log(`  - 1 Permission Override (sample)`)
+
   console.log("\n🔐 Login credentials:")
   console.log(`  Owner: ${adminEmail} / ${process.env.ADMIN_PASSWORD ? '[from env]' : 'admin123'}`)
   console.log("  Service Advisor: sarah@shopmule.com / advisor123")
+  console.log("  Service Manager: lisa@shopmule.com / manager123")
+  console.log("  Parts Manager: rick@shopmule.com / parts123")
   console.log("  Mechanic: john@shopmule.com / mechanic123")
 }
 

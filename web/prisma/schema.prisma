@@ -50,6 +50,7 @@ model Tenant {
   Shops               Shop[]
   EmployeeProfiles    EmployeeProfile[]
   DeferredWork        DeferredWork[]
+  Invites             Invite[]
 
   @@index([slug])
 }
@@ -95,6 +96,7 @@ model User {
   TimesheetApprovals     Timesheet[]              @relation("TimesheetApprover")
   WorkOrdersCreated      WorkOrder[]              @relation("WorkOrderCreatedBy")
   InvoicePaymentsRecorded InvoicePayment[]
+  PermissionOverrides    PermissionOverride[]
 
   @@index([tenantId])
   @@index([email])
@@ -104,9 +106,16 @@ enum Role {
   OWNER
   ADMIN
   MANAGER
+  SERVICE_MANAGER
   SERVICE_ADVISOR
+  PARTS_MANAGER
+  OFFICE_MANAGER
+  SENIOR_TECHNICIAN
   MECHANIC
+  TECHNICIAN
   FRONT_DESK
+  TIMESHEET_USER
+  CUSTOMER
 }
 
 // ==========================================
@@ -1486,4 +1495,46 @@ model DeferredWork {
   @@index([vehicleId])
   @@index([tenantId])
   @@index([status])
+}
+
+// ==========================================
+// PERMISSION OVERRIDES
+// ==========================================
+
+model PermissionOverride {
+  id         String    @id @default(cuid())
+  userId     String
+  permission String
+  granted    Boolean   @default(true)
+  grantedBy  String?
+  reason     String?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permission])
+  @@index([userId])
+}
+
+// ==========================================
+// INVITES
+// ==========================================
+
+model Invite {
+  id         String    @id @default(cuid())
+  tenantId   String
+  email      String
+  role       Role
+  invitedBy  String
+  token      String    @unique @default(cuid())
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  Tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, email])
+  @@index([token])
 }

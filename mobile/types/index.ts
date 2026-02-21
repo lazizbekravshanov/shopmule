@@ -1,5 +1,18 @@
 // User and Auth types
-export type Role = 'ADMIN' | 'MANAGER' | 'MECHANIC' | 'FRONT_DESK';
+export type Role =
+  | 'OWNER'
+  | 'ADMIN'
+  | 'MANAGER'
+  | 'SERVICE_MANAGER'
+  | 'SERVICE_ADVISOR'
+  | 'PARTS_MANAGER'
+  | 'OFFICE_MANAGER'
+  | 'SENIOR_TECHNICIAN'
+  | 'MECHANIC'
+  | 'TECHNICIAN'
+  | 'FRONT_DESK'
+  | 'TIMESHEET_USER'
+  | 'CUSTOMER';
 
 export interface User {
   id: string;

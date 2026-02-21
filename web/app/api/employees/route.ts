@@ -1,14 +1,21 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { z } from "zod"
-import { verifyMobileAuth } from "@/lib/mobile-auth"
+import { withAuth, withPermission } from "@/lib/auth/with-permission"
+import { P } from "@/lib/auth/permissions"
 import bcrypt from "bcryptjs"
+
+const VALID_ROLES = [
+  "OWNER", "ADMIN", "MANAGER", "SERVICE_MANAGER", "SERVICE_ADVISOR",
+  "PARTS_MANAGER", "OFFICE_MANAGER", "SENIOR_TECHNICIAN", "MECHANIC",
+  "TECHNICIAN", "FRONT_DESK", "TIMESHEET_USER", "CUSTOMER",
+] as const
 
 const createEmployeeSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
   email: z.string().email("Valid email is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  role: z.enum(["OWNER", "ADMIN", "MANAGER", "SERVICE_ADVISOR", "MECHANIC", "FRONT_DESK"]),
+  role: z.enum(VALID_ROLES),
   payRate: z.number().min(0),
   payType: z.enum(["HOURLY", "FLAT_RATE", "SALARY"]).optional(),
   overtimeRate: z.number().min(0).optional(),
@@ -18,14 +25,9 @@ const createEmployeeSchema = z.object({
   pin: z.string().max(10).optional(),
 })
 
-export async function GET(request: Request) {
+export const GET = withAuth(async (request, { auth }) => {
   try {
-    const authResult = await verifyMobileAuth(request)
-    if (!authResult.authenticated || !authResult.tenantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const tenantId = authResult.tenantId
+    const tenantId = auth.tenantId
     const { searchParams } = new URL(request.url)
     const role = searchParams.get("role")
     const status = searchParams.get("status")
@@ -95,16 +97,11 @@ export async function GET(request: Request) {
       { status: 500 }
     )
   }
-}
+})
 
-export async function POST(request: Request) {
+export const POST = withPermission(P.USERS_CREATE, async (request, { auth }) => {
   try {
-    const authResult = await verifyMobileAuth(request)
-    if (!authResult.authenticated || !authResult.tenantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const tenantId = authResult.tenantId
+    const tenantId = auth.tenantId
 
     const body = await request.json()
     const parsed = createEmployeeSchema.safeParse(body)
@@ -180,4 +177,4 @@ export async function POST(request: Request) {
       { status: 500 }
     )
   }
-}
+})

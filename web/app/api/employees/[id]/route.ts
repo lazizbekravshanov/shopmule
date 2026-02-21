@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { verifyMobileAuth } from "@/lib/mobile-auth"
+import { withAuth, withPermission } from "@/lib/auth/with-permission"
+import { P } from "@/lib/auth/permissions"
 import { isValidId } from "@/lib/security"
 import { z } from "zod"
 
+const VALID_ROLES = [
+  "OWNER", "ADMIN", "MANAGER", "SERVICE_MANAGER", "SERVICE_ADVISOR",
+  "PARTS_MANAGER", "OFFICE_MANAGER", "SENIOR_TECHNICIAN", "MECHANIC",
+  "TECHNICIAN", "FRONT_DESK", "TIMESHEET_USER", "CUSTOMER",
+] as const
+
 const updateEmployeeSchema = z.object({
   name: z.string().min(1).max(200).optional(),
-  role: z.enum(["OWNER", "ADMIN", "MANAGER", "SERVICE_ADVISOR", "MECHANIC", "FRONT_DESK"]).optional(),
+  role: z.enum(VALID_ROLES).optional(),
   payRate: z.number().min(0).optional(),
   payType: z.enum(["HOURLY", "FLAT_RATE", "SALARY"]).optional(),
   overtimeRate: z.number().min(0).nullable().optional(),
@@ -22,17 +29,9 @@ const updateEmployeeSchema = z.object({
   notes: z.string().max(5000).nullable().optional(),
 })
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const GET = withAuth(async (request, { auth, params }) => {
   try {
-    const authResult = await verifyMobileAuth(request)
-    if (!authResult.authenticated || !authResult.tenantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const tenantId = authResult.tenantId
+    const tenantId = auth.tenantId
     const { id } = await params
 
     if (!isValidId(id)) {
@@ -114,11 +113,6 @@ export async function GET(
       : 0
 
     // Revenue generated this month
-    const monthRevenue = await prisma.workOrderLabor.aggregate({
-      where: { employeeId: id, WorkOrder: { updatedAt: { gte: monthStart } } },
-      _sum: { hours: true, rate: true },
-    })
-    // Revenue = sum of (hours * rate) per entry
     const laborEntries = await prisma.workOrderLabor.findMany({
       where: { employeeId: id, WorkOrder: { updatedAt: { gte: monthStart } } },
       select: { hours: true, rate: true },
@@ -187,19 +181,11 @@ export async function GET(
       { status: 500 }
     )
   }
-}
+})
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const PATCH = withPermission(P.USERS_UPDATE, async (request, { auth, params }) => {
   try {
-    const authResult = await verifyMobileAuth(request)
-    if (!authResult.authenticated || !authResult.tenantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const tenantId = authResult.tenantId
+    const tenantId = auth.tenantId
     const { id } = await params
 
     if (!isValidId(id)) {
@@ -273,19 +259,11 @@ export async function PATCH(
       { status: 500 }
     )
   }
-}
+})
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const DELETE = withPermission(P.USERS_DELETE, async (request, { auth, params }) => {
   try {
-    const authResult = await verifyMobileAuth(request)
-    if (!authResult.authenticated || !authResult.tenantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const tenantId = authResult.tenantId
+    const tenantId = auth.tenantId
     const { id } = await params
 
     if (!isValidId(id)) {
@@ -316,7 +294,7 @@ export async function DELETE(
       { status: 500 }
     )
   }
-}
+})
 
 // Helper: compute hours from punch records
 function computeHoursFromPunches(

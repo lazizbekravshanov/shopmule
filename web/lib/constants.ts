@@ -12,9 +12,16 @@ export const ROLE_LABELS: Record<Role, string> = {
   OWNER: "Owner",
   ADMIN: "Administrator",
   MANAGER: "Manager",
+  SERVICE_MANAGER: "Service Manager",
   SERVICE_ADVISOR: "Service Advisor",
+  PARTS_MANAGER: "Parts Manager",
+  OFFICE_MANAGER: "Office Manager",
+  SENIOR_TECHNICIAN: "Senior Technician",
   MECHANIC: "Mechanic",
+  TECHNICIAN: "Technician",
   FRONT_DESK: "Front Desk",
+  TIMESHEET_USER: "Timesheet User",
+  CUSTOMER: "Customer",
 }
 
 // Work order status config
