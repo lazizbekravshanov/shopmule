@@ -127,9 +127,9 @@ const blogPosts: BlogPost[] = [
   },
   {
     id: '3',
-    title: 'Diesel Prices Drop 12% as Supply Chain Normalizes',
+    title: 'Diesel Prices Ease as 2026 Outlook Improves',
     excerpt:
-      'After years of volatility, diesel prices are finally stabilizing. What this means for your operating costs and how to lock in savings for your fleet.',
+      'The EIA reports diesel at $3.71/gal and forecasts a $3.50 average for 2026. Here\'s what\'s driving the decline and how much fleets are saving.',
     category: 'trucking',
     date: 'Jan 29, 2026',
     readTime: '3 min read',

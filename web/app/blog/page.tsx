@@ -110,9 +110,9 @@ const blogPosts: BlogPost[] = [
   },
   {
     id: '3',
-    title: 'Diesel Prices Drop 12% as Supply Chain Normalizes',
+    title: 'Diesel Prices Ease as 2026 Outlook Improves',
     excerpt:
-      'After years of volatility, diesel prices are finally stabilizing. What this means for your operating costs and how to lock in savings for your fleet through fuel hedging and route optimization.',
+      'The EIA reports diesel at $3.71/gal and forecasts a $3.50 average for 2026. Here\'s what\'s driving the decline, how much fleets are actually saving, and what could disrupt the outlook.',
     category: 'trucking',
     date: 'Jan 29, 2026',
     readTime: '3 min read',
@@ -165,9 +165,9 @@ const blogPosts: BlogPost[] = [
   },
   {
     id: '8',
-    title: 'Hours of Service Updates: Split Sleeper Berth Changes',
+    title: 'Hours of Service Updates: Split Sleeper Berth Pilot Program',
     excerpt:
-      'FMCSA has finalized changes to the split sleeper berth provision. Here\'s how the new rules work and when they take effect.',
+      'FMCSA is running a pilot program testing 6/4 and 5/5 split sleeper configurations with 256 drivers. Here\'s what\'s actually being tested and what hasn\'t changed.',
     category: 'fmcsa',
     date: 'Jan 12, 2026',
     readTime: '4 min read',
