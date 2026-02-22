@@ -156,7 +156,7 @@ export default function RootLayout({
               ],
               contactPoint: {
                 '@type': 'ContactPoint',
-                telephone: '+1-555-123-4567',
+                email: 'support@shopmule.com',
                 contactType: 'sales',
                 availableLanguage: 'English',
               },
