@@ -17,7 +17,6 @@ import {
   ROICalculator,
   SecuritySection,
   BackToTop,
-  ExitIntentPopup,
   SmoothScroll,
 } from '@/components/landing';
 import { FounderStory } from '@/components/landing/testimonials';
@@ -44,7 +43,6 @@ export default function LandingPage() {
       </main>
       <Footer />
       <BackToTop />
-      <ExitIntentPopup />
       <SmoothScroll />
     </div>
   );
