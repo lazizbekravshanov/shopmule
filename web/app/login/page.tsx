@@ -51,56 +51,89 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel - Brand */}
-      <div className="hidden lg:flex lg:w-1/2 bg-neutral-900 flex-col justify-between p-12">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded flex items-center justify-center">
-            <MuleIcon className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-lg font-semibold text-white">ShopMule</span>
-        </Link>
+    <>
+      <style>{`
+        @keyframes gradientShift {
+          0% { background-position: 0% 50%; }
+          25% { background-position: 50% 100%; }
+          50% { background-position: 100% 50%; }
+          75% { background-position: 50% 0%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes float1 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(30px, -40px) scale(1.05); }
+          66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+        @keyframes float2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(-40px, 30px) scale(1.1); }
+          66% { transform: translate(25px, -15px) scale(0.9); }
+        }
+        @keyframes float3 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(20px, 30px) scale(1.08); }
+        }
+      `}</style>
 
-        <div>
-          <h1 className="text-4xl font-bold text-white tracking-tight leading-tight">
-            Run your shop
-            <br />
-            <span className="text-orange-400">with precision.</span>
-          </h1>
-          <p className="mt-4 text-neutral-400 max-w-sm">
-            Work orders. Time tracking. Invoicing.
-            Everything you need, nothing you don&apos;t.
-          </p>
-        </div>
+      <div
+        className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 py-12"
+        style={{
+          background:
+            'linear-gradient(135deg, #171717, #f97316, #f59e0b, #171717, #ea580c, #171717)',
+          backgroundSize: '400% 400%',
+          animation: 'gradientShift 15s ease infinite',
+        }}
+      >
+        {/* Floating ambient shapes */}
+        <div
+          className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full opacity-30 blur-3xl"
+          style={{
+            background: 'radial-gradient(circle, #f97316, transparent 70%)',
+            animation: 'float1 20s ease-in-out infinite',
+          }}
+        />
+        <div
+          className="pointer-events-none absolute -bottom-32 -right-32 h-[28rem] w-[28rem] rounded-full opacity-25 blur-3xl"
+          style={{
+            background: 'radial-gradient(circle, #f59e0b, transparent 70%)',
+            animation: 'float2 25s ease-in-out infinite',
+          }}
+        />
+        <div
+          className="pointer-events-none absolute top-1/3 right-1/4 h-72 w-72 rounded-full opacity-20 blur-3xl"
+          style={{
+            background: 'radial-gradient(circle, #fb923c, transparent 70%)',
+            animation: 'float3 18s ease-in-out infinite',
+          }}
+        />
 
-        <p className="text-sm text-neutral-500">
-          &copy; {new Date().getFullYear()} ShopMule
-        </p>
-      </div>
-
-      {/* Right Panel - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-neutral-50">
-        <div className="w-full max-w-sm">
-          {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded flex items-center justify-center">
+        {/* Glass card */}
+        <div className="relative z-10 w-full max-w-md rounded-2xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl sm:p-10">
+          {/* Logo */}
+          <div className="mb-8 flex items-center justify-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-orange-600">
               <MuleIcon className="h-5 w-5 text-white" />
             </div>
-            <span className="text-lg font-semibold text-neutral-900">ShopMule</span>
+            <span className="text-xl font-semibold text-neutral-900">
+              ShopMule
+            </span>
           </div>
 
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">
+          {/* Heading */}
+          <div className="mb-6 text-center">
+            <h1 className="text-2xl font-bold tracking-tight text-neutral-900">
               Welcome back
-            </h2>
+            </h1>
             <p className="mt-1 text-sm text-neutral-500">
               Sign in to your account
             </p>
           </div>
 
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
                 {error}
               </div>
             )}
@@ -118,7 +151,7 @@ export default function LoginPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-11 border-neutral-200 focus:border-orange-500 focus:ring-orange-500"
+                className="h-11 border-white/30 bg-white/50 backdrop-blur-sm focus:border-orange-500 focus:ring-orange-500"
                 required
               />
             </div>
@@ -135,7 +168,7 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-11 border-neutral-200 focus:border-orange-500 focus:ring-orange-500"
+                className="h-11 border-white/30 bg-white/50 backdrop-blur-sm focus:border-orange-500 focus:ring-orange-500"
                 required
               />
             </div>
@@ -153,13 +186,13 @@ export default function LoginPage() {
             Don&apos;t have an account?{' '}
             <Link
               href="/"
-              className="text-orange-600 hover:text-orange-700 font-medium"
+              className="font-medium text-orange-600 hover:text-orange-700"
             >
               Start free trial
             </Link>
           </p>
         </div>
       </div>
-    </div>
+    </>
   );
 }
