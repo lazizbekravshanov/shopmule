@@ -1,4 +1,4 @@
-import { anthropic } from '@ai-sdk/anthropic'
+import { groq } from '@ai-sdk/groq'
 import { streamText, stepCountIs } from 'ai'
 import { aiTools } from '@/lib/ai/tools'
 import { getServerSession } from 'next-auth'
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
     const personalizedPrompt = `${systemPrompt}\n\nThe current user is ${userName}. Address them naturally.`
 
     const result = streamText({
-      model: anthropic('claude-sonnet-4-20250514'),
+      model: groq('llama-3.3-70b-versatile'),
       system: personalizedPrompt,
       messages,
       tools: aiTools,
