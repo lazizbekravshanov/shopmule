@@ -193,26 +193,23 @@ export function AICommandCenter() {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-neutral-900">
-      {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent" />
-
-      <div className="relative p-8">
+    <div className="rounded-2xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+      <div className="p-8">
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30">
+              <div className="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
-              <div className="px-3 py-1 rounded-full bg-white/10 text-white/70 text-xs font-medium">
+              <div className="px-3 py-1 rounded-full bg-neutral-100 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-400 text-xs font-medium">
                 AI Command Center
               </div>
             </div>
-            <h2 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-semibold text-neutral-900 dark:text-white tracking-tight">
               {greeting}, {userName}.
             </h2>
-            <p className="text-neutral-400 mt-2 text-lg">
+            <p className="text-neutral-500 dark:text-neutral-400 mt-2 text-lg">
               {isError
                 ? "We couldn't load your dashboard data."
                 : isAllClear
@@ -225,7 +222,7 @@ export function AICommandCenter() {
           {/* Quick stats */}
           <div className="hidden md:flex items-center gap-6">
             <div className="text-right">
-              <p className="text-2xl font-semibold text-white">{commandItems.length}</p>
+              <p className="text-2xl font-semibold text-neutral-900 dark:text-white">{commandItems.length}</p>
               <p className="text-xs text-neutral-500">Items</p>
             </div>
           </div>
@@ -235,21 +232,21 @@ export function AICommandCenter() {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2].map((i) => (
-              <Skeleton key={i} className="h-20 bg-white/5" />
+              <Skeleton key={i} className="h-20" />
             ))}
           </div>
         ) : isError ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-4 p-6 rounded-xl bg-red-500/10 border border-red-500/20"
+            className="flex items-center gap-4 p-6 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800"
           >
-            <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
-              <AlertCircle className="w-6 h-6 text-red-400" />
+            <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+              <AlertCircle className="w-6 h-6 text-red-500 dark:text-red-400" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-white">Unable to load data</h3>
-              <p className="text-neutral-400 text-sm">
+              <h3 className="font-semibold text-neutral-900 dark:text-white">Unable to load data</h3>
+              <p className="text-neutral-500 dark:text-neutral-400 text-sm">
                 Check your connection and try again.
               </p>
             </div>
@@ -257,7 +254,7 @@ export function AICommandCenter() {
               variant="outline"
               size="sm"
               onClick={() => refetch()}
-              className="border-white/20 text-white hover:bg-white/10 gap-2"
+              className="gap-2"
             >
               <RefreshCw className="w-3 h-3" />
               Retry
@@ -267,14 +264,14 @@ export function AICommandCenter() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-4 p-6 rounded-xl bg-green-500/10 border border-green-500/20"
+            className="flex items-center gap-4 p-6 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800"
           >
-            <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-              <CheckCircle2 className="w-6 h-6 text-green-400" />
+            <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-white">All clear!</h3>
-              <p className="text-neutral-400 text-sm">
+              <h3 className="font-semibold text-neutral-900 dark:text-white">All clear!</h3>
+              <p className="text-neutral-500 dark:text-neutral-400 text-sm">
                 No urgent items. Focus on growth or take a well-deserved break.
               </p>
             </div>
@@ -336,13 +333,13 @@ export function AICommandCenter() {
         )}
 
         {/* Quick Actions */}
-        <div className="flex flex-wrap items-center gap-3 mt-6 pt-6 border-t border-white/10">
-          <span className="text-xs text-neutral-500 uppercase tracking-wider font-medium">Quick:</span>
+        <div className="flex flex-wrap items-center gap-3 mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-700">
+          <span className="text-xs text-neutral-400 uppercase tracking-wider font-medium">Quick:</span>
           <Button
             asChild
             variant="ghost"
             size="sm"
-            className="text-white/70 hover:text-white hover:bg-white/10 rounded-lg h-8"
+            className="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg h-8"
           >
             <Link href="/work-orders/new">
               <Wrench className="w-3.5 h-3.5 mr-1.5" />
@@ -353,7 +350,7 @@ export function AICommandCenter() {
             asChild
             variant="ghost"
             size="sm"
-            className="text-white/70 hover:text-white hover:bg-white/10 rounded-lg h-8"
+            className="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg h-8"
           >
             <Link href="/invoices?action=new">
               <DollarSign className="w-3.5 h-3.5 mr-1.5" />
@@ -364,7 +361,7 @@ export function AICommandCenter() {
             asChild
             variant="ghost"
             size="sm"
-            className="text-white/70 hover:text-white hover:bg-white/10 rounded-lg h-8"
+            className="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg h-8"
           >
             <Link href="/customers?action=new">
               <Users className="w-3.5 h-3.5 mr-1.5" />

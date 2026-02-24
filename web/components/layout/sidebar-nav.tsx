@@ -115,14 +115,14 @@ export function SidebarNav({ collapsed = false }: SidebarNavProps) {
         className={cn(
           'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
           isQuickAction
-            ? 'bg-[#ee7a14] hover:bg-[#d96a0a] text-white shadow-sm shadow-orange-500/20'
+            ? 'bg-neutral-100 text-neutral-900 dark:bg-white/10 dark:text-white border-l-2 border-[#ee7a14]'
             : isActive
             ? 'bg-white/10 text-white'
             : 'text-neutral-400 hover:text-white hover:bg-white/5',
           collapsed && 'justify-center px-2'
         )}
       >
-        <Icon className={cn('h-4 w-4 shrink-0', isQuickAction && 'text-white')} strokeWidth={1.5} />
+        <Icon className={cn('h-4 w-4 shrink-0', isQuickAction && 'text-[#ee7a14]')} strokeWidth={1.5} />
         {!collapsed && <span>{item.title}</span>}
         {!collapsed && item.badge && (
           <span className="ml-auto text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">

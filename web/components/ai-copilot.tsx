@@ -98,7 +98,7 @@ export function AICopilot() {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-500/30 z-50 group"
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-neutral-900 hover:bg-neutral-800 shadow-lg z-50 group"
         title="Open Mule AI Assistant"
       >
         <MuleIcon className="h-6 w-6 text-white group-hover:scale-110 transition-transform" />
@@ -117,13 +117,13 @@ export function AICopilot() {
       <div
         className={cn(
           "flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-neutral-700 cursor-pointer",
-          "bg-gradient-to-r from-neutral-900 to-neutral-800 dark:from-neutral-950 dark:to-neutral-900 rounded-t-2xl"
+          "bg-neutral-900 dark:bg-neutral-950 rounded-t-2xl"
         )}
         onClick={() => setIsMinimized(!isMinimized)}
       >
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30">
-            <MuleIcon className="h-5 w-5 text-white" />
+          <div className="h-10 w-10 rounded-xl bg-neutral-800 flex items-center justify-center">
+            <MuleIcon className="h-5 w-5 text-[#ee7a14]" />
           </div>
           <div>
             <h3 className="font-semibold text-sm text-white">Mule</h3>
@@ -176,8 +176,8 @@ export function AICopilot() {
               <div className="space-y-6">
                 {/* Welcome */}
                 <div className="text-center py-4">
-                  <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-500/20">
-                    <MuleIcon className="h-8 w-8 text-white" />
+                  <div className="h-16 w-16 rounded-2xl bg-neutral-900 flex items-center justify-center mx-auto mb-4">
+                    <MuleIcon className="h-8 w-8 text-[#ee7a14]" />
                   </div>
                   <h4 className="font-semibold text-neutral-900 dark:text-white text-lg">Hey there, boss!</h4>
                   <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 max-w-[280px] mx-auto">
@@ -191,9 +191,9 @@ export function AICopilot() {
                     <button
                       key={action.label}
                       onClick={() => handleQuickAction(action.prompt)}
-                      className="flex items-center gap-2 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700 hover:border-orange-300 dark:hover:border-orange-700 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-all text-left group"
+                      className="flex items-center gap-2 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all text-left group"
                     >
-                      <action.icon className="h-4 w-4 text-orange-500 group-hover:scale-110 transition-transform" />
+                      <action.icon className="h-4 w-4 text-neutral-500 group-hover:text-neutral-900 dark:group-hover:text-white group-hover:scale-110 transition-transform" />
                       <span className="text-sm text-neutral-700 dark:text-neutral-300 font-medium">{action.label}</span>
                     </button>
                   ))}
@@ -207,7 +207,7 @@ export function AICopilot() {
                       <button
                         key={prompt}
                         onClick={() => handleQuickAction(prompt)}
-                        className="px-3 py-1.5 text-xs rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-700 dark:hover:text-orange-400 transition-colors"
+                        className="px-3 py-1.5 text-xs rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 hover:text-neutral-900 dark:hover:text-white transition-colors"
                       >
                         {prompt}
                       </button>
@@ -226,15 +226,15 @@ export function AICopilot() {
                     )}
                   >
                     {message.role === 'assistant' && (
-                      <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                        <MuleIcon className="h-4 w-4 text-white" />
+                      <div className="h-8 w-8 rounded-lg bg-neutral-900 flex items-center justify-center flex-shrink-0">
+                        <MuleIcon className="h-4 w-4 text-[#ee7a14]" />
                       </div>
                     )}
                     <div
                       className={cn(
                         "rounded-2xl px-4 py-2.5 max-w-[85%]",
                         message.role === 'user'
-                          ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white"
+                          ? "bg-neutral-900 text-white"
                           : "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                       )}
                     >
@@ -259,7 +259,7 @@ export function AICopilot() {
                           if (friendlyNames[toolName]) {
                             return (
                               <div key={i} className="flex items-center gap-2 my-2 py-2 px-3 rounded-lg bg-white/50 dark:bg-neutral-700/50 text-xs text-neutral-600 dark:text-neutral-400">
-                                <Loader2 className="h-3 w-3 animate-spin text-orange-500" />
+                                <Loader2 className="h-3 w-3 animate-spin text-neutral-500" />
                                 <span>{friendlyNames[toolName]}</span>
                               </div>
                             )
@@ -282,7 +282,7 @@ export function AICopilot() {
                     </div>
                     <div className="bg-neutral-100 dark:bg-neutral-800 rounded-2xl px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
+                        <Loader2 className="h-4 w-4 animate-spin text-neutral-500" />
                         <span className="text-sm text-neutral-500 dark:text-neutral-400">Thinking...</span>
                       </div>
                     </div>
@@ -303,13 +303,13 @@ export function AICopilot() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Ask me anything..."
-                className="flex-1 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 rounded-xl focus:ring-orange-500 focus:border-orange-500"
+                className="flex-1 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 rounded-xl focus:ring-[#ee7a14]/30 focus:border-[#ee7a14]"
                 disabled={isLoading}
               />
               <Button
                 type="submit"
                 disabled={isLoading || !inputValue.trim()}
-                className="bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl px-4 shadow-sm"
+                className="bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl px-4 shadow-sm"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

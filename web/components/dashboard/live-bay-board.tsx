@@ -73,7 +73,7 @@ export function LiveBayBoard() {
   const availableCount = bays.filter(b => b.status === 'available').length
 
   return (
-    <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl overflow-hidden">
+    <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-neutral-100 dark:border-neutral-700">
         <div className="flex items-center justify-between">

@@ -41,8 +41,8 @@ export function Header() {
         </SheetTrigger>
         <SheetContent side="left" className="w-56 p-0 bg-neutral-900 border-neutral-800">
           <div className="flex h-14 items-center border-b border-neutral-800 px-4">
-            <div className="w-7 h-7 bg-[#ee7a14] rounded-lg flex items-center justify-center mr-2">
-              <MuleIcon className="h-4 w-4 text-white" />
+            <div className="w-7 h-7 bg-neutral-900 rounded-lg flex items-center justify-center mr-2">
+              <MuleIcon className="h-4 w-4 text-[#ee7a14]" />
             </div>
             <span className="font-semibold text-white">ShopMule</span>
           </div>

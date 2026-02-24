@@ -90,7 +90,7 @@ export function TechnicianStatusBoard() {
   const activeCount = technicians.filter((t) => t.status === 'clocked-in').length;
 
   return (
-    <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl overflow-hidden">
+    <div className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-neutral-100 dark:border-neutral-700 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -170,7 +170,7 @@ export function TechnicianStatusBoard() {
                   className={cn(
                     'p-3 rounded-lg border transition-colors',
                     tech.status === 'clocked-in'
-                      ? 'border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/30'
+                      ? 'border-neutral-200 dark:border-neutral-700'
                       : 'border-neutral-100 dark:border-neutral-700'
                   )}
                 >

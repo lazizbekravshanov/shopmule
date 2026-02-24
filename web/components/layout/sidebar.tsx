@@ -26,8 +26,8 @@ export function Sidebar() {
         )}
       >
         <Link href="/dashboard" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/30 group-hover:scale-105 transition-all duration-300">
-            <MuleIcon className="h-5 w-5 text-white" />
+          <div className="w-9 h-9 bg-neutral-800 rounded-xl flex items-center justify-center group-hover:scale-105 transition-all duration-300">
+            <MuleIcon className="h-5 w-5 text-[#ee7a14]" />
           </div>
           {!sidebarCollapsed && (
             <span className="font-semibold text-lg text-white tracking-tight">
