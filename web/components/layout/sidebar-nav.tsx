@@ -11,6 +11,7 @@ import {
   Package,
   UserCog,
   BarChart3,
+  TrendingUp,
   Plus,
   CalendarDays,
   Truck,
@@ -67,6 +68,7 @@ const navGroups: NavGroup[] = [
     items: [
       { title: 'Technicians', href: '/technicians', icon: UserCog, permission: 'users:read' },
       { title: 'Time Clock', href: '/time-clock', icon: Clock, permission: 'time:clock_self' },
+      { title: 'Efficiency', href: '/efficiency', icon: TrendingUp, permission: 'reports:view_operational' },
     ],
   },
   {

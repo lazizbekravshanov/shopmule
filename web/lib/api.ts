@@ -390,6 +390,32 @@ export interface TimeEntry {
   employee?: Employee;
 }
 
+export interface TechEfficiency {
+  id: string;
+  name: string;
+  role: string;
+  photoUrl?: string | null;
+  clockedHours: number;
+  billedHours: number;
+  efficiency: number;
+  revenue: number;
+  jobsCompleted: number;
+  isClockedIn: boolean;
+}
+
+export interface EfficiencyReport {
+  period: string;
+  periodStart: string;
+  summary: {
+    shopEfficiency: number;
+    totalBilledHours: number;
+    totalClockedHours: number;
+    totalRevenue: number;
+    techCount: number;
+  };
+  technicians: TechEfficiency[];
+}
+
 // Paginated response type
 export interface PaginatedResponse<T> {
   data: T[];
@@ -662,5 +688,9 @@ export const api = {
       request<{ totalHours: number }>(`/reports/productivity/${employeeId}`),
     payroll: (employeeId: string) =>
       request<{ hours: number; rate: number; grossPay: number }>(`/reports/payroll/${employeeId}`),
+  },
+  efficiency: {
+    get: (period: string) =>
+      request<EfficiencyReport>(`/efficiency?period=${encodeURIComponent(period)}`),
   },
 };

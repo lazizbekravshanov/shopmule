@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { verifyMobileAuth } from "@/lib/mobile-auth"
 import { isValidId } from "@/lib/security"
+import { computeHoursFromPunches, getPeriodRange } from "@/lib/efficiency-utils"
 
 export async function GET(
   request: Request,
@@ -29,30 +30,7 @@ export async function GET(
     const period = searchParams.get("period") || "month"
 
     const now = new Date()
-    let periodStart: Date
-
-    switch (period) {
-      case "week": {
-        periodStart = new Date(now)
-        periodStart.setDate(periodStart.getDate() - periodStart.getDay())
-        periodStart.setHours(0, 0, 0, 0)
-        break
-      }
-      case "quarter": {
-        const quarter = Math.floor(now.getMonth() / 3)
-        periodStart = new Date(now.getFullYear(), quarter * 3, 1)
-        break
-      }
-      case "year": {
-        periodStart = new Date(now.getFullYear(), 0, 1)
-        break
-      }
-      default: {
-        // month
-        periodStart = new Date(now.getFullYear(), now.getMonth(), 1)
-        break
-      }
-    }
+    const periodStart = getPeriodRange(period)
 
     // Total work hours from PunchRecords
     const punchRecords = await prisma.punchRecord.findMany({
@@ -130,29 +108,6 @@ export async function GET(
       { status: 500 }
     )
   }
-}
-
-function computeHoursFromPunches(
-  punches: { type: string; timestamp: Date }[],
-  now: Date
-): number {
-  let totalMs = 0
-  let clockInTime: Date | null = null
-
-  for (const punch of punches) {
-    if (punch.type === "CLOCK_IN") {
-      clockInTime = punch.timestamp
-    } else if (punch.type === "CLOCK_OUT" && clockInTime) {
-      totalMs += punch.timestamp.getTime() - clockInTime.getTime()
-      clockInTime = null
-    }
-  }
-
-  if (clockInTime) {
-    totalMs += now.getTime() - clockInTime.getTime()
-  }
-
-  return totalMs / (1000 * 60 * 60)
 }
 
 function buildDailyBreakdown(
