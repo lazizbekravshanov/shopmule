@@ -4,6 +4,8 @@ import { aiTools } from '@/lib/ai/tools'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 export const maxDuration = 30
 
 const systemPrompt = `You are Mule, the AI assistant for ShopMule - and you work as hard as your name suggests. You're not just a chatbot, you're like the most experienced shop manager who's seen it all and is here to help.
@@ -101,9 +103,9 @@ export async function POST(req: Request) {
       system: personalizedPrompt,
       messages,
       tools: aiTools,
-      stopWhen: stepCountIs(5), // Allow multi-step tool usage
+      stopWhen: stepCountIs(5),
       onError: (error) => {
-        console.error('[AI Chat Error]', error)
+        console.error('[AI Chat Stream Error]', error)
       },
     })
 
