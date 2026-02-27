@@ -18,6 +18,7 @@ import {
   Settings,
   HelpCircle,
   Plug,
+  Wallet,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -60,6 +61,7 @@ const navGroups: NavGroup[] = [
     label: 'Finance',
     items: [
       { title: 'Invoices', href: '/invoices', icon: FileText, permission: 'invoices:read' },
+      { title: 'Payroll', href: '/payroll', icon: Wallet, permission: 'reports:view_financial' },
       { title: 'Reports', href: '/reports', icon: BarChart3, permission: 'reports:view_operational' },
     ],
   },

@@ -51,6 +51,8 @@ model Tenant {
   EmployeeProfiles    EmployeeProfile[]
   DeferredWork        DeferredWork[]
   Invites             Invite[]
+  Deductions          Deduction[]
+  LoanAdvances        LoanAdvance[]
 
   @@index([slug])
 }
@@ -869,6 +871,8 @@ model EmployeeProfile {
   LineItems           WorkOrderLine[]       @relation("LineItemTechnician")
   Appointments        Appointment[]         @relation("AppointmentTechnician")
   Certifications      TechnicianCertification[]
+  Deductions          Deduction[]
+  LoanAdvances        LoanAdvance[]
 
   @@index([tenantId])
   @@index([userId])
@@ -1537,4 +1541,58 @@ model Invite {
 
   @@unique([tenantId, email])
   @@index([token])
+}
+
+// ==========================================
+// PAYROLL: DEDUCTIONS & LOANS
+// ==========================================
+
+enum DeductionType {
+  TAX_FEDERAL
+  TAX_STATE
+  INSURANCE
+  RETIREMENT
+  LOAN_REPAYMENT
+  OTHER
+}
+
+model Deduction {
+  id            String        @id @default(cuid())
+  tenantId      String
+  employeeId    String
+  type          DeductionType
+  description   String
+  amount        Float
+  percentage    Float?
+  isRecurring   Boolean       @default(true)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  Tenant        Tenant          @relation(fields: [tenantId], references: [id])
+  Employee      EmployeeProfile @relation(fields: [employeeId], references: [id])
+
+  @@index([tenantId])
+  @@index([employeeId])
+}
+
+model LoanAdvance {
+  id               String          @id @default(cuid())
+  tenantId         String
+  employeeId       String
+  description      String
+  originalAmount   Float
+  remainingBalance Float
+  monthlyPayment   Float
+  issuedDate       DateTime
+  isActive         Boolean         @default(true)
+  notes            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  Tenant           Tenant          @relation(fields: [tenantId], references: [id])
+  Employee         EmployeeProfile @relation(fields: [employeeId], references: [id])
+
+  @@index([tenantId])
+  @@index([employeeId])
 }

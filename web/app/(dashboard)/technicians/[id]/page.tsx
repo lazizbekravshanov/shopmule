@@ -53,7 +53,8 @@ import {
   useRemoveCertification,
   useEmployeePerformance,
 } from '@/lib/queries/employees'
-import { cn } from '@/lib/utils'
+import { useEmployeePayroll, useDeductions, useLoans } from '@/lib/queries/payroll'
+import { cn, formatCurrency } from '@/lib/utils'
 
 export default function TechnicianDetailPage({
   params,
@@ -65,6 +66,9 @@ export default function TechnicianDetailPage({
   const { data: employee, isLoading } = useEmployee(id)
   const [performancePeriod, setPerformancePeriod] = useState('month')
   const { data: performance } = useEmployeePerformance(id, performancePeriod)
+  const { data: payroll } = useEmployeePayroll(id, 'month')
+  const { data: deductionsList } = useDeductions(id)
+  const { data: loansList } = useLoans(id)
   const updateEmployee = useUpdateEmployee()
   const deleteEmployee = useDeleteEmployee()
   const addCert = useAddCertification()
@@ -367,6 +371,7 @@ export default function TechnicianDetailPage({
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="bg-neutral-100 border border-neutral-200">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="payroll">Payroll</TabsTrigger>
           <TabsTrigger value="certifications">Certifications</TabsTrigger>
           <TabsTrigger value="timelog">Time Log</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
@@ -531,6 +536,70 @@ export default function TechnicianDetailPage({
               </div>
             </div>
           )}
+        </TabsContent>
+
+        {/* Payroll Tab */}
+        <TabsContent value="payroll" className="space-y-4">
+          <div className="bg-white border border-neutral-200 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-neutral-900">Current Period Pay Summary</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-neutral-200"
+                onClick={() => router.push(`/payroll/${id}`)}
+              >
+                View Full Payroll
+              </Button>
+            </div>
+            {payroll ? (
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-neutral-50 rounded-lg">
+                  <p className="text-sm text-neutral-500">Gross Pay</p>
+                  <p className="text-xl font-bold text-neutral-900">{formatCurrency(payroll.pay.grossPay)}</p>
+                </div>
+                <div className="text-center p-4 bg-neutral-50 rounded-lg">
+                  <p className="text-sm text-neutral-500">Deductions</p>
+                  <p className="text-xl font-bold text-red-600">
+                    {formatCurrency(payroll.pay.totalDeductions + payroll.pay.loanRepayments)}
+                  </p>
+                </div>
+                <div className="text-center p-4 bg-neutral-50 rounded-lg">
+                  <p className="text-sm text-neutral-500">Net Pay</p>
+                  <p className="text-xl font-bold text-emerald-600">{formatCurrency(payroll.pay.netPay)}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-neutral-400 text-sm text-center py-4">No payroll data available</p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white border border-neutral-200 rounded-xl p-6">
+              <h3 className="font-semibold text-neutral-900 mb-3">Active Deductions</h3>
+              <p className="text-3xl font-bold text-neutral-900">
+                {(deductionsList ?? []).filter((d) => d.isActive).length}
+              </p>
+              <p className="text-sm text-neutral-400 mt-1">configured deductions</p>
+            </div>
+            <div className="bg-white border border-neutral-200 rounded-xl p-6">
+              <h3 className="font-semibold text-neutral-900 mb-3">Active Loans</h3>
+              {(loansList ?? []).filter((l) => l.isActive).length > 0 ? (
+                <>
+                  <p className="text-3xl font-bold text-neutral-900">
+                    {formatCurrency(
+                      (loansList ?? []).filter((l) => l.isActive).reduce((sum, l) => sum + l.remainingBalance, 0)
+                    )}
+                  </p>
+                  <p className="text-sm text-neutral-400 mt-1">
+                    {(loansList ?? []).filter((l) => l.isActive).length} active loan(s) remaining
+                  </p>
+                </>
+              ) : (
+                <p className="text-neutral-400 text-sm">No active loans</p>
+              )}
+            </div>
+          </div>
         </TabsContent>
 
         {/* Certifications Tab */}

@@ -1,4 +1,4 @@
-import { PrismaClient, Role, WorkOrderStatus, CustomerType, CustomerSource, PaymentTerms, InvoiceStatus, AppointmentStatus, AppointmentType, PartStatus, LineItemType, LineItemStatus, WorkOrderPriority, PunchMethod, PayType } from "@prisma/client"
+import { PrismaClient, Role, WorkOrderStatus, CustomerType, CustomerSource, PaymentTerms, InvoiceStatus, AppointmentStatus, AppointmentType, PartStatus, LineItemType, LineItemStatus, WorkOrderPriority, PunchMethod, PayType, DeductionType } from "@prisma/client"
 import bcrypt from "bcryptjs"
 
 const prisma = new PrismaClient()
@@ -777,6 +777,76 @@ async function main() {
   console.log("Created sample permission override")
 
   // ==========================================
+  // DEDUCTIONS (for technicians)
+  // ==========================================
+  for (const tech of technicians) {
+    await prisma.deduction.createMany({
+      data: [
+        {
+          tenantId: tenant.id,
+          employeeId: tech.id,
+          type: DeductionType.TAX_FEDERAL,
+          description: "Federal Income Tax",
+          amount: 0,
+          percentage: 12,
+          isRecurring: true,
+          isActive: true,
+        },
+        {
+          tenantId: tenant.id,
+          employeeId: tech.id,
+          type: DeductionType.TAX_STATE,
+          description: "IL State Income Tax",
+          amount: 0,
+          percentage: 4.95,
+          isRecurring: true,
+          isActive: true,
+        },
+        {
+          tenantId: tenant.id,
+          employeeId: tech.id,
+          type: DeductionType.INSURANCE,
+          description: "Health Insurance",
+          amount: 250,
+          isRecurring: true,
+          isActive: true,
+        },
+      ],
+    })
+  }
+  console.log("Created deductions for", technicians.length, "technicians")
+
+  // ==========================================
+  // LOAN ADVANCES (for 2 technicians)
+  // ==========================================
+  await prisma.loanAdvance.create({
+    data: {
+      tenantId: tenant.id,
+      employeeId: technicians[0].id,
+      description: "Tool purchase advance",
+      originalAmount: 2000,
+      remainingBalance: 1500,
+      monthlyPayment: 250,
+      issuedDate: new Date("2025-11-01"),
+      isActive: true,
+      notes: "Snap-On tool chest purchase",
+    },
+  })
+  await prisma.loanAdvance.create({
+    data: {
+      tenantId: tenant.id,
+      employeeId: technicians[2].id,
+      description: "Emergency payroll advance",
+      originalAmount: 1000,
+      remainingBalance: 600,
+      monthlyPayment: 200,
+      issuedDate: new Date("2025-12-15"),
+      isActive: true,
+    },
+  })
+  console.log("Created 2 loan advances")
+
+  // ==========================================
   // SUMMARY
   // ==========================================
   console.log("\n✅ Comprehensive seed completed!")
@@ -794,6 +864,8 @@ async function main() {
   console.log(`  - ${vendors.length} Vendors`)
   console.log(`  - ${certsData.length} Technician Certifications`)
 
+  console.log(`  - ${technicians.length * 3} Deductions (3 per technician)`)
+  console.log(`  - 2 Loan Advances`)
   console.log(`  - 1 Permission Override (sample)`)
 
   console.log("\n🔐 Login credentials:")

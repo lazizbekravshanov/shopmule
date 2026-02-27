@@ -416,6 +416,102 @@ export interface EfficiencyReport {
   technicians: TechEfficiency[];
 }
 
+// Payroll types
+export interface DeductionItem {
+  id: string;
+  type: string;
+  description: string;
+  amount: number;
+  percentage?: number | null;
+  isRecurring: boolean;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface LoanItem {
+  id: string;
+  description: string;
+  originalAmount: number;
+  remainingBalance: number;
+  monthlyPayment: number;
+  issuedDate: string;
+  isActive: boolean;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface PayrollEmployeeRow {
+  id: string;
+  name: string;
+  role: string;
+  payType: string;
+  payRate: number;
+  regularHours: number;
+  overtimeHours: number;
+  regularPay: number;
+  overtimePay: number;
+  grossPay: number;
+  totalDeductions: number;
+  loanRepayments: number;
+  netPay: number;
+}
+
+export interface PayrollSummary {
+  period: string;
+  periodStart: string;
+  totals: {
+    grossPay: number;
+    totalDeductions: number;
+    loanRepayments: number;
+    netPay: number;
+    regularHours: number;
+    overtimeHours: number;
+    employeeCount: number;
+  };
+  employees: PayrollEmployeeRow[];
+}
+
+export interface DailyBreakdownRow {
+  date: string;
+  clockIn?: string | null;
+  clockOut?: string | null;
+  regularHours: number;
+  overtimeHours: number;
+  pay: number;
+}
+
+export interface DeductionBreakdownItem {
+  id: string;
+  type: string;
+  description: string;
+  amount: number;
+}
+
+export interface EmployeePayrollDetail {
+  employee: {
+    id: string;
+    name: string;
+    role: string;
+    payRate: number;
+    payType: string;
+    overtimeRate?: number | null;
+  };
+  period: string;
+  periodStart: string;
+  pay: {
+    regularPay: number;
+    overtimePay: number;
+    grossPay: number;
+    totalDeductions: number;
+    loanRepayments: number;
+    netPay: number;
+  };
+  deductionBreakdown: DeductionBreakdownItem[];
+  dailyBreakdown: DailyBreakdownRow[];
+  regularHours: number;
+  overtimeHours: number;
+}
+
 // Paginated response type
 export interface PaginatedResponse<T> {
   data: T[];
@@ -660,6 +756,36 @@ export const api = {
     },
     performance: (id: string, period?: string) =>
       request<EmployeePerformance>(`/employees/${id}/performance${period ? `?period=${period}` : ''}`),
+    deductions: {
+      list: (id: string) => request<DeductionItem[]>(`/employees/${id}/deductions`),
+      create: (id: string, payload: Omit<DeductionItem, 'id' | 'createdAt'>) =>
+        request<DeductionItem>(`/employees/${id}/deductions`, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        }),
+      update: (id: string, deductionId: string, payload: Partial<DeductionItem>) =>
+        request<DeductionItem>(`/employees/${id}/deductions/${deductionId}`, {
+          method: 'PATCH',
+          body: JSON.stringify(payload),
+        }),
+      delete: (id: string, deductionId: string) =>
+        request<{ success: boolean }>(`/employees/${id}/deductions/${deductionId}`, {
+          method: 'DELETE',
+        }),
+    },
+    loans: {
+      list: (id: string) => request<LoanItem[]>(`/employees/${id}/loans`),
+      create: (id: string, payload: Omit<LoanItem, 'id' | 'createdAt'>) =>
+        request<LoanItem>(`/employees/${id}/loans`, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        }),
+      update: (id: string, loanId: string, payload: Partial<LoanItem>) =>
+        request<LoanItem>(`/employees/${id}/loans/${loanId}`, {
+          method: 'PATCH',
+          body: JSON.stringify(payload),
+        }),
+    },
   },
   time: {
     clockIn: (payload: { employeeId: string }) =>
@@ -688,6 +814,12 @@ export const api = {
       request<{ totalHours: number }>(`/reports/productivity/${employeeId}`),
     payroll: (employeeId: string) =>
       request<{ hours: number; rate: number; grossPay: number }>(`/reports/payroll/${employeeId}`),
+  },
+  payroll: {
+    summary: (period: string) =>
+      request<PayrollSummary>(`/payroll?period=${encodeURIComponent(period)}`),
+    employee: (id: string, period: string) =>
+      request<EmployeePayrollDetail>(`/payroll/${id}?period=${encodeURIComponent(period)}`),
   },
   efficiency: {
     get: (period: string) =>

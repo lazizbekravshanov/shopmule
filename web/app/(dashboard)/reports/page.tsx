@@ -14,6 +14,7 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  Wallet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -28,6 +29,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { RevenueChart } from '@/components/charts/revenue-chart';
 import { useBreakdownReport } from '@/lib/queries/reports';
 import { useEmployees } from '@/lib/queries/employees';
+import { usePayrollSummary } from '@/lib/queries/payroll';
 import { formatCurrency } from '@/lib/utils';
 import {
   RevenueKPIs,
@@ -84,6 +86,7 @@ export default function ReportsPage() {
   const [activeTab, setActiveTab]   = useState('overview');
   const { data, isLoading, isFetching, refetch } = useBreakdownReport(dateRange);
   const { data: employees } = useEmployees();
+  const { data: payrollData, isLoading: payrollLoading } = usePayrollSummary('month');
 
   const s = data?.summary;
 
@@ -108,8 +111,16 @@ export default function ReportsPage() {
         ...(data.techPerformance.map((t) => [t.name, String(t.hours), String(t.revenue)])),
       ];
       downloadCsv(`shopmule-team-${dateRange}.csv`, rows);
+    } else if (activeTab === 'payroll' && payrollData) {
+      const rows: string[][] = [
+        ['Name', 'Role', 'Pay Type', 'Gross Pay', 'Deductions', 'Net Pay'],
+        ...payrollData.employees.map((e) => [
+          e.name, e.role, e.payType, String(e.grossPay), String(e.totalDeductions + e.loanRepayments), String(e.netPay),
+        ]),
+      ];
+      downloadCsv(`shopmule-payroll-${dateRange}.csv`, rows);
     }
-  }, [data, activeTab, dateRange]);
+  }, [data, payrollData, activeTab, dateRange]);
 
   // Build TechLeaderboard-compatible rankings from real data
   const techRankings = (data?.techPerformance ?? []).map((t: any, i: number) => ({
@@ -273,6 +284,9 @@ export default function ReportsPage() {
           </TabsTrigger>
           <TabsTrigger value="team" className="data-[state=active]:bg-white">
             <Users className="w-4 h-4 mr-2" />Team
+          </TabsTrigger>
+          <TabsTrigger value="payroll" className="data-[state=active]:bg-white">
+            <Wallet className="w-4 h-4 mr-2" />Payroll
           </TabsTrigger>
         </TabsList>
 
@@ -446,6 +460,108 @@ export default function ReportsPage() {
           )}
 
           <UtilizationHeatmap data={heatmapData} />
+        </TabsContent>
+
+        {/* Payroll */}
+        <TabsContent value="payroll" className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            {payrollLoading ? (
+              Array.from({ length: 3 }).map((_, i) => <MetricSkeleton key={i} />)
+            ) : (
+              <>
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  className="bg-white border border-neutral-200 rounded-xl p-5">
+                  <div className="flex items-center gap-2 text-neutral-500 mb-3">
+                    <Wallet className="h-4 w-4" />
+                    <span className="text-sm font-medium">Total Payroll Cost</span>
+                  </div>
+                  <div className="text-3xl font-bold text-neutral-900">
+                    {formatCurrency(payrollData?.totals?.grossPay ?? 0)}
+                  </div>
+                  <p className="text-xs text-neutral-400 mt-1">
+                    {payrollData?.totals?.employeeCount ?? 0} employees this month
+                  </p>
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="bg-white border border-neutral-200 rounded-xl p-5">
+                  <div className="flex items-center gap-2 text-neutral-500 mb-3">
+                    <DollarSign className="h-4 w-4" />
+                    <span className="text-sm font-medium">Avg Pay Per Tech</span>
+                  </div>
+                  <div className="text-3xl font-bold text-neutral-900">
+                    {payrollData?.totals?.employeeCount
+                      ? formatCurrency(Math.round((payrollData.totals.grossPay / payrollData.totals.employeeCount) * 100) / 100)
+                      : '$0'}
+                  </div>
+                  <p className="text-xs text-neutral-400 mt-1">Monthly average</p>
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-white border border-neutral-200 rounded-xl p-5">
+                  <div className="flex items-center gap-2 text-neutral-500 mb-3">
+                    <TrendingUp className="h-4 w-4" />
+                    <span className="text-sm font-medium">Labor Cost vs Revenue</span>
+                  </div>
+                  <div className="text-3xl font-bold text-neutral-900">
+                    {s?.totalRevenue && payrollData?.totals?.grossPay
+                      ? `${Math.round((payrollData.totals.grossPay / s.totalRevenue) * 100)}%`
+                      : '—'}
+                  </div>
+                  <p className="text-xs text-neutral-400 mt-1">Payroll as % of revenue</p>
+                </motion.div>
+              </>
+            )}
+          </div>
+
+          {/* Payroll comparison metrics */}
+          {payrollData && s && (
+            <ComparativeAnalytics
+              metrics={[
+                { label: 'Total Payroll', current: payrollData.totals.grossPay, previous: 0, format: 'currency' },
+                { label: 'Net Payroll', current: payrollData.totals.netPay, previous: 0, format: 'currency' },
+                { label: 'Total Revenue', current: s.totalRevenue ?? 0, previous: s.prevRevenue ?? 0, format: 'currency' },
+                { label: 'Labor Ratio', current: s.totalRevenue ? Math.round((payrollData.totals.grossPay / s.totalRevenue) * 100) : 0, previous: 0, format: 'number' },
+              ]}
+            />
+          )}
+
+          {/* Payroll Employee breakdown */}
+          {payrollData && payrollData.employees.length > 0 && (
+            <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-neutral-200">
+                <h3 className="font-semibold text-neutral-900">Payroll Breakdown by Employee</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-neutral-200 bg-neutral-50">
+                      <th className="text-left px-4 py-3 font-medium text-neutral-500">Name</th>
+                      <th className="text-right px-4 py-3 font-medium text-neutral-500">Gross</th>
+                      <th className="text-right px-4 py-3 font-medium text-neutral-500">Deductions</th>
+                      <th className="text-right px-4 py-3 font-medium text-neutral-500">Net</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-100">
+                    {payrollData.employees.map((e) => (
+                      <tr key={e.id} className="hover:bg-neutral-50">
+                        <td className="px-4 py-3 font-medium text-neutral-900">{e.name}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{formatCurrency(e.grossPay)}</td>
+                        <td className="px-4 py-3 text-right tabular-nums text-red-600">
+                          {e.totalDeductions + e.loanRepayments > 0 ? `-${formatCurrency(e.totalDeductions + e.loanRepayments)}` : '$0.00'}
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums font-semibold text-emerald-600">
+                          {formatCurrency(e.netPay)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
