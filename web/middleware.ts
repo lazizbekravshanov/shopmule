@@ -22,6 +22,8 @@ const protectedRoutes = [
   "/repair-orders",
   "/integrations",
   "/help",
+  "/payroll",
+  "/efficiency",
 ]
 
 // Routes that are always public
@@ -64,6 +66,9 @@ const selfAuthApiRoutes = [
   "/api/fleet-accounts", // Fleet account management
   "/api/appointments",   // Appointment scheduling
   "/api/tenant",         // Tenant settings
+  "/api/payroll",        // Payroll endpoints
+  "/api/employees",      // Employee endpoints (deductions, loans, etc.)
+  "/api/efficiency",     // Efficiency endpoints
 ]
 
 // In-memory rate limiter store
@@ -209,6 +214,8 @@ export async function middleware(request: NextRequest) {
       "/schedule": "service_orders:read_own",
       "/time-clock": "time:clock_self",
       "/integrations": "org:manage_settings",
+      "/payroll": "reports:view_financial",
+      "/efficiency": "reports:view_operational",
     }
 
     const userRole = token.role as Role
