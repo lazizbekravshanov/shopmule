@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, after } from 'next/server';
 import { prisma } from '@/lib/db';
 import { hashToken } from '@/lib/tokens';
 import {
@@ -8,6 +8,7 @@ import {
   errorResponse,
 } from '@/lib/api/response';
 import { logAudit } from '@/lib/security/audit';
+import { runAIPipeline } from '@/lib/ai/pipeline';
 
 export async function POST(
   request: NextRequest,
@@ -89,6 +90,8 @@ export async function POST(
         approvedViaPortal: true,
       },
     });
+
+    after(() => runAIPipeline(workOrderId, "APPROVED"))
 
     return successResponse({
       id: updatedWorkOrder.id,

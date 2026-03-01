@@ -1,12 +1,28 @@
-import { NextResponse } from "next/server"
+import { NextResponse, after } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { z } from "zod"
 import { isValidId } from "@/lib/security"
+import { runAIPipeline } from "@/lib/ai/pipeline"
 
 const updateStatusSchema = z.object({
-  status: z.enum(["DIAGNOSED", "APPROVED", "IN_PROGRESS", "COMPLETED"]),
+  status: z.enum([
+    "DRAFT",
+    "ESTIMATE",
+    "ESTIMATE_SENT",
+    "AWAITING_APPROVAL",
+    "DIAGNOSED",
+    "APPROVED",
+    "IN_PROGRESS",
+    "WAITING_ON_PARTS",
+    "QUALITY_CHECK",
+    "READY_FOR_PICKUP",
+    "COMPLETED",
+    "INVOICED",
+    "CANCELLED",
+    "ARCHIVED",
+  ]),
 })
 
 export async function PATCH(
@@ -73,6 +89,8 @@ export async function PATCH(
       createdAt: workOrder.createdAt.toISOString(),
       updatedAt: workOrder.updatedAt.toISOString(),
     }
+
+    after(() => runAIPipeline(id, data.status))
 
     return NextResponse.json(transformed)
   } catch (error) {

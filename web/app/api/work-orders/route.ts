@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server"
+import { after } from "next/server"
 import { prisma } from "@/lib/db"
 import { z } from "zod"
 import { isValidId } from "@/lib/security"
 import { verifyMobileAuth } from "@/lib/mobile-auth"
+import { runAIPipeline } from "@/lib/ai/pipeline"
 
 const createWorkOrderSchema = z.object({
   vehicleId: z.string().min(1, "Vehicle ID is required"),
@@ -423,6 +425,8 @@ export async function POST(request: Request) {
       createdAt: workOrder.createdAt.toISOString(),
       updatedAt: workOrder.updatedAt.toISOString(),
     }
+
+    after(() => runAIPipeline(workOrder.id, "DIAGNOSED"))
 
     return NextResponse.json(transformed, { status: 201 })
   } catch (error) {

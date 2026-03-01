@@ -2,6 +2,7 @@ import { tool } from 'ai'
 import { z } from 'zod'
 import { prisma } from '@/lib/db'
 import { WorkOrderStatus, InvoiceStatus, PunchType } from '@prisma/client'
+import { runAIPipeline } from '@/lib/ai/pipeline'
 
 // Tool definitions for the AI copilot
 export const aiTools = {
@@ -312,6 +313,7 @@ export const aiTools = {
           data: { status: status as WorkOrderStatus },
           include: { Vehicle: true },
         })
+        void runAIPipeline(workOrderId, status)
         return {
           success: true,
           message: `Work order updated to ${status}`,
