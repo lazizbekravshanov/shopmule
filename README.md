@@ -4,17 +4,9 @@
 
 ShopMule is a multi-tenant SaaS application for managing heavy-duty truck repair shop operations, including repair orders, technician time tracking, parts inventory, billing, and performance dashboards.
 
-## ⚠️ Migration Status
-
-This repository contains:
-- **Legacy Django app** (root directory) - Original implementation
-- **New Next.js app** (`/web` directory) - Modernized implementation
-
-See [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) for detailed migration information.
-
 ---
 
-## 🚀 New Next.js App (Recommended)
+## Quick Start
 
 ### Stack
 - **Frontend/Backend**: Next.js 14+ (App Router) with TypeScript
@@ -24,7 +16,7 @@ See [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) for detailed migration information.
 - **Validation**: Zod
 - **Forms**: React Hook Form
 
-### Quick Start
+### Setup
 
 1. **Navigate to web directory:**
    ```bash
@@ -68,12 +60,14 @@ See [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) for detailed migration information.
 
 8. **Access the application:**
    - Web app: http://localhost:3000
-   - Login with: `admin@example.com` / `admin123`
+   - Login with: `admin@shopmule.com` / `admin123`
 
 ### Default Users (from seed)
-- **Admin**: `admin@example.com` / `admin123` (Role: ADMIN)
-- **Service Writer**: `writer@example.com` / `writer123` (Role: MANAGER)
-- **Technician**: `tech@example.com` / `tech123` (Role: TECH)
+- **Owner**: `admin@shopmule.com` / `admin123` (Role: OWNER)
+- **Service Advisor**: `sarah@shopmule.com` / `advisor123` (Role: SERVICE_ADVISOR)
+- **Service Manager**: `lisa@shopmule.com` / `manager123` (Role: SERVICE_MANAGER)
+- **Parts Manager**: `rick@shopmule.com` / `parts123` (Role: PARTS_MANAGER)
+- **Mechanic**: `john@shopmule.com` / `mechanic123` (Role: MECHANIC)
 
 ### Available Routes
 
@@ -100,93 +94,39 @@ See [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) for detailed migration information.
 
 ### Features
 
-✅ **Authentication & RBAC**
-- NextAuth with credentials provider
-- Roles: ADMIN, MANAGER, TECH, VIEWER
-- Protected routes with middleware
-
-✅ **Repair Orders**
-- Create, view, and manage repair orders
-- Status workflow: DRAFT → AWAITING_APPROVAL → APPROVED → IN_PROGRESS → READY_TO_INVOICE → INVOICED → CLOSED
-- Labor lines and parts lines
-- Time tracking per repair order
-
-✅ **Time Tracking**
-- Shift punches (clock in/out)
-- Time entries linked to repair orders
-- Real-time duration tracking
-- Today's summary view
-
-✅ **Technicians**
-- View all technicians
-- See who's clocked in
-- Track active time entries
-
-✅ **Invoices**
-- Invoice generation from repair orders
-- Payment tracking
-- Status: UNPAID, PARTIALLY_PAID, PAID
-
-✅ **TV Dashboard**
-- Full-screen leaderboard
-- Technician performance metrics
-- Active orders
-- Real-time auto-refresh
-
-### Database Schema
-
-The Prisma schema is located at `web/prisma/schema.prisma`. Key models:
-- `Shop` - Multi-tenant shop/tenant
-- `User` - Users with roles
-- `Customer` - Customers
-- `Vehicle` - Customer vehicles
-- `RepairOrder` - Repair/service orders
-- `LaborLine`, `PartLine` - Order line items
-- `TimeEntry`, `ShiftPunch` - Time tracking
-- `Invoice`, `Payment` - Billing
-- `Part` - Parts inventory
+- **Authentication & RBAC** — NextAuth with credentials provider. Roles: OWNER, ADMIN, MANAGER, SERVICE_ADVISOR, SERVICE_MANAGER, PARTS_MANAGER, MECHANIC, TECH, VIEWER. Protected routes with middleware.
+- **Work Orders** — Create, view, and manage repair orders with status workflow, labor/parts lines, and time tracking.
+- **Time Tracking** — Shift punches (clock in/out), time entries linked to repair orders, real-time duration tracking.
+- **Invoices** — Invoice generation from repair orders, payment tracking (UNPAID, PARTIALLY_PAID, PAID).
+- **Inventory** — Parts management with stock levels, vendor tracking, and low-stock alerts.
+- **TV Dashboard** — Full-screen leaderboard with technician performance metrics and auto-refresh.
+- **AI Assistant** — Chat-based AI assistant with tool access for searching data, managing work orders, and getting recommendations.
 
 ---
 
-## 🐍 Legacy Django App (Deprecated)
+## Developer Portal
 
-> **Note**: The Django app is preserved for reference but the Next.js app is the active development target.
-
-### Stack
-- Python 3.12, Django 5.x, DRF
-- PostgreSQL
-- Redis + Celery
-- JWT auth (SimpleJWT)
-- Django Admin + Django templates
-
-### Quick Start (Legacy)
-
-```bash
-cp .env.example .env
-docker compose up --build
-```
-
-In another terminal:
-```bash
-docker compose exec web python manage.py migrate
-docker compose exec web python manage.py seed_demo
-```
-
-Admin: http://localhost:8000/admin/ (admin/admin123)
+A developer portal is available at `/dev` in the app. The public REST API, SDKs, CLI, and webhooks documented there are **coming soon** — they are not yet live. The internal `/api/*` routes used by the ShopMule web app work as expected.
 
 ---
 
-## 📋 Migration Guide
+## Production Deployment
 
-See [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) for:
-- Model mappings (Django → Prisma)
-- Route mappings
-- Data migration strategy
-- Testing plan
+Before deploying to production, complete this security checklist:
+
+- [ ] **`NEXTAUTH_SECRET`** — Generate a unique secret: `openssl rand -base64 32`
+- [ ] **`ADMIN_PASSWORD`** — Set a strong password via env var (seed script will refuse to run in production with the default)
+- [ ] **`ADMIN_EMAIL`** — Change from default `admin@shopmule.com` to your real email
+- [ ] **`DATABASE_URL`** — Use a production PostgreSQL instance with a strong password
+- [ ] **HTTPS** — Serve the app behind TLS (required for secure cookies)
+- [ ] **`NEXTAUTH_URL`** — Set to your production domain (e.g. `https://app.yourshop.com`)
+- [ ] **Rotate all seed passwords** — All default passwords (`advisor123`, `manager123`, etc.) must be changed
+- [ ] **Stripe keys** — Switch from `sk_test_` to `sk_live_` keys
+- [ ] **Review `.env.example`** — Ensure no secrets are committed to version control
 
 ---
 
-## 🛠️ Development
+## Development
 
 ### Prisma Commands
 
@@ -197,7 +137,7 @@ npm run db:generate
 # Create a new migration
 npm run db:migrate
 
-# Reset database (⚠️ deletes all data)
+# Reset database (deletes all data)
 npx prisma migrate reset
 
 # View database in browser
@@ -213,7 +153,7 @@ Required in `.env`:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 web/
@@ -239,7 +179,7 @@ web/
 
 ---
 
-## 🐳 Docker
+## Docker
 
 ### Development
 ```bash
@@ -255,7 +195,7 @@ docker compose -f docker-compose.yml up --build
 
 ---
 
-## 📝 Notes
+## Notes
 
 - All tenant-scoped models include `shopId` and are filtered by the user's shop
 - Role-based access control (RBAC) is enforced via middleware and server-side helpers
@@ -264,106 +204,7 @@ docker compose -f docker-compose.yml up --build
 
 ---
 
-## 🔌 Developer Portal & API Integration
-
-ShopMule exposes a REST API for third-party integrations. If you want to build on top of ShopMule or connect your service, start here.
-
-**Full docs:** Visit `/dev` in the app or see [web/app/dev/page.tsx](web/app/dev/page.tsx).
-
-### API Base URL
-
-```
-https://api.shopmule.com/v2
-```
-
-### Authentication
-
-All API requests require a Bearer token:
-
-```bash
-curl https://api.shopmule.com/v2/work-orders \
-  -H "Authorization: Bearer sk_live_your_api_key"
-```
-
-Get your API key from **Settings > API Keys** in the dashboard.
-
-### SDKs
-
-```bash
-# Node.js / TypeScript
-npm install @shopmule/sdk
-
-# Python
-pip install shopmule
-
-# CLI
-npm install -g @shopmule/cli
-```
-
-### Quick Example
-
-```typescript
-import ShopMule from '@shopmule/sdk';
-
-const client = new ShopMule({
-  apiKey: process.env.SHOPMULE_API_KEY,
-});
-
-// Create a work order
-const wo = await client.workOrders.create({
-  customerId: 'cus_abc123',
-  vehicleId: 'veh_xyz789',
-  description: 'Oil change + tire rotation',
-});
-
-// Listen for webhook events
-client.webhooks.on('work_order.completed', async (event) => {
-  console.log(`Work order ${event.data.id} completed`);
-});
-```
-
-### API Resources
-
-| Resource | Endpoints |
-|----------|-----------|
-| **Work Orders** | CRUD + status transitions |
-| **Customers** | CRUD + vehicle management |
-| **Invoices** | Create, send, record payments |
-| **Inventory** | Parts CRUD + stock history |
-| **AI Agents** | Diagnose, estimate, summarize (Beta) |
-
-### Webhooks
-
-Subscribe to real-time events in **Settings > Webhooks**:
-
-| Event | Description |
-|-------|-------------|
-| `work_order.created` | New work order created |
-| `work_order.status_changed` | Work order transitions status |
-| `work_order.completed` | Work order marked complete |
-| `invoice.created` | Invoice generated |
-| `invoice.paid` | Payment recorded |
-| `customer.created` | New customer added |
-| `inventory.low_stock` | Part stock below threshold |
-| `ai.job_completed` | Async AI job finished |
-
-All payloads are signed — verify using your webhook secret.
-
-### Sandbox
-
-Use `sk_test_*` keys for development. Sandbox data resets daily at midnight UTC. No billing impact.
-
-### Rate Limits
-
-| Plan | Rate | Burst | Daily |
-|------|------|-------|-------|
-| Free | 60 req/min | 10 req/sec | 1,000 |
-| Pro | 600 req/min | 50 req/sec | 50,000 |
-| Enterprise | Custom | Custom | Unlimited |
-
----
-
-## 🤝 Contributing
+## Contributing
 
 1. Follow the coding style in existing files
 2. Use TypeScript strict mode
@@ -373,6 +214,6 @@ Use `sk_test_*` keys for development. Sandbox data resets daily at midnight UTC.
 
 ---
 
-## 📄 License
+## License
 
 Proprietary. All rights reserved.

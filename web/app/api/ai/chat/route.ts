@@ -3,10 +3,16 @@ import { streamText, stepCountIs } from 'ai'
 import { aiTools } from '@/lib/ai/tools'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { checkRateLimit, sanitizeInput } from '@/lib/security'
 
 export const dynamic = 'force-dynamic'
 
 export const maxDuration = 30
+
+const MAX_MESSAGES = 50
+const MAX_MESSAGE_LENGTH = 4000
+const MAX_TOTAL_LENGTH = 40000
+const VALID_ROLES = ['user', 'assistant', 'system']
 
 const systemPrompt = `You are Mule, the AI assistant for ShopMule - and you work as hard as your name suggests. You're not just a chatbot, you're like the most experienced shop manager who's seen it all and is here to help.
 
@@ -73,6 +79,16 @@ You: "Sure thing - which vehicle? Give me a customer name or license plate and I
 
 Remember: You're here to make their job easier. Be the assistant everyone wishes they had.`
 
+function isValidMessage(msg: unknown): msg is { role: string; content: string } {
+  if (typeof msg !== 'object' || msg === null) return false
+  const m = msg as Record<string, unknown>
+  return (
+    typeof m.role === 'string' &&
+    VALID_ROLES.includes(m.role) &&
+    typeof m.content === 'string'
+  )
+}
+
 export async function POST(req: Request) {
   try {
     // Check authentication
@@ -81,6 +97,18 @@ export async function POST(req: Request) {
       return new Response(JSON.stringify({ error: 'Please sign in to use the AI assistant' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
+      })
+    }
+
+    // Rate limiting
+    const rateLimit = checkRateLimit(session.user.id, 'ai')
+    if (!rateLimit.allowed) {
+      return new Response(JSON.stringify({ error: 'Too many requests. Please wait a moment and try again.' }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(rateLimit.resetIn),
+        }
       })
     }
 
@@ -94,14 +122,55 @@ export async function POST(req: Request) {
       })
     }
 
+    // Cap message count
+    if (messages.length > MAX_MESSAGES) {
+      return new Response(JSON.stringify({ error: `Too many messages (max ${MAX_MESSAGES})` }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+
+    // Validate and sanitize messages
+    let totalLength = 0
+    const sanitizedMessages = []
+
+    for (const msg of messages) {
+      if (!isValidMessage(msg)) {
+        return new Response(JSON.stringify({ error: 'Invalid message format: each message must have a valid role (user/assistant/system) and string content' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+
+      if (msg.content.length > MAX_MESSAGE_LENGTH) {
+        return new Response(JSON.stringify({ error: `Message too long (max ${MAX_MESSAGE_LENGTH} characters)` }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+
+      totalLength += msg.content.length
+      if (totalLength > MAX_TOTAL_LENGTH) {
+        return new Response(JSON.stringify({ error: `Total message content too long (max ${MAX_TOTAL_LENGTH} characters)` }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+
+      sanitizedMessages.push({
+        role: msg.role as 'user' | 'assistant' | 'system',
+        content: sanitizeInput(msg.content),
+      })
+    }
+
     // Add user context to the system prompt
-    const userName = session.user?.name || session.user?.email?.split('@')[0] || 'boss'
+    const userName = sanitizeInput(session.user?.name || session.user?.email?.split('@')[0] || 'boss')
     const personalizedPrompt = `${systemPrompt}\n\nThe current user is ${userName}. Address them naturally.`
 
     const result = streamText({
       model: groq('llama-3.3-70b-versatile'),
       system: personalizedPrompt,
-      messages,
+      messages: sanitizedMessages,
       tools: aiTools,
       stopWhen: stepCountIs(5),
       onError: (error) => {

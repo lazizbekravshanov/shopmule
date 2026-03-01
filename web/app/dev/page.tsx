@@ -75,11 +75,23 @@ function Badge({ children, variant = 'default' }: { children: React.ReactNode; v
   );
 }
 
-function NavItem({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
+function ComingSoonBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 border border-amber-200">
+      <Clock className="w-3 h-3" />
+      Coming Soon
+    </span>
+  );
+}
+
+function NavItem({ href, icon: Icon, label, comingSoon }: { href: string; icon: React.ElementType; label: string; comingSoon?: boolean }) {
   return (
     <a href={href} className="flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors">
       <Icon className="w-4 h-4 text-neutral-400" />
       {label}
+      {comingSoon && (
+        <span className="ml-auto text-[10px] font-medium text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">Soon</span>
+      )}
     </a>
   );
 }
@@ -150,11 +162,11 @@ export default function DevPage() {
               <NavItem href="#quick-start" icon={Zap} label="Quick Start" />
               <NavItem href="#authentication" icon={Shield} label="Authentication" />
               <NavItem href="#api-reference" icon={Code2} label="API Reference" />
-              <NavItem href="#sdks" icon={Terminal} label="SDKs & Libraries" />
-              <NavItem href="#webhooks" icon={Webhook} label="Webhooks" />
+              <NavItem href="#sdks" icon={Terminal} label="SDKs & Libraries" comingSoon />
+              <NavItem href="#webhooks" icon={Webhook} label="Webhooks" comingSoon />
               <NavItem href="#rate-limits" icon={Gauge} label="Rate Limits" />
-              <NavItem href="#cli" icon={Terminal} label="CLI" />
-              <NavItem href="#sandbox" icon={FlaskConical} label="Sandbox" />
+              <NavItem href="#cli" icon={Terminal} label="CLI" comingSoon />
+              <NavItem href="#sandbox" icon={FlaskConical} label="Sandbox" comingSoon />
               <NavItem href="#changelog" icon={Clock} label="Changelog" />
               <NavItem href="#status" icon={Activity} label="Status" />
               <NavItem href="#github" icon={GitBranch} label="GitHub" />
@@ -164,11 +176,24 @@ export default function DevPage() {
           {/* ───── Main Content ───── */}
           <main className="py-10 min-w-0">
 
+            {/* ━━━ COMING SOON BANNER ━━━ */}
+            <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div className="text-sm">
+                <p className="font-semibold text-amber-800">Public API Under Development</p>
+                <p className="text-amber-700 mt-0.5">
+                  The external REST API, SDKs, webhooks, and CLI documented below are not yet available.
+                  Internal <code className="font-mono text-xs bg-amber-100 px-1.5 py-0.5 rounded">/api/*</code> routes used by the ShopMule web app work as expected.
+                  This page previews what&apos;s coming.
+                </p>
+              </div>
+            </div>
+
             {/* ━━━ 1. HERO ━━━ */}
             <SectionAnchor id="overview" />
             <section className="mb-16">
               <div className="flex items-center gap-3 mb-4">
-                <Badge variant="green">v2.0</Badge>
+                <Badge variant="amber">Preview</Badge>
                 <Badge>REST</Badge>
                 <Badge>Node.js</Badge>
                 <Badge>Python</Badge>
@@ -197,10 +222,11 @@ export default function DevPage() {
                 </a>
               </div>
 
-              <div className="mt-8 p-4 rounded-xl border border-neutral-200 bg-neutral-50 flex items-center gap-3 text-sm">
-                <Server className="w-5 h-5 text-neutral-400 flex-shrink-0" />
+              <div className="mt-8 p-4 rounded-xl border border-amber-200 bg-amber-50 flex items-center gap-3 text-sm">
+                <Server className="w-5 h-5 text-amber-500 flex-shrink-0" />
                 <span className="text-neutral-600">
                   Base URL: <code className="font-mono text-neutral-900 bg-white px-2 py-0.5 rounded border border-neutral-200">https://api.shopmule.com/v2</code>
+                  <span className="ml-2 text-amber-600 text-xs font-medium">(not yet live)</span>
                 </span>
               </div>
             </section>
@@ -398,7 +424,9 @@ console.log(workOrder.id); // "wo_k8x2m4n1"`}
             {/* ━━━ 5. SDKs ━━━ */}
             <SectionAnchor id="sdks" />
             <section className="mb-16">
-              <SectionHeading sub="Official client libraries.">SDKs &amp; Libraries</SectionHeading>
+              <SectionHeading sub="Official client libraries.">
+                <span className="flex items-center gap-3">SDKs &amp; Libraries <ComingSoonBadge /></span>
+              </SectionHeading>
 
               <div className="grid sm:grid-cols-3 gap-4">
                 <div className="rounded-xl border border-neutral-200 p-5 hover:border-neutral-300 transition-colors">
@@ -445,7 +473,9 @@ console.log(workOrder.id); // "wo_k8x2m4n1"`}
             {/* ━━━ 6. WEBHOOKS ━━━ */}
             <SectionAnchor id="webhooks" />
             <section className="mb-16">
-              <SectionHeading sub="Receive real-time notifications when events occur.">Webhooks</SectionHeading>
+              <SectionHeading sub="Receive real-time notifications when events occur.">
+                <span className="flex items-center gap-3">Webhooks <ComingSoonBadge /></span>
+              </SectionHeading>
 
               <div className="space-y-6">
                 <div className="rounded-xl border border-neutral-200 p-5">
@@ -571,7 +601,9 @@ switch (event.type) {
             {/* ━━━ 8. CLI ━━━ */}
             <SectionAnchor id="cli" />
             <section className="mb-16">
-              <SectionHeading sub="Manage resources from your terminal.">CLI</SectionHeading>
+              <SectionHeading sub="Manage resources from your terminal.">
+                <span className="flex items-center gap-3">CLI <ComingSoonBadge /></span>
+              </SectionHeading>
 
               <div className="space-y-4">
                 <CodeBlock lang="bash" filename="terminal">
@@ -602,7 +634,9 @@ shopmule logs tail --resource work-orders`}
             {/* ━━━ 9. SANDBOX ━━━ */}
             <SectionAnchor id="sandbox" />
             <section className="mb-16">
-              <SectionHeading sub="Test your integration without affecting production data.">Sandbox</SectionHeading>
+              <SectionHeading sub="Test your integration without affecting production data.">
+                <span className="flex items-center gap-3">Sandbox <ComingSoonBadge /></span>
+              </SectionHeading>
 
               <div className="space-y-6">
                 <div className="rounded-xl border border-neutral-200 p-5 space-y-4">

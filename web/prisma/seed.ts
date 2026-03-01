@@ -4,6 +4,22 @@ import bcrypt from "bcryptjs"
 const prisma = new PrismaClient()
 
 async function main() {
+  // Production guard: abort if running in production with default credentials
+  const adminPassword = (process.env.ADMIN_PASSWORD || "admin123").trim()
+  if (process.env.NODE_ENV === "production" && (!process.env.ADMIN_PASSWORD || adminPassword === "admin123")) {
+    console.error("\n╔══════════════════════════════════════════════════════════╗")
+    console.error("║  ERROR: Cannot seed production with default credentials  ║")
+    console.error("╚══════════════════════════════════════════════════════════╝")
+    console.error("\nSet ADMIN_PASSWORD to a strong, unique password before seeding production.")
+    console.error("Example: ADMIN_PASSWORD=$(openssl rand -base64 24) npx prisma db seed\n")
+    process.exit(1)
+  }
+
+  console.log("\n⚠️  ════════════════════════════════════════════════════════")
+  console.log("   FOR DEVELOPMENT ONLY — Do not use these credentials")
+  console.log("   in production. See .env.example for guidance.")
+  console.log("   ════════════════════════════════════════════════════════\n")
+
   console.log("Starting comprehensive seed...")
 
   // ==========================================
@@ -44,7 +60,6 @@ async function main() {
   // USERS & EMPLOYEE PROFILES
   // ==========================================
   const adminEmail = (process.env.ADMIN_EMAIL || "admin@shopmule.com").trim()
-  const adminPassword = (process.env.ADMIN_PASSWORD || "admin123").trim()
 
   // Admin/Owner
   const adminHash = await bcrypt.hash(adminPassword, 12)
@@ -874,6 +889,9 @@ async function main() {
   console.log("  Service Manager: lisa@shopmule.com / manager123")
   console.log("  Parts Manager: rick@shopmule.com / parts123")
   console.log("  Mechanic: john@shopmule.com / mechanic123")
+
+  console.log("\n🔄 REMINDER: Rotate all default passwords before deploying to production.")
+  console.log("   Set ADMIN_PASSWORD and ADMIN_EMAIL environment variables for custom credentials.\n")
 }
 
 main()
