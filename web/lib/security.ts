@@ -87,6 +87,7 @@ export const RATE_LIMITS = {
   login: { max: 5, window: 60 * 15 }, // 5 attempts per 15 minutes
   api: { max: 100, window: 60 }, // 100 requests per minute
   create: { max: 30, window: 60 }, // 30 creates per minute
+  ai: { max: 20, window: 60 }, // 20 AI chat requests per minute
 } as const
 
 // In-memory rate limiter (for development/simple deployments)
