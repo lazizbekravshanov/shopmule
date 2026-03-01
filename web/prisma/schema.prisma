@@ -337,6 +337,9 @@ model WorkOrder {
   checklist             String?
   notes                 String?
   partsStatus           String?             // WAITING | ORDERED | IN_STOCK (null = no parts concern)
+  aiDiagnosis           Json?               // Wrench agent output
+  aiEstimate            Json?               // Ledger agent output
+  aiSummary             Json?               // Scribe agent output
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   deletedAt             DateTime?

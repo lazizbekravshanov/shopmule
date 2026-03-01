@@ -24,6 +24,7 @@ const protectedRoutes = [
   "/help",
   "/payroll",
   "/efficiency",
+  "/workflow",
 ]
 
 // Routes that are always public
@@ -216,6 +217,7 @@ export async function middleware(request: NextRequest) {
       "/integrations": "org:manage_settings",
       "/payroll": "reports:view_financial",
       "/efficiency": "reports:view_operational",
+      "/workflow": "service_orders:read_own",
     }
 
     const userRole = token.role as Role

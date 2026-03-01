@@ -19,6 +19,7 @@ import {
   HelpCircle,
   Plug,
   Wallet,
+  Workflow,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -53,6 +54,7 @@ const navGroups: NavGroup[] = [
     label: 'Operations',
     items: [
       { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { title: 'Workflow', href: '/workflow', icon: Workflow, permission: 'service_orders:read_own' },
       { title: 'Work Orders', href: '/work-orders', icon: Wrench, permission: 'service_orders:read_own' },
       { title: 'Schedule', href: '/schedule', icon: CalendarDays, permission: 'service_orders:read_own' },
     ],
