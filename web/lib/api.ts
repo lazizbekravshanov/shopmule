@@ -178,6 +178,10 @@ export interface WorkOrder {
   assignments?: { employee: Employee }[];
   partsUsed?: WorkOrderPart[];
   laborEntries?: WorkOrderLabor[];
+  aiDiagnosis?: Record<string, unknown> | null;
+  aiEstimate?: Record<string, unknown> | null;
+  aiSummary?: Record<string, unknown> | null;
+  aiStatus?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

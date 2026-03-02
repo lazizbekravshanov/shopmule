@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db"
 import { z } from "zod"
 import { isValidId } from "@/lib/security"
 import { runAIPipeline } from "@/lib/ai/pipeline"
+import { sendWorkOrderStatusNotification } from "@/lib/notifications/customer"
 
 const updateStatusSchema = z.object({
   status: z.enum([
@@ -91,6 +92,7 @@ export async function PATCH(
     }
 
     after(() => runAIPipeline(id, data.status))
+    after(() => sendWorkOrderStatusNotification({ workOrderId: id, newStatus: data.status }))
 
     return NextResponse.json(transformed)
   } catch (error) {

@@ -340,6 +340,7 @@ model WorkOrder {
   aiDiagnosis           Json?               // Wrench agent output
   aiEstimate            Json?               // Ledger agent output
   aiSummary             Json?               // Scribe agent output
+  aiStatus              String?             // DIAGNOSING | ESTIMATING | SUMMARIZING | null when idle
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   deletedAt             DateTime?

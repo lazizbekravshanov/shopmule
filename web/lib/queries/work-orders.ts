@@ -25,11 +25,17 @@ export function useWorkOrdersSummary(limit = 5) {
 }
 
 export function useWorkOrder(id: string) {
-  return useQuery({
+  const query = useQuery({
     queryKey: workOrderKeys.detail(id),
     queryFn: () => api.workOrders.get(id),
     enabled: !!id,
+    refetchInterval: (query) => {
+      const data = query.state.data as Record<string, unknown> | undefined;
+      // Poll every 5s while AI is processing
+      return data?.aiStatus ? 5000 : false;
+    },
   });
+  return query;
 }
 
 export function useCreateWorkOrder() {

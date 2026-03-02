@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Truck, User, FileText, DollarSign, Wrench, Package, CreditCard, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, Truck, User, FileText, DollarSign, Wrench, Package, CreditCard, CheckCircle, Loader2, Camera } from 'lucide-react';
 import { LaborTimerSection } from '@/components/work-order/labor-timer-section';
 import { InspectionPanel } from '@/components/work-order/inspection-panel';
 import { DeferredWorkPanel } from '@/components/work-order/deferred-work-panel';
 import { PartsPicker } from '@/components/work-order/parts-picker';
+import { PhotoUpload } from '@/components/work-order/photo-upload';
+import { AIStatusPanel } from '@/components/work-order/ai-status-panel';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
@@ -367,10 +369,27 @@ export default function WorkOrderDetailPage() {
               <p className="text-neutral-400 text-sm">No parts added yet</p>
             )}
           </div>
+
+          {/* Photos */}
+          <div className="bg-white border border-neutral-200 rounded-lg p-6">
+            <div className="flex items-center gap-2 text-neutral-500 mb-4">
+              <Camera className="h-4 w-4" />
+              <span className="text-sm font-medium">Photos</span>
+            </div>
+            <PhotoUpload workOrderId={id} />
+          </div>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* AI Status Panel */}
+          <AIStatusPanel
+            aiStatus={workOrder.aiStatus ?? null}
+            aiDiagnosis={workOrder.aiDiagnosis as Record<string, unknown> | null ?? null}
+            aiEstimate={workOrder.aiEstimate as Record<string, unknown> | null ?? null}
+            aiSummary={workOrder.aiSummary as Record<string, unknown> | null ?? null}
+          />
+
           {/* Summary Card */}
           <div className="bg-white border border-neutral-200 rounded-lg p-6">
             <div className="flex items-center gap-2 text-neutral-500 mb-4">

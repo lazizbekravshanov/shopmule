@@ -1,7 +1,7 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { Bell, Menu, Search, User, Settings } from 'lucide-react';
+import { Menu, Search, User, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +20,7 @@ import { Breadcrumbs } from './breadcrumbs';
 import { MuleIcon } from '@/components/ui/mule-logo';
 import { LogoutButton } from '@/components/logout-button';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { NotificationBell } from './notification-bell';
 
 export function Header() {
   const { data: session } = useSession();
@@ -75,14 +76,7 @@ export function Header() {
       <ThemeToggle />
 
       {/* Notifications */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100"
-      >
-        <Bell className="h-5 w-5" strokeWidth={1.5} />
-        <span className="sr-only">Notifications</span>
-      </Button>
+      <NotificationBell />
 
       {/* User menu */}
       <DropdownMenu>

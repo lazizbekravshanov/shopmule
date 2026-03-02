@@ -9,6 +9,7 @@ import {
 } from '@/lib/api/response';
 import { logAudit } from '@/lib/security/audit';
 import { runAIPipeline } from '@/lib/ai/pipeline';
+import { sendWorkOrderStatusNotification } from '@/lib/notifications/customer';
 
 export async function POST(
   request: NextRequest,
@@ -92,6 +93,7 @@ export async function POST(
     });
 
     after(() => runAIPipeline(workOrderId, "APPROVED"))
+    after(() => sendWorkOrderStatusNotification({ workOrderId, newStatus: "APPROVED" }))
 
     return successResponse({
       id: updatedWorkOrder.id,

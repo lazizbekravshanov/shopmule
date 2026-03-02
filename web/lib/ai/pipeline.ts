@@ -5,6 +5,8 @@ import {
   runSummarizeAgent,
 } from "./agents";
 import type { Prisma } from "@prisma/client";
+import { createStaffNotification } from "@/lib/notifications/staff";
+import { sendWorkOrderStatusNotification } from "@/lib/notifications/customer";
 
 /**
  * Central AI pipeline orchestrator.
@@ -65,7 +67,15 @@ export async function runAIPipeline(
     // WO Created / Diagnosed → run diagnose, then chain to estimate
     if (status === "DIAGNOSED") {
       if (!workOrder.aiDiagnosis) {
+        await prisma.workOrder.update({ where: { id: workOrderId }, data: { aiStatus: "DIAGNOSING" } });
         await runDiagnoseStep(workOrder);
+        await createStaffNotification({
+          tenantId: workOrder.tenantId,
+          type: "WORK_ORDER_STATUS",
+          title: "AI diagnosis complete",
+          message: `Diagnosis finished for WO ${workOrder.workOrderNumber ?? workOrderId.slice(0, 8)}`,
+          data: { workOrderId, agent: "diagnostic" },
+        });
       }
       // Re-fetch to get the diagnosis we just saved (for estimate input)
       const refreshed = await prisma.workOrder.findUnique({
@@ -73,8 +83,19 @@ export async function runAIPipeline(
         include: { Vehicle: true },
       });
       if (refreshed && !refreshed.aiEstimate) {
+        await prisma.workOrder.update({ where: { id: workOrderId }, data: { aiStatus: "ESTIMATING" } });
         await runEstimateStep(refreshed);
+        await createStaffNotification({
+          tenantId: workOrder.tenantId,
+          type: "WORK_ORDER_STATUS",
+          title: "AI estimate complete",
+          message: `Estimate generated for WO ${workOrder.workOrderNumber ?? workOrderId.slice(0, 8)}`,
+          data: { workOrderId, agent: "estimate" },
+        });
       }
+      await prisma.workOrder.update({ where: { id: workOrderId }, data: { aiStatus: null } });
+      // Send customer notification after diagnosis + estimate are ready
+      await sendWorkOrderStatusNotification({ workOrderId, newStatus: "DIAGNOSED" });
       return;
     }
 
@@ -85,7 +106,16 @@ export async function runAIPipeline(
       status === "WAITING_ON_PARTS"
     ) {
       if (!workOrder.aiEstimate) {
+        await prisma.workOrder.update({ where: { id: workOrderId }, data: { aiStatus: "ESTIMATING" } });
         await runEstimateStep(workOrder);
+        await prisma.workOrder.update({ where: { id: workOrderId }, data: { aiStatus: null } });
+        await createStaffNotification({
+          tenantId: workOrder.tenantId,
+          type: "WORK_ORDER_STATUS",
+          title: "AI estimate complete",
+          message: `Estimate generated for WO ${workOrder.workOrderNumber ?? workOrderId.slice(0, 8)}`,
+          data: { workOrderId, agent: "estimate" },
+        });
       }
       return;
     }
@@ -93,7 +123,16 @@ export async function runAIPipeline(
     // Completed / Invoiced → run summarize
     if (status === "COMPLETED" || status === "INVOICED") {
       if (!workOrder.aiSummary) {
+        await prisma.workOrder.update({ where: { id: workOrderId }, data: { aiStatus: "SUMMARIZING" } });
         await runSummarizeStep(workOrder);
+        await prisma.workOrder.update({ where: { id: workOrderId }, data: { aiStatus: null } });
+        await createStaffNotification({
+          tenantId: workOrder.tenantId,
+          type: "WORK_ORDER_STATUS",
+          title: "AI summary complete",
+          message: `Summary generated for WO ${workOrder.workOrderNumber ?? workOrderId.slice(0, 8)}`,
+          data: { workOrderId, agent: "summarize" },
+        });
       }
       return;
     }

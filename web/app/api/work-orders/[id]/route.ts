@@ -120,6 +120,10 @@ export async function GET(
             }
           : undefined,
       })),
+      aiDiagnosis: workOrder.aiDiagnosis ?? null,
+      aiEstimate: workOrder.aiEstimate ?? null,
+      aiSummary: workOrder.aiSummary ?? null,
+      aiStatus: workOrder.aiStatus ?? null,
       createdAt: workOrder.createdAt.toISOString(),
       updatedAt: workOrder.updatedAt.toISOString(),
     }
