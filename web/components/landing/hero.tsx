@@ -57,7 +57,7 @@ export function Hero() {
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href="/login"
+              href="/register"
               className="inline-flex items-center gap-2 bg-neutral-900 hover:bg-neutral-800 text-white h-12 px-8 rounded-lg text-base font-medium transition-colors"
             >
               Start Free Trial

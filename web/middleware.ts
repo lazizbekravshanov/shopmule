@@ -70,6 +70,7 @@ const selfAuthApiRoutes = [
   "/api/payroll",        // Payroll endpoints
   "/api/employees",      // Employee endpoints (deductions, loans, etc.)
   "/api/efficiency",     // Efficiency endpoints
+  "/api/billing",        // Billing endpoints (session auth)
 ]
 
 // In-memory rate limiter store

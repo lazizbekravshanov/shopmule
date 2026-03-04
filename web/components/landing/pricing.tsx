@@ -191,7 +191,7 @@ export function PricingSection() {
                     : 'bg-neutral-900 hover:bg-neutral-800 text-white'
                 )}
               >
-                <Link href="/login">
+                <Link href="/register">
                   Start free trial
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>

@@ -10,7 +10,7 @@ const comparisons = [
   },
   {
     before: 'Calling customers for approval on a $3K brake job',
-    after: 'Text-to-approve estimates with photo documentation',
+    after: 'Online estimate approval via customer portal',
   },
   {
     before: 'End-of-month scramble to figure out who owes what',
@@ -18,7 +18,7 @@ const comparisons = [
   },
   {
     before: '"We\'re out of that filter" on a Friday afternoon',
-    after: 'Auto reorder alerts before stock hits zero',
+    after: 'Low stock visibility in your parts inventory',
   },
   {
     before: 'Tech says 4 hours, you billed for 2',

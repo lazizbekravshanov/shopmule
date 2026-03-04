@@ -21,7 +21,7 @@ const features: Feature[] = [
     ccc: false,
     mitchell: false,
     shopmonkey: false,
-    description: 'Auto-generate repair estimates from photos',
+    description: 'AI-generated diagnostic analysis and repair estimates',
   },
   {
     name: 'Modern Cloud Architecture',
@@ -60,14 +60,14 @@ const features: Feature[] = [
   },
   {
     name: 'Parts Ordering Integration',
-    shopmule: true,
+    shopmule: false,
     ccc: true,
     mitchell: true,
     shopmonkey: 'partial',
   },
   {
     name: 'Insurance DRP Integration',
-    shopmule: true,
+    shopmule: false,
     ccc: true,
     mitchell: true,
     shopmonkey: false,

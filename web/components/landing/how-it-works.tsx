@@ -5,8 +5,8 @@ import { motion } from 'framer-motion';
 const steps = [
   {
     number: '01',
-    title: 'Sign up',
-    description: 'Create your account in under a minute. No credit card required.',
+    title: 'Create your account',
+    description: 'Register at /register in under a minute. No credit card required.',
   },
   {
     number: '02',

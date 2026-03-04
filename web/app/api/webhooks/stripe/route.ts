@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { prisma } from '@/lib/db';
+import { stripePlanToSubscriptionPlan } from '@/lib/billing';
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -46,6 +47,21 @@ export async function POST(request: NextRequest) {
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         await handlePaymentIntentFailed(paymentIntent);
+        break;
+      }
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutCompleted(session);
+        break;
+      }
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription;
+        await handleSubscriptionUpdated(subscription);
+        break;
+      }
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription;
+        await handleSubscriptionDeleted(subscription);
         break;
       }
       default:
@@ -126,4 +142,94 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   console.log(
     `Payment failed for invoice ${invoiceId}: ${paymentIntent.last_payment_error?.message}`
   );
+}
+
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  const tenantId = session.metadata?.tenantId;
+  const plan = session.metadata?.plan;
+
+  if (!tenantId || !plan) {
+    console.error('Missing tenantId or plan in checkout session metadata');
+    return;
+  }
+
+  const subscriptionPlan = stripePlanToSubscriptionPlan(
+    // Look up the price from the plan name in metadata
+    plan as string
+  ) ?? (plan as 'STARTER' | 'PRO' | 'ENTERPRISE');
+
+  const subscriptionId =
+    typeof session.subscription === 'string'
+      ? session.subscription
+      : session.subscription?.id;
+
+  await prisma.tenant.update({
+    where: { id: tenantId },
+    data: {
+      subscriptionPlan: subscriptionPlan,
+      subscriptionStatus: 'ACTIVE',
+      stripeCustomerId: typeof session.customer === 'string' ? session.customer : session.customer?.id,
+      stripeSubscriptionId: subscriptionId ?? null,
+    },
+  });
+
+  console.log(`Checkout completed for tenant ${tenantId}: plan=${plan}`);
+}
+
+async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+  const tenant = await prisma.tenant.findFirst({
+    where: { stripeSubscriptionId: subscription.id },
+  });
+
+  if (!tenant) {
+    console.log(`No tenant found for subscription ${subscription.id}`);
+    return;
+  }
+
+  // Map Stripe status to our enum
+  const statusMap: Record<string, 'ACTIVE' | 'PAST_DUE' | 'CANCELLED' | 'PAUSED'> = {
+    active: 'ACTIVE',
+    past_due: 'PAST_DUE',
+    canceled: 'CANCELLED',
+    paused: 'PAUSED',
+    unpaid: 'PAST_DUE',
+  };
+
+  const newStatus = statusMap[subscription.status] ?? 'ACTIVE';
+
+  // Try to determine the plan from the subscription items
+  const priceId = subscription.items.data[0]?.price?.id;
+  const newPlan = priceId ? stripePlanToSubscriptionPlan(priceId) : undefined;
+
+  await prisma.tenant.update({
+    where: { id: tenant.id },
+    data: {
+      subscriptionStatus: newStatus,
+      ...(newPlan ? { subscriptionPlan: newPlan } : {}),
+    },
+  });
+
+  console.log(`Subscription updated for tenant ${tenant.id}: status=${newStatus}`);
+}
+
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+  const tenant = await prisma.tenant.findFirst({
+    where: { stripeSubscriptionId: subscription.id },
+  });
+
+  if (!tenant) {
+    console.log(`No tenant found for deleted subscription ${subscription.id}`);
+    return;
+  }
+
+  await prisma.tenant.update({
+    where: { id: tenant.id },
+    data: {
+      subscriptionPlan: 'FREE',
+      subscriptionStatus: 'CANCELLED',
+      stripeSubscriptionId: null,
+    },
+  });
+
+  console.log(`Subscription deleted for tenant ${tenant.id}: reverted to FREE`);
 }

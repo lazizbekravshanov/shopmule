@@ -4,16 +4,16 @@ import { motion } from "framer-motion"
 
 const stats = [
   {
-    value: "50%",
-    label: "Faster invoicing",
+    value: "1-click",
+    label: "Invoicing from work orders",
   },
   {
-    value: "3x",
-    label: "Better visibility",
+    value: "Real-time",
+    label: "Work order visibility",
   },
   {
-    value: "85%",
-    label: "Less paperwork",
+    value: "Zero paper",
+    label: "Digital from intake to invoice",
   },
 ]
 

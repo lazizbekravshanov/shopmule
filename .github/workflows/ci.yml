@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: shopmule
+          POSTGRES_PASSWORD: shopmule
+          POSTGRES_DB: shopmule
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U shopmule"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    defaults:
+      run:
+        working-directory: web
+
+    env:
+      DATABASE_URL: postgresql://shopmule:shopmule@localhost:5432/shopmule
+      NEXTAUTH_SECRET: ci-test-secret-do-not-use-in-production
+      NEXTAUTH_URL: http://localhost:3000
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npx vitest run
+
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: web/.next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('web/package-lock.json') }}-${{ hashFiles('web/**/*.ts', 'web/**/*.tsx') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('web/package-lock.json') }}-
+
+      - name: Build
+        run: npx next build
+        env:
+          STRIPE_SECRET_KEY: sk_test_placeholder
+          STRIPE_WEBHOOK_SECRET: whsec_placeholder
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
+          ANTHROPIC_API_KEY: sk-ant-placeholder
+          RESEND_API_KEY: re_placeholder
+          TWILIO_ACCOUNT_SID: AC_placeholder
+          TWILIO_AUTH_TOKEN: placeholder
+          TWILIO_PHONE_NUMBER: "+10000000000"

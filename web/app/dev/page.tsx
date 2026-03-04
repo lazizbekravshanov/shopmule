@@ -245,6 +245,7 @@ export default function DevPage() {
                   <CodeBlock lang="bash" filename="terminal">
 {`npm install @shopmule/sdk`}
                   </CodeBlock>
+                  <p className="mt-2 text-xs text-amber-600 font-medium">Package not yet published — coming soon.</p>
                 </div>
 
                 <div>
@@ -440,6 +441,7 @@ console.log(workOrder.id); // "wo_k8x2m4n1"`}
                     </div>
                   </div>
                   <CodeBlock lang="bash" filename="terminal">{`npm install @shopmule/sdk`}</CodeBlock>
+                  <p className="mt-2 text-xs text-amber-600 font-medium">Package not yet published.</p>
                 </div>
 
                 <div className="rounded-xl border border-neutral-200 p-5 hover:border-neutral-300 transition-colors">
@@ -453,6 +455,7 @@ console.log(workOrder.id); // "wo_k8x2m4n1"`}
                     </div>
                   </div>
                   <CodeBlock lang="bash" filename="terminal">{`pip install shopmule`}</CodeBlock>
+                  <p className="mt-2 text-xs text-amber-600 font-medium">Package not yet published.</p>
                 </div>
 
                 <div className="rounded-xl border border-neutral-200 p-5 hover:border-neutral-300 transition-colors">
@@ -466,6 +469,7 @@ console.log(workOrder.id); // "wo_k8x2m4n1"`}
                     </div>
                   </div>
                   <CodeBlock lang="bash" filename="terminal">{`curl https://api.shopmule.com/v2`}</CodeBlock>
+                  <p className="mt-2 text-xs text-amber-600 font-medium">Public API not yet available.</p>
                 </div>
               </div>
             </section>
@@ -685,6 +689,13 @@ SHOPMULE_WEBHOOK_SECRET=whsec_test_your_secret
             <SectionAnchor id="changelog" />
             <section className="mb-16">
               <SectionHeading sub="Latest updates to the ShopMule API.">Changelog</SectionHeading>
+
+              <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-amber-700">
+                  These are planned milestones. Dates and features are subject to change as development progresses.
+                </p>
+              </div>
 
               <div className="space-y-0 border border-neutral-200 rounded-xl overflow-hidden divide-y divide-neutral-100">
                 {[

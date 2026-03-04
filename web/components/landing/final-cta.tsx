@@ -193,7 +193,7 @@ export function FinalCTA() {
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/login"
+              href="/register"
               className="inline-flex items-center gap-2 bg-white hover:bg-neutral-100 text-neutral-900 h-14 px-10 rounded-lg text-base font-semibold transition-colors"
             >
               Start Free Trial

@@ -330,7 +330,7 @@ export default function LoginPage() {
           >
             Don&apos;t have an account?{' '}
             <Link
-              href="/"
+              href="/register"
               className="font-medium text-[#ee7a14] hover:text-[#d56c10] transition-colors"
             >
               Start free trial

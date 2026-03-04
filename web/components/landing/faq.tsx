@@ -11,7 +11,7 @@ import {
 const faqs = [
   {
     question: 'How quickly can we get started?',
-    answer: 'Most shops can get started quickly. Create your account, add your team, and start tracking work orders right away.',
+    answer: 'Register at /register in under a minute. Add your team, and start tracking work orders right away. No credit card required.',
   },
   {
     question: 'Do you offer training?',

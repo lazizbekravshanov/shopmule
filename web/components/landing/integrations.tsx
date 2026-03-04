@@ -25,6 +25,7 @@ const integrations: Integration[] = [
       </svg>
     ),
     features: ['Auto-sync invoices', 'Payment reconciliation', 'Customer sync'],
+    comingSoon: true,
   },
   {
     name: 'Stripe',
@@ -67,6 +68,7 @@ const integrations: Integration[] = [
       </svg>
     ),
     features: ['Calendar sync', 'Technician scheduling', 'Customer appointments'],
+    comingSoon: true,
   },
   {
     name: 'FMCSA SAFER',

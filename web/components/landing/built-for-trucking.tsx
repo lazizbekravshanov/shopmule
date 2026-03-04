@@ -23,6 +23,7 @@ const truckingFeatures = [
     icon: FileSearch,
     title: 'DOT Inspection Ready',
     description: 'Structured checklists for DOT annual and periodic inspections. Generate inspection reports customers can hand to officers.',
+    comingSoon: true,
   },
   {
     icon: MapPinned,
@@ -33,16 +34,19 @@ const truckingFeatures = [
     icon: Gauge,
     title: 'PM Scheduling',
     description: 'Preventive maintenance schedules based on mileage or time intervals. Never let a customer miss a service window.',
+    comingSoon: true,
   },
   {
     icon: AlertTriangle,
     title: 'Recall Monitoring',
     description: 'Automatic NHTSA recall checks by VIN. Notify fleet managers when their units have open recalls.',
+    comingSoon: true,
   },
   {
     icon: ClipboardList,
     title: 'Multi-Unit Work Orders',
     description: 'Handle fleet drop-offs with batch work orders. Process 10 trucks at once—same customer, separate jobs.',
+    comingSoon: true,
   },
 ];
 
@@ -104,7 +108,14 @@ export function BuiltForTrucking() {
               }`}>
                 <feature.icon className="w-5 h-5" strokeWidth={1.5} />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+              <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+                {feature.title}
+                {feature.comingSoon && (
+                  <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-medium rounded-full">
+                    Coming Soon
+                  </span>
+                )}
+              </h3>
               <p className="text-sm text-neutral-400 leading-relaxed">{feature.description}</p>
             </motion.div>
           ))}

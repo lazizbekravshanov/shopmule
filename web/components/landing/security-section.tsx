@@ -21,16 +21,15 @@ const securityFeatures = [
   },
   {
     icon: Eye,
-    title: 'Multi-Factor Auth',
-    description: 'MFA available for all accounts',
+    title: 'Audit Logging',
+    description: 'Track changes and access',
   },
 ];
 
 const securityChecklist = [
   'End-to-end TLS 1.3 encryption',
-  'Multi-factor authentication (MFA)',
   'Role-based access control (RBAC) with 13 granular roles',
-  'Automated security scanning in CI/CD',
+  'CI with linting and type checks',
   'Secure backup & disaster recovery',
   'Privacy-by-design architecture',
 ];
@@ -114,11 +113,11 @@ export function SecuritySection() {
               </div>
               <div className="flex items-center justify-between py-3 border-b border-neutral-700">
                 <span className="text-neutral-400">Authentication</span>
-                <span className="text-white font-medium">OAuth 2.0 / JWT</span>
+                <span className="text-white font-medium">JWT Authentication</span>
               </div>
               <div className="flex items-center justify-between py-3">
                 <span className="text-neutral-400">Access Control</span>
-                <span className="text-white font-medium">RBAC with MFA</span>
+                <span className="text-white font-medium">RBAC (13 roles)</span>
               </div>
             </div>
           </div>

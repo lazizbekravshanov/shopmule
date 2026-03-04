@@ -34,7 +34,7 @@ const features = [
   {
     icon: Sparkles,
     title: 'AI-Powered Estimates',
-    description: 'Upload photos of the damage and get AI-generated repair estimates in seconds. Auto-generated repair notes, predicted parts needs, and smart labor time suggestions.',
+    description: 'AI diagnostic analysis from work order descriptions. Auto-generated repair notes, predicted parts needs, and smart labor time suggestions.',
   },
   {
     icon: Users,
