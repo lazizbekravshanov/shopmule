@@ -166,7 +166,7 @@ export function Integrations() {
           className="mt-12 text-center"
         >
           <p className="text-neutral-600 mb-4">
-            Don't see your tool? We're always adding new integrations.
+            Don&apos;t see your tool? We&apos;re always adding new integrations.
           </p>
           <a
             href="#contact"

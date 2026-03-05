@@ -116,7 +116,7 @@ export function RequestDemoModal({ open, onOpenChange }: RequestDemoModalProps) 
               Thank you!
             </h3>
             <p className="text-neutral-500 dark:text-neutral-400 mb-6">
-              We've received your demo request. A ShopMule specialist will reach out within 24 hours.
+              We&apos;ve received your demo request. A ShopMule specialist will reach out within 24 hours.
             </p>
             <Button onClick={handleClose} className="w-full">
               Close
@@ -133,7 +133,7 @@ export function RequestDemoModal({ open, onOpenChange }: RequestDemoModalProps) 
         <DialogHeader>
           <DialogTitle>Request a Demo</DialogTitle>
           <DialogDescription>
-            See how ShopMule can transform your shop operations. Fill out the form and we'll schedule a personalized demo.
+            See how ShopMule can transform your shop operations. Fill out the form and we&apos;ll schedule a personalized demo.
           </DialogDescription>
         </DialogHeader>
 
@@ -222,7 +222,7 @@ export function RequestDemoModal({ open, onOpenChange }: RequestDemoModalProps) 
 
           <div className="space-y-2">
             <Label htmlFor="message">
-              Anything specific you'd like to see? <span className="text-neutral-400">(optional)</span>
+              Anything specific you&apos;d like to see? <span className="text-neutral-400">(optional)</span>
             </Label>
             <Textarea
               id="message"

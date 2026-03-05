@@ -393,14 +393,14 @@ export default function WorkOrderDetailPage() {
       {approvalSuccess && (
         <div className="rounded-md bg-green-100 p-4 text-green-800 flex items-center gap-2">
           <CheckCircle className="h-5 w-5" />
-          Estimate approved successfully! We'll begin work on your vehicle soon.
+          Estimate approved successfully! We&apos;ll begin work on your vehicle soon.
         </div>
       )}
 
       {updateSuccess && (
         <div className="rounded-md bg-green-100 p-4 text-green-800 flex items-center gap-2">
           <CheckCircle className="h-5 w-5" />
-          Update request submitted. We'll get back to you soon.
+          Update request submitted. We&apos;ll get back to you soon.
         </div>
       )}
 
@@ -439,7 +439,7 @@ export default function WorkOrderDetailPage() {
               <DialogHeader>
                 <DialogTitle>Request Status Update</DialogTitle>
                 <DialogDescription>
-                  Have a question about your work order? We'll get back to you as
+                  Have a question about your work order? We&apos;ll get back to you as
                   soon as possible.
                 </DialogDescription>
               </DialogHeader>

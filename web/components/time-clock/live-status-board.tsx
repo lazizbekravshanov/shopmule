@@ -153,7 +153,7 @@ export function LiveStatusBoard({ activeTechs }: { activeTechs: ActiveTech[] }) 
             </div>
             <div>
               <h3 className="font-semibold text-neutral-900">Live Status</h3>
-              <p className="text-xs text-neutral-500">Who's on the clock right now</p>
+              <p className="text-xs text-neutral-500">Who&apos;s on the clock right now</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

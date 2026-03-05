@@ -98,6 +98,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (tenant) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShop({
         name: tenant.name ?? '',
         address: [tenant.address, tenant.city, tenant.state, tenant.zipCode].filter(Boolean).join(', '),

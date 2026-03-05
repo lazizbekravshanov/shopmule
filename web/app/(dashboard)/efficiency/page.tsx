@@ -29,6 +29,13 @@ const PERIODS: { label: string; value: Period }[] = [
 
 type SortKey = 'name' | 'clockedHours' | 'billedHours' | 'efficiency' | 'revenue' | 'jobsCompleted';
 
+function SortIcon({ column, sortKey, sortDir }: { column: SortKey; sortKey: SortKey; sortDir: 'asc' | 'desc' }) {
+  if (sortKey !== column) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
+  return sortDir === 'desc'
+    ? <ArrowDown className="h-3 w-3 ml-1" />
+    : <ArrowUp className="h-3 w-3 ml-1" />;
+}
+
 function efficiencyColor(pct: number) {
   if (pct >= 100) return 'text-emerald-600 dark:text-emerald-400';
   if (pct >= 80) return 'text-blue-600 dark:text-blue-400';
@@ -118,13 +125,6 @@ export default function EfficiencyPage() {
     ];
     downloadCsv(`efficiency-${period}.csv`, rows);
   }, [data, sorted, period]);
-
-  const SortIcon = ({ column }: { column: SortKey }) => {
-    if (sortKey !== column) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
-    return sortDir === 'desc'
-      ? <ArrowDown className="h-3 w-3 ml-1" />
-      : <ArrowUp className="h-3 w-3 ml-1" />;
-  };
 
   return (
     <div className="space-y-6">
@@ -237,32 +237,32 @@ export default function EfficiencyPage() {
               <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
                 <th className="text-left px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">
                   <button className="flex items-center" onClick={() => toggleSort('name')}>
-                    Technician <SortIcon column="name" />
+                    Technician <SortIcon sortKey={sortKey} sortDir={sortDir} column="name" />
                   </button>
                 </th>
                 <th className="text-right px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">
                   <button className="flex items-center justify-end ml-auto" onClick={() => toggleSort('clockedHours')}>
-                    Clocked Hrs <SortIcon column="clockedHours" />
+                    Clocked Hrs <SortIcon sortKey={sortKey} sortDir={sortDir} column="clockedHours" />
                   </button>
                 </th>
                 <th className="text-right px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">
                   <button className="flex items-center justify-end ml-auto" onClick={() => toggleSort('billedHours')}>
-                    Billed Hrs <SortIcon column="billedHours" />
+                    Billed Hrs <SortIcon sortKey={sortKey} sortDir={sortDir} column="billedHours" />
                   </button>
                 </th>
                 <th className="text-right px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400 min-w-[180px]">
                   <button className="flex items-center justify-end ml-auto" onClick={() => toggleSort('efficiency')}>
-                    Efficiency <SortIcon column="efficiency" />
+                    Efficiency <SortIcon sortKey={sortKey} sortDir={sortDir} column="efficiency" />
                   </button>
                 </th>
                 <th className="text-right px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">
                   <button className="flex items-center justify-end ml-auto" onClick={() => toggleSort('revenue')}>
-                    Revenue <SortIcon column="revenue" />
+                    Revenue <SortIcon sortKey={sortKey} sortDir={sortDir} column="revenue" />
                   </button>
                 </th>
                 <th className="text-right px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">
                   <button className="flex items-center justify-end ml-auto" onClick={() => toggleSort('jobsCompleted')}>
-                    Jobs <SortIcon column="jobsCompleted" />
+                    Jobs <SortIcon sortKey={sortKey} sortDir={sortDir} column="jobsCompleted" />
                   </button>
                 </th>
                 <th className="text-center px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">

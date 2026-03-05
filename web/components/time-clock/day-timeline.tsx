@@ -150,7 +150,7 @@ export function DayTimeline({ technicians }: { technicians: TechTimeline[] }) {
             <Clock className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className="font-semibold text-neutral-900">Today's Timeline</h3>
+            <h3 className="font-semibold text-neutral-900">Today&apos;s Timeline</h3>
             <p className="text-xs text-neutral-500">Visual breakdown of work hours</p>
           </div>
         </div>

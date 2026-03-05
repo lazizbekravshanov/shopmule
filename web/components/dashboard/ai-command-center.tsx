@@ -80,6 +80,7 @@ export function AICommandCenter() {
   const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setGreeting(getGreeting());
   }, []);
 

@@ -15,6 +15,7 @@ export function OfflineIndicator() {
 
   // Read initial state only after mount to avoid SSR mismatch
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     setIsOnline(navigator.onLine);
     setQueueCount(offlineQueue.count());

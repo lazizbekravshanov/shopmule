@@ -184,7 +184,7 @@ export function TechLeaderboard({ rankings }: { rankings: TechRanking[] }) {
             </div>
             <div>
               <h3 className="font-semibold text-neutral-900">Technician Leaderboard</h3>
-              <p className="text-xs text-neutral-500">This month's performance rankings</p>
+              <p className="text-xs text-neutral-500">This month&apos;s performance rankings</p>
             </div>
           </div>
 

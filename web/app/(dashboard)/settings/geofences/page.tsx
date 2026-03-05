@@ -540,7 +540,7 @@ export default function GeofencesPage() {
           <DialogHeader>
             <DialogTitle>Delete Geofence</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{deleteConfirm?.name}"? This action
+              Are you sure you want to delete &quot;{deleteConfirm?.name}&quot;? This action
               cannot be undone.
             </DialogDescription>
           </DialogHeader>

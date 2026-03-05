@@ -13,6 +13,7 @@ export function Announce({ message, politeness = 'polite' }: AnnounceProps) {
 
   useEffect(() => {
     // Clear and re-announce to ensure screen readers pick it up
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAnnounced('');
     const timeout = setTimeout(() => setAnnounced(message), 100);
     return () => clearTimeout(timeout);

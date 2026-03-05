@@ -117,6 +117,7 @@ export function InvoicePreviewSheet({ invoiceId, open, onOpenChange }: InvoicePr
 
   useEffect(() => {
     if (!invoiceData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPdfUrl(null);
       return;
     }

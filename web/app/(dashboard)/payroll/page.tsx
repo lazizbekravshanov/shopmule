@@ -29,6 +29,13 @@ const PERIODS: { label: string; value: Period }[] = [
 
 type SortKey = 'name' | 'regularHours' | 'overtimeHours' | 'grossPay' | 'totalDeductions' | 'netPay';
 
+function SortIcon({ column, sortKey, sortDir }: { column: SortKey; sortKey: SortKey; sortDir: 'asc' | 'desc' }) {
+  if (sortKey !== column) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
+  return sortDir === 'desc'
+    ? <ArrowDown className="h-3 w-3 ml-1" />
+    : <ArrowUp className="h-3 w-3 ml-1" />;
+}
+
 function downloadCsv(filename: string, rows: string[][]): void {
   const escape = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const csv = rows.map((r) => r.map(escape).join(',')).join('\n');
@@ -105,13 +112,6 @@ export default function PayrollPage() {
     ];
     downloadCsv(`payroll-${period}.csv`, rows);
   }, [data, sorted, period]);
-
-  const SortIcon = ({ column }: { column: SortKey }) => {
-    if (sortKey !== column) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
-    return sortDir === 'desc'
-      ? <ArrowDown className="h-3 w-3 ml-1" />
-      : <ArrowUp className="h-3 w-3 ml-1" />;
-  };
 
   return (
     <div className="space-y-6">
@@ -224,7 +224,7 @@ export default function PayrollPage() {
               <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
                 <th className="text-left px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">
                   <button className="flex items-center" onClick={() => toggleSort('name')}>
-                    Name <SortIcon column="name" />
+                    Name <SortIcon sortKey={sortKey} sortDir={sortDir} column="name" />
                   </button>
                 </th>
                 <th className="text-left px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">
@@ -232,27 +232,27 @@ export default function PayrollPage() {
                 </th>
                 <th className="text-right px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">
                   <button className="flex items-center justify-end ml-auto" onClick={() => toggleSort('regularHours')}>
-                    Regular Hrs <SortIcon column="regularHours" />
+                    Regular Hrs <SortIcon sortKey={sortKey} sortDir={sortDir} column="regularHours" />
                   </button>
                 </th>
                 <th className="text-right px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">
                   <button className="flex items-center justify-end ml-auto" onClick={() => toggleSort('overtimeHours')}>
-                    OT Hrs <SortIcon column="overtimeHours" />
+                    OT Hrs <SortIcon sortKey={sortKey} sortDir={sortDir} column="overtimeHours" />
                   </button>
                 </th>
                 <th className="text-right px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">
                   <button className="flex items-center justify-end ml-auto" onClick={() => toggleSort('grossPay')}>
-                    Gross Pay <SortIcon column="grossPay" />
+                    Gross Pay <SortIcon sortKey={sortKey} sortDir={sortDir} column="grossPay" />
                   </button>
                 </th>
                 <th className="text-right px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">
                   <button className="flex items-center justify-end ml-auto" onClick={() => toggleSort('totalDeductions')}>
-                    Deductions <SortIcon column="totalDeductions" />
+                    Deductions <SortIcon sortKey={sortKey} sortDir={sortDir} column="totalDeductions" />
                   </button>
                 </th>
                 <th className="text-right px-4 py-3 font-medium text-neutral-500 dark:text-neutral-400">
                   <button className="flex items-center justify-end ml-auto" onClick={() => toggleSort('netPay')}>
-                    Net Pay <SortIcon column="netPay" />
+                    Net Pay <SortIcon sortKey={sortKey} sortDir={sortDir} column="netPay" />
                   </button>
                 </th>
               </tr>

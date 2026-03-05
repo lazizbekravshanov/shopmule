@@ -212,10 +212,12 @@ export function NewWorkOrderModal({ open, onOpenChange }: NewWorkOrderModalProps
   const { data: deferredItems = [] } = useDeferredWork(vehicleId || undefined);
   const pendingDeferred = deferredItems.filter((i) => i.status === 'PENDING');
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setVehicleId(''); }, [customerId]);
 
   useEffect(() => {
     if (!open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCustomerId('');
       setVehicleId('');
       setDescription('');

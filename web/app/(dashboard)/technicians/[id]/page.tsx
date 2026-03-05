@@ -624,6 +624,7 @@ export default function TechnicianDetailPage({
                   const expiresSoon =
                     cert.expiryDate &&
                     !isExpired &&
+                    // eslint-disable-next-line react-hooks/purity
                     new Date(cert.expiryDate) < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
 
                   return (

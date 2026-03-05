@@ -181,7 +181,7 @@ export function AICopilot() {
                   </div>
                   <h4 className="font-semibold text-neutral-900 dark:text-white text-lg">Hey there, boss!</h4>
                   <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 max-w-[280px] mx-auto">
-                    I'm Mule - your shop assistant. I can look up customers, check inventory, manage work orders, and more.
+                    I&apos;m Mule - your shop assistant. I can look up customers, check inventory, manage work orders, and more.
                   </p>
                 </div>
 

@@ -260,7 +260,7 @@ export function EstimateApprovalEmail({
         Hi {customerName},
       </p>
       <p style={{ margin: '0 0 24px', color: '#525252', fontSize: '16px', lineHeight: '24px' }}>
-        We've completed the diagnosis on your vehicle and prepared an estimate for the recommended repairs.
+        We&apos;ve completed the diagnosis on your vehicle and prepared an estimate for the recommended repairs.
       </p>
       <table width="100%" cellPadding="0" cellSpacing="0" style={{ backgroundColor: '#f4f4f5', borderRadius: '8px', marginBottom: '24px' }}>
         <tr>

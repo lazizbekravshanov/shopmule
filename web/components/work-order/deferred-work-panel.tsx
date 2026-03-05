@@ -131,7 +131,7 @@ function DeferredCard({
         </div>
         <p className="text-sm text-neutral-800 mt-0.5 leading-snug">{item.description}</p>
         {item.declinedReason && (
-          <p className="text-xs text-neutral-500 mt-0.5 italic">"{item.declinedReason}"</p>
+          <p className="text-xs text-neutral-500 mt-0.5 italic">&quot;{item.declinedReason}&quot;</p>
         )}
       </div>
       <div className="flex items-center gap-1 shrink-0">

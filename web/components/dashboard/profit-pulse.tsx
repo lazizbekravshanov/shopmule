@@ -100,7 +100,7 @@ export function ProfitPulse() {
       <div className="px-5 py-6 border-b border-neutral-100 bg-gradient-to-br from-green-50 to-emerald-50">
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-xs text-neutral-500 mb-1">This Month's Gross Profit</p>
+            <p className="text-xs text-neutral-500 mb-1">This Month&apos;s Gross Profit</p>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-bold text-neutral-900 tracking-tight">
                 ${(totalRevenue - totalCost).toLocaleString()}

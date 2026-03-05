@@ -180,6 +180,7 @@ export default function IntegrationsPage() {
   useEffect(() => {
     const saved = loadConnected();
     // Stripe is always connected (it's actually wired)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setConnected({ ...saved, stripe: true });
   }, []);
 
