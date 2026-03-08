@@ -84,96 +84,50 @@ async function main() {
   })
   console.log("Created admin:", admin.email)
 
-  // Service Advisors
-  const saHash = await bcrypt.hash("advisor123", 12)
-  const serviceAdvisor1 = await prisma.user.create({
+  // Service Managers
+  const smHash = await bcrypt.hash("manager123", 12)
+  const serviceManager1 = await prisma.user.create({
     data: {
       tenantId: tenant.id,
       email: "sarah@shopmule.com",
-      passwordHash: saHash,
-      name: "Sarah Advisor",
-      role: Role.SERVICE_ADVISOR,
+      passwordHash: smHash,
+      name: "Sarah Manager",
+      role: Role.SERVICE_MANAGER,
     },
   })
   const saProfile1 = await prisma.employeeProfile.create({
     data: {
       tenantId: tenant.id,
-      userId: serviceAdvisor1.id,
-      name: "Sarah Advisor",
-      role: Role.SERVICE_ADVISOR,
-      payRate: 25,
+      userId: serviceManager1.id,
+      name: "Sarah Manager",
+      role: Role.SERVICE_MANAGER,
+      payRate: 28,
       status: "active",
     },
   })
 
-  const serviceAdvisor2 = await prisma.user.create({
-    data: {
-      tenantId: tenant.id,
-      email: "tom@shopmule.com",
-      passwordHash: saHash,
-      name: "Tom Advisor",
-      role: Role.SERVICE_ADVISOR,
-    },
-  })
-  await prisma.employeeProfile.create({
-    data: {
-      tenantId: tenant.id,
-      userId: serviceAdvisor2.id,
-      name: "Tom Advisor",
-      role: Role.SERVICE_ADVISOR,
-      payRate: 24,
-      status: "active",
-    },
-  })
-  console.log("Created service advisors")
-
-  // Service Manager
-  const smHash = await bcrypt.hash("manager123", 12)
-  const serviceManager = await prisma.user.create({
+  const serviceManager2 = await prisma.user.create({
     data: {
       tenantId: tenant.id,
       email: "lisa@shopmule.com",
       passwordHash: smHash,
-      name: "Lisa Service Manager",
+      name: "Lisa Manager",
       role: Role.SERVICE_MANAGER,
     },
   })
   await prisma.employeeProfile.create({
     data: {
       tenantId: tenant.id,
-      userId: serviceManager.id,
-      name: "Lisa Service Manager",
+      userId: serviceManager2.id,
+      name: "Lisa Manager",
       role: Role.SERVICE_MANAGER,
       payRate: 30,
       status: "active",
     },
   })
-  console.log("Created service manager")
+  console.log("Created service managers")
 
-  // Parts Manager
-  const pmHash = await bcrypt.hash("parts123", 12)
-  const partsManager = await prisma.user.create({
-    data: {
-      tenantId: tenant.id,
-      email: "rick@shopmule.com",
-      passwordHash: pmHash,
-      name: "Rick Parts Manager",
-      role: Role.PARTS_MANAGER,
-    },
-  })
-  await prisma.employeeProfile.create({
-    data: {
-      tenantId: tenant.id,
-      userId: partsManager.id,
-      name: "Rick Parts Manager",
-      role: Role.PARTS_MANAGER,
-      payRate: 26,
-      status: "active",
-    },
-  })
-  console.log("Created parts manager")
-
-  // Mechanics/Technicians
+  // Technicians
   const mechHash = await bcrypt.hash("mechanic123", 12)
   const techNames = [
     { name: "John Martinez", email: "john@shopmule.com", rate: 35, specializations: ["Diesel", "Heavy Duty", "Electrical"], payType: PayType.HOURLY, hireDate: new Date("2022-03-15"), phone: "555-TECH-001" },
@@ -191,7 +145,7 @@ async function main() {
         email: tech.email,
         passwordHash: mechHash,
         name: tech.name,
-        role: Role.MECHANIC,
+        role: Role.TECHNICIAN,
         phone: tech.phone,
       },
     })
@@ -200,7 +154,7 @@ async function main() {
         tenantId: tenant.id,
         userId: user.id,
         name: tech.name,
-        role: Role.MECHANIC,
+        role: Role.TECHNICIAN,
         payRate: tech.rate,
         payType: tech.payType,
         overtimeRate: tech.rate * 1.5,

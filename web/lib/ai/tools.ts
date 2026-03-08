@@ -418,7 +418,7 @@ export const aiTools = {
 
       // Get technicians and their status
       const technicians = await prisma.employeeProfile.findMany({
-        where: { role: 'MECHANIC', status: 'active' },
+        where: { role: 'TECHNICIAN', status: 'active' },
         include: {
           PunchRecords: {
             where: { timestamp: { gte: today } },

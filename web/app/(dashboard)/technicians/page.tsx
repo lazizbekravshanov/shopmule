@@ -42,9 +42,9 @@ import { cn } from '@/lib/utils';
 
 const roleOptions = [
   { label: 'Admin', value: 'ADMIN' },
-  { label: 'Manager', value: 'MANAGER' },
-  { label: 'Mechanic', value: 'MECHANIC' },
-  { label: 'Front Desk', value: 'FRONT_DESK' },
+  { label: 'Service Manager', value: 'SERVICE_MANAGER' },
+  { label: 'Technician', value: 'TECHNICIAN' },
+  { label: 'Timesheet User', value: 'TIMESHEET_USER' },
 ];
 
 type WhoEntry = {

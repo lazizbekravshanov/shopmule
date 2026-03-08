@@ -18,7 +18,7 @@ export const GET = withPermission(P.REPORTS_VIEW_FINANCIAL, async (request, { au
     where: {
       tenantId: auth.tenantId,
       status: "active",
-      role: { in: ["MECHANIC", "TECHNICIAN", "SENIOR_TECHNICIAN"] },
+      role: "TECHNICIAN",
     },
   })
 

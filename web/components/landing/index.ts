@@ -10,8 +10,6 @@ export { FAQSection } from './faq';
 export { SecuritySection } from './security-section';
 export { FinalCTA } from './final-cta';
 export { Footer } from './footer';
-export { StatusSection } from '@/components/status/status-section';
-export { BlogPreview } from './blog-preview';
 export { StatsCounter } from './stats-counter';
 export { ROICalculator } from './roi-calculator';
 export { Integrations } from './integrations';

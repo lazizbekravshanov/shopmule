@@ -16,7 +16,7 @@ export const GET = withPermission(P.REPORTS_VIEW_OPERATIONAL, async (request, { 
       where: {
         tenantId: auth.tenantId,
         status: "active",
-        role: { in: ["MECHANIC", "TECHNICIAN", "SENIOR_TECHNICIAN"] },
+        role: "TECHNICIAN",
       },
       select: {
         id: true,

@@ -19,7 +19,6 @@ const protectedRoutes = [
   "/schedule",
   "/fleet-accounts",
   "/time-clock",
-  "/repair-orders",
   "/integrations",
   "/help",
   "/payroll",
@@ -35,7 +34,6 @@ const publicRoutes = [
   "/pay",     // Customer payment portal
   "/portal",  // Customer portal
   "/contact", // Contact form
-  "/blog",    // Blog
   "/",        // Landing page
 ]
 

@@ -1,12 +1,9 @@
 'use client';
 
 import { LogOut } from 'lucide-react';
-import { logger } from '@/lib/logger';
 
 export function LogoutButton() {
   const handleLogout = async () => {
-    logger.info('User initiating logout');
-
     try {
       // Call our custom logout endpoint
       await fetch('/api/logout', { method: 'POST' });
@@ -17,12 +14,10 @@ export function LogoutButton() {
         sessionStorage.clear();
       }
 
-      logger.info('Logout successful, redirecting...');
-
       // Force hard redirect to home page
       window.location.href = '/';
     } catch (error) {
-      logger.error('Logout failed', error);
+      console.error('Logout failed', error);
       // Fallback: still try to redirect
       window.location.href = '/';
     }

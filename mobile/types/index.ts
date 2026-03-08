@@ -2,17 +2,9 @@
 export type Role =
   | 'OWNER'
   | 'ADMIN'
-  | 'MANAGER'
   | 'SERVICE_MANAGER'
-  | 'SERVICE_ADVISOR'
-  | 'PARTS_MANAGER'
-  | 'OFFICE_MANAGER'
-  | 'SENIOR_TECHNICIAN'
-  | 'MECHANIC'
   | 'TECHNICIAN'
-  | 'FRONT_DESK'
-  | 'TIMESHEET_USER'
-  | 'CUSTOMER';
+  | 'TIMESHEET_USER';
 
 export interface User {
   id: string;

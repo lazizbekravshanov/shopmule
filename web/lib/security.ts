@@ -35,11 +35,11 @@ export function isAdmin(role: Role): boolean {
 }
 
 export function isManager(role: Role): boolean {
-  return role === Role.ADMIN || role === Role.MANAGER
+  return role === Role.ADMIN || role === Role.SERVICE_MANAGER
 }
 
 export function canManageUsers(role: Role): boolean {
-  return role === Role.ADMIN || role === Role.MANAGER
+  return role === Role.ADMIN || role === Role.SERVICE_MANAGER
 }
 
 export function canManageShop(role: Role): boolean {

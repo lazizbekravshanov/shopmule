@@ -91,7 +91,7 @@ export async function GET(request: Request) {
   const techs = await prisma.employeeProfile.findMany({
     where: {
       tenantId: shop.tenantId!,
-      role: "MECHANIC",
+      role: "TECHNICIAN",
     },
   })
 

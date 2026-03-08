@@ -6,9 +6,7 @@ import { z } from "zod"
 import crypto from "crypto"
 
 const VALID_ROLES = [
-  "OWNER", "ADMIN", "MANAGER", "SERVICE_MANAGER", "SERVICE_ADVISOR",
-  "PARTS_MANAGER", "OFFICE_MANAGER", "SENIOR_TECHNICIAN", "MECHANIC",
-  "TECHNICIAN", "FRONT_DESK", "TIMESHEET_USER", "CUSTOMER",
+  "OWNER", "ADMIN", "SERVICE_MANAGER", "TECHNICIAN", "TIMESHEET_USER",
 ] as const
 
 const createInviteSchema = z.object({

@@ -23,10 +23,10 @@ export async function GET() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Get all technicians (MECHANIC role)
+    // Get all technicians (TECHNICIAN role)
     const technicians = await prisma.employeeProfile.findMany({
       where: {
-        role: Role.MECHANIC,
+        role: Role.TECHNICIAN,
         status: 'active',
       },
       include: {

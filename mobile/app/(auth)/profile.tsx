@@ -69,13 +69,14 @@ export default function ProfileScreen() {
   };
 
   const roleLabels: Record<string, string> = {
+    OWNER: 'Owner',
     ADMIN: 'Administrator',
-    MANAGER: 'Manager',
-    MECHANIC: 'Mechanic',
-    FRONT_DESK: 'Front Desk',
+    SERVICE_MANAGER: 'Service Manager',
+    TECHNICIAN: 'Technician',
+    TIMESHEET_USER: 'Timesheet User',
   };
 
-  const isManager = user?.role === 'ADMIN' || user?.role === 'MANAGER';
+  const isManager = user?.role === 'ADMIN' || user?.role === 'SERVICE_MANAGER';
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>

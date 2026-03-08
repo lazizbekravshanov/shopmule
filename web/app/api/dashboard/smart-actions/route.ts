@@ -192,7 +192,7 @@ export async function GET() {
 
       const activeTechnicians = await prisma.employeeProfile.count({
         where: {
-          role: 'MECHANIC',
+          role: 'TECHNICIAN',
           status: 'active',
         },
       });

@@ -11,17 +11,9 @@ export const MAX_PAGE_SIZE = 100
 export const ROLE_LABELS: Record<Role, string> = {
   OWNER: "Owner",
   ADMIN: "Administrator",
-  MANAGER: "Manager",
   SERVICE_MANAGER: "Service Manager",
-  SERVICE_ADVISOR: "Service Advisor",
-  PARTS_MANAGER: "Parts Manager",
-  OFFICE_MANAGER: "Office Manager",
-  SENIOR_TECHNICIAN: "Senior Technician",
-  MECHANIC: "Mechanic",
   TECHNICIAN: "Technician",
-  FRONT_DESK: "Front Desk",
   TIMESHEET_USER: "Timesheet User",
-  CUSTOMER: "Customer",
 }
 
 // Work order status config
@@ -165,11 +157,6 @@ export const ROUTES = {
   home: "/",
   login: "/login",
   dashboard: "/dashboard",
-  repairOrders: {
-    list: "/repair-orders",
-    new: "/repair-orders/new",
-    detail: (id: string) => `/repair-orders/${id}`,
-  },
   invoices: {
     list: "/invoices",
     detail: (id: string) => `/invoices/${id}`,
@@ -183,7 +170,6 @@ export const ROUTES = {
 export const API_ROUTES = {
   customers: "/api/customers",
   vehicles: "/api/vehicles",
-  repairOrders: "/api/repair-orders",
   timeEntries: {
     current: "/api/time-entries/current",
     today: "/api/time-entries/today",

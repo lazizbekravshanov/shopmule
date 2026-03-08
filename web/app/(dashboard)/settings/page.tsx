@@ -115,7 +115,6 @@ export default function SettingsPage() {
     emailWorkOrders: true,
     emailInvoices: true,
     emailReminders: false,
-    pushNotifications: true,
   });
 
   const handleSaveShop = () => {
@@ -355,29 +354,6 @@ export default function SettingsPage() {
                       checked={notifications.emailReminders}
                       onCheckedChange={(checked) =>
                         setNotifications({ ...notifications, emailReminders: checked })
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium flex items-center gap-2">
-                  <Bell className="h-4 w-4" />
-                  Push Notifications
-                </h4>
-                <div className="space-y-4 pl-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="pushNotifications">Enable Push Notifications</Label>
-                      <p className="text-sm text-neutral-500">
-                        Receive real-time updates in your browser
-                      </p>
-                    </div>
-                    <Switch
-                      id="pushNotifications"
-                      checked={notifications.pushNotifications}
-                      onCheckedChange={(checked) =>
-                        setNotifications({ ...notifications, pushNotifications: checked })
                       }
                     />
                   </div>
