@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { WorkOrderStatus, InvoiceStatus } from '@prisma/client';
+import { withAuth } from '@/lib/auth/with-permission';
+import type { AuthContext } from '@/lib/auth/with-permission';
 
 interface SmartAction {
   id: string;
@@ -13,8 +15,9 @@ interface SmartAction {
   metadata?: Record<string, unknown>;
 }
 
-export async function GET() {
+export const GET = withAuth(async (_request: Request, { auth }: { auth: AuthContext; params: Promise<Record<string, string>> }) => {
   try {
+    const tenantId = auth.tenantId;
     const now = new Date();
     const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -24,6 +27,7 @@ export async function GET() {
     // 1. Pending estimates over 48 hours
     const pendingEstimates = await prisma.workOrder.count({
       where: {
+        tenantId,
         status: WorkOrderStatus.DIAGNOSED,
         createdAt: {
           lt: fortyEightHoursAgo,
@@ -47,7 +51,7 @@ export async function GET() {
     let actualLowStock = 0;
     try {
       const lowStockCount = await prisma.$queryRaw<[{ count: bigint }]>`
-        SELECT COUNT(*) as count FROM "Part" WHERE stock <= "reorderPoint"
+        SELECT COUNT(*) as count FROM "Part" WHERE stock <= "reorderPoint" AND "tenantId" = ${tenantId}
       `;
       actualLowStock = Number(lowStockCount[0]?.count ?? 0);
     } catch (sqlError) {
@@ -56,7 +60,7 @@ export async function GET() {
       // Fallback: try simpler count
       try {
         actualLowStock = await prisma.part.count({
-          where: { stock: { lte: 5 } }, // Fallback to a fixed threshold
+          where: { tenantId, stock: { lte: 5 } },
         });
       } catch {
         actualLowStock = 0;
@@ -78,6 +82,7 @@ export async function GET() {
     // 3. Completed work orders without invoices
     const completedWithoutInvoice = await prisma.workOrder.findMany({
       where: {
+        tenantId,
         status: WorkOrderStatus.COMPLETED,
         Invoice: null,
       },
@@ -108,6 +113,7 @@ export async function GET() {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const overdueInvoices = await prisma.invoice.count({
       where: {
+        tenantId,
         status: {
           in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIAL],
         },
@@ -132,6 +138,7 @@ export async function GET() {
     // 5. Work orders in progress for too long (> 7 days)
     const staleWorkOrders = await prisma.workOrder.count({
       where: {
+        tenantId,
         status: WorkOrderStatus.IN_PROGRESS,
         updatedAt: {
           lt: sevenDaysAgo,
@@ -155,6 +162,7 @@ export async function GET() {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const readyForPickup = await prisma.workOrder.findMany({
       where: {
+        tenantId,
         status: WorkOrderStatus.COMPLETED,
         updatedAt: {
           gte: oneDayAgo,
@@ -192,6 +200,7 @@ export async function GET() {
 
       const activeTechnicians = await prisma.employeeProfile.count({
         where: {
+          tenantId,
           role: 'TECHNICIAN',
           status: 'active',
         },
@@ -199,6 +208,7 @@ export async function GET() {
 
       const clockedIn = await prisma.punchRecord.findMany({
         where: {
+          EmployeeProfile: { tenantId },
           timestamp: {
             gte: today,
           },
@@ -240,4 +250,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

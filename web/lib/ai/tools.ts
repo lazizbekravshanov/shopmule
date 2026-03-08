@@ -4,8 +4,9 @@ import { prisma } from '@/lib/db'
 import { WorkOrderStatus, InvoiceStatus, PunchType } from '@prisma/client'
 import { runAIPipeline } from '@/lib/ai/pipeline'
 
-// Tool definitions for the AI copilot
-export const aiTools = {
+// Tool definitions for the AI copilot — scoped to a tenant
+export function createAITools(tenantId: string) {
+  return {
   // Search customers
   searchCustomers: tool({
     description: 'Search for customers by name, email, phone, or company name. Use this whenever someone mentions a customer.',
@@ -15,6 +16,7 @@ export const aiTools = {
     execute: async ({ query }: { query: string }) => {
       const customers = await prisma.customer.findMany({
         where: {
+          tenantId,
           OR: [
             { name: { contains: query, mode: 'insensitive' } },
             { email: { contains: query, mode: 'insensitive' } },
@@ -74,6 +76,7 @@ export const aiTools = {
     execute: async ({ query }: { query: string }) => {
       const vehicles = await prisma.vehicle.findMany({
         where: {
+          tenantId,
           OR: [
             { vin: { contains: query, mode: 'insensitive' } },
             { make: { contains: query, mode: 'insensitive' } },
@@ -136,22 +139,24 @@ export const aiTools = {
         unpaidInvoices,
         overdueInvoices,
       ] = await Promise.all([
-        prisma.workOrder.count(),
-        prisma.workOrder.count({ where: { status: WorkOrderStatus.DRAFT } }),
-        prisma.workOrder.count({ where: { status: WorkOrderStatus.DIAGNOSED } }),
-        prisma.workOrder.count({ where: { status: WorkOrderStatus.IN_PROGRESS } }),
+        prisma.workOrder.count({ where: { tenantId } }),
+        prisma.workOrder.count({ where: { tenantId, status: WorkOrderStatus.DRAFT } }),
+        prisma.workOrder.count({ where: { tenantId, status: WorkOrderStatus.DIAGNOSED } }),
+        prisma.workOrder.count({ where: { tenantId, status: WorkOrderStatus.IN_PROGRESS } }),
         prisma.workOrder.count({
           where: {
+            tenantId,
             status: WorkOrderStatus.COMPLETED,
             updatedAt: { gte: today },
           },
         }),
-        prisma.customer.count(),
+        prisma.customer.count({ where: { tenantId } }),
         prisma.invoice.count({
-          where: { status: { in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIAL] } }
+          where: { tenantId, status: { in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIAL] } }
         }),
         prisma.invoice.count({
           where: {
+            tenantId,
             status: { in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIAL] },
             createdAt: { lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
           }
@@ -162,16 +167,16 @@ export const aiTools = {
       let lowStockParts = 0
       try {
         const lowStockResult = await prisma.$queryRaw<[{count: bigint}]>`
-          SELECT COUNT(*) as count FROM "Part" WHERE stock <= "reorderPoint"
+          SELECT COUNT(*) as count FROM "Part" WHERE stock <= "reorderPoint" AND "tenantId" = ${tenantId}
         `
         lowStockParts = Number(lowStockResult[0]?.count || 0)
       } catch (e) {
-        lowStockParts = await prisma.part.count({ where: { stock: { lte: 5 } } })
+        lowStockParts = await prisma.part.count({ where: { tenantId, stock: { lte: 5 } } })
       }
 
       // Get unpaid total
       const unpaidTotal = await prisma.invoice.aggregate({
-        where: { status: { in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIAL] } },
+        where: { tenantId, status: { in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIAL] } },
         _sum: { total: true }
       })
 
@@ -207,6 +212,7 @@ export const aiTools = {
     execute: async ({ status, customerName, limit }: { status?: string; customerName?: string; limit?: number }) => {
       const workOrders = await prisma.workOrder.findMany({
         where: {
+          tenantId,
           ...(status ? { status: status as WorkOrderStatus } : {}),
           ...(customerName ? {
             Vehicle: {
@@ -253,9 +259,9 @@ export const aiTools = {
     }),
     execute: async ({ vehicleId, description }: { vehicleId: string; description: string }) => {
       try {
-        // Look up the vehicle to get tenantId and customerId
-        const vehicle = await prisma.vehicle.findUnique({
-          where: { id: vehicleId },
+        // Look up the vehicle — must belong to this tenant
+        const vehicle = await prisma.vehicle.findFirst({
+          where: { id: vehicleId, tenantId },
           select: { tenantId: true, customerId: true },
         })
         if (!vehicle) {
@@ -267,7 +273,7 @@ export const aiTools = {
         const workOrderNumber = `WO-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`
         const workOrder = await prisma.workOrder.create({
           data: {
-            tenantId: vehicle.tenantId,
+            tenantId,
             customerId: vehicle.customerId,
             vehicleId,
             workOrderNumber,
@@ -308,6 +314,13 @@ export const aiTools = {
     }),
     execute: async ({ workOrderId, status }: { workOrderId: string; status: string }) => {
       try {
+        // Verify work order belongs to this tenant before updating
+        const existing = await prisma.workOrder.findFirst({
+          where: { id: workOrderId, tenantId },
+        })
+        if (!existing) {
+          return { success: false, message: 'Work order not found.' }
+        }
         const workOrder = await prisma.workOrder.update({
           where: { id: workOrderId },
           data: { status: status as WorkOrderStatus },
@@ -349,13 +362,14 @@ export const aiTools = {
         }>>`
           SELECT id, sku, name, category, stock, "reorderPoint", price
           FROM "Part"
-          WHERE stock <= "reorderPoint"
+          WHERE stock <= "reorderPoint" AND "tenantId" = ${tenantId}
           ORDER BY (stock - "reorderPoint") ASC
           LIMIT 15
         `
       } else if (query) {
         parts = await prisma.part.findMany({
           where: {
+            tenantId,
             OR: [
               { name: { contains: query, mode: 'insensitive' } },
               { sku: { contains: query, mode: 'insensitive' } },
@@ -366,6 +380,7 @@ export const aiTools = {
         })
       } else {
         parts = await prisma.part.findMany({
+          where: { tenantId },
           orderBy: { name: 'asc' },
           take: 10,
         })
@@ -406,6 +421,7 @@ export const aiTools = {
       // Get active work orders
       const activeWorkOrders = await prisma.workOrder.findMany({
         where: {
+          tenantId,
           status: { in: [WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.DIAGNOSED, WorkOrderStatus.APPROVED] },
         },
         include: {
@@ -418,7 +434,7 @@ export const aiTools = {
 
       // Get technicians and their status
       const technicians = await prisma.employeeProfile.findMany({
-        where: { role: 'TECHNICIAN', status: 'active' },
+        where: { tenantId, role: 'TECHNICIAN', status: 'active' },
         include: {
           PunchRecords: {
             where: { timestamp: { gte: today } },
@@ -482,6 +498,7 @@ export const aiTools = {
       // Check for stale work orders (pending > 48 hours)
       const staleWOs = await prisma.workOrder.findMany({
         where: {
+          tenantId,
           status: { in: [WorkOrderStatus.DRAFT, WorkOrderStatus.DIAGNOSED] },
           createdAt: { lt: new Date(Date.now() - 48 * 60 * 60 * 1000) }
         },
@@ -507,6 +524,7 @@ export const aiTools = {
       // Check overdue invoices
       const overdueInvoices = await prisma.invoice.findMany({
         where: {
+          tenantId,
           status: { in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIAL] },
           createdAt: { lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
         },
@@ -532,7 +550,7 @@ export const aiTools = {
       // Check low stock
       const lowStock = await prisma.$queryRaw<Array<{name: string; stock: number; reorderPoint: number}>>`
         SELECT name, stock, "reorderPoint" FROM "Part"
-        WHERE stock <= "reorderPoint"
+        WHERE stock <= "reorderPoint" AND "tenantId" = ${tenantId}
         ORDER BY (stock - "reorderPoint") ASC
         LIMIT 5
       `
@@ -555,6 +573,7 @@ export const aiTools = {
       // Check work orders in progress too long
       const longRunningWOs = await prisma.workOrder.findMany({
         where: {
+          tenantId,
           status: WorkOrderStatus.IN_PROGRESS,
           updatedAt: { lt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
         },
@@ -604,6 +623,7 @@ export const aiTools = {
       const [customers, vehicles, workOrders] = await Promise.all([
         prisma.customer.findMany({
           where: {
+            tenantId,
             OR: [
               { name: { contains: query, mode: 'insensitive' } },
               { email: { contains: query, mode: 'insensitive' } },
@@ -614,6 +634,7 @@ export const aiTools = {
         }),
         prisma.vehicle.findMany({
           where: {
+            tenantId,
             OR: [
               { make: { contains: query, mode: 'insensitive' } },
               { model: { contains: query, mode: 'insensitive' } },
@@ -626,6 +647,7 @@ export const aiTools = {
         }),
         prisma.workOrder.findMany({
           where: {
+            tenantId,
             OR: [
               { description: { contains: query, mode: 'insensitive' } },
               { Vehicle: { make: { contains: query, mode: 'insensitive' } } },
@@ -667,4 +689,5 @@ export const aiTools = {
       }
     },
   }),
+  }
 }

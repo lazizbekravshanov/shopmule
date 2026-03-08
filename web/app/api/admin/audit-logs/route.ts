@@ -27,11 +27,15 @@ export async function GET(request: NextRequest) {
     // Check if user has admin/manager role
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { role: true },
+      select: { role: true, tenantId: true },
     });
 
     if (!user || !['ADMIN', 'SERVICE_MANAGER'].includes(user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    if (!user.tenantId) {
+      return NextResponse.json({ error: 'No tenant associated' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -43,8 +47,8 @@ export async function GET(request: NextRequest) {
     const query = querySchema.parse(params);
     const skip = (query.page - 1) * query.limit;
 
-    // Build where clause
-    const where: Record<string, unknown> = {};
+    // Build where clause — always scoped to tenant
+    const where: Record<string, unknown> = { tenantId: user.tenantId };
 
     if (query.userId) {
       where.userId = query.userId;
@@ -141,17 +145,21 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { role: true },
+      select: { role: true, tenantId: true },
     });
 
     if (!user || !['ADMIN', 'SERVICE_MANAGER'].includes(user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    if (!user.tenantId) {
+      return NextResponse.json({ error: 'No tenant associated' }, { status: 403 });
+    }
+
     const body = await request.json();
     const { startDate, endDate } = body;
 
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = { tenantId: user.tenantId };
     if (startDate || endDate) {
       where.createdAt = {};
       if (startDate) {

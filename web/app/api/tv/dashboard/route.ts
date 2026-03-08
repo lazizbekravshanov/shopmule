@@ -15,7 +15,6 @@ export async function GET(request: Request) {
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
   const displayToken = await prisma.displayToken.findFirst({
     where: {
-      tokenHash,
       expiresAt: {
         gt: new Date(),
       },
@@ -25,7 +24,14 @@ export async function GET(request: Request) {
     },
   })
 
-  if (!displayToken) {
+  // Use constant-time comparison to prevent timing attacks
+  if (
+    !displayToken ||
+    !crypto.timingSafeEqual(
+      Buffer.from(tokenHash, "hex"),
+      Buffer.from(displayToken.tokenHash, "hex")
+    )
+  ) {
     return NextResponse.json({ error: "Invalid token" }, { status: 403 })
   }
 

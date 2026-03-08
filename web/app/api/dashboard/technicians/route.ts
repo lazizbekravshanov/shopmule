@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { Role, PunchType, WorkOrderStatus, Prisma } from '@prisma/client';
+import { withAuth } from '@/lib/auth/with-permission';
+import type { AuthContext } from '@/lib/auth/with-permission';
 
 type TechnicianWithRelations = Prisma.EmployeeProfileGetPayload<{
   include: {
@@ -18,14 +20,16 @@ type TechnicianWithRelations = Prisma.EmployeeProfileGetPayload<{
   };
 }>;
 
-export async function GET() {
+export const GET = withAuth(async (_request: Request, { auth }: { auth: AuthContext; params: Promise<Record<string, string>> }) => {
   try {
+    const tenantId = auth.tenantId;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Get all technicians (TECHNICIAN role)
+    // Get all technicians (TECHNICIAN role) for this tenant
     const technicians = await prisma.employeeProfile.findMany({
       where: {
+        tenantId,
         role: Role.TECHNICIAN,
         status: 'active',
       },
@@ -153,4 +157,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

@@ -1,6 +1,6 @@
 import { groq } from '@ai-sdk/groq'
 import { streamText, stepCountIs } from 'ai'
-import { aiTools } from '@/lib/ai/tools'
+import { createAITools } from '@/lib/ai/tools'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { checkRateLimit, sanitizeInput } from '@/lib/security'
@@ -100,6 +100,15 @@ export async function POST(req: Request) {
       })
     }
 
+    // Ensure tenant isolation for AI tools
+    const tenantId = session.user.tenantId
+    if (!tenantId) {
+      return new Response(JSON.stringify({ error: 'No tenant associated with user' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+
     // Rate limiting
     const rateLimit = checkRateLimit(session.user.id, 'ai')
     if (!rateLimit.allowed) {
@@ -171,7 +180,7 @@ export async function POST(req: Request) {
       model: groq('llama-3.3-70b-versatile'),
       system: personalizedPrompt,
       messages: sanitizedMessages,
-      tools: aiTools,
+      tools: createAITools(tenantId),
       stopWhen: stepCountIs(5),
       onError: (error) => {
         console.error('[AI Chat Stream Error]', error)
