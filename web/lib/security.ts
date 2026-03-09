@@ -46,11 +46,15 @@ export function canManageShop(role: Role): boolean {
   return role === Role.ADMIN
 }
 
-// Input sanitization
+// Input sanitization — encode HTML entities to prevent XSS
 export function sanitizeInput(input: string): string {
   return input
     .trim()
-    .replace(/[<>]/g, "") // Basic XSS prevention
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
     .slice(0, 10000) // Limit length
 }
 

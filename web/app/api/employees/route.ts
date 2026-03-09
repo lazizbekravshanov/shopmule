@@ -12,7 +12,11 @@ const VALID_ROLES = [
 const createEmployeeSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
   email: z.string().email("Valid email is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain an uppercase letter")
+    .regex(/[a-z]/, "Password must contain a lowercase letter")
+    .regex(/[0-9]/, "Password must contain a number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain a special character"),
   role: z.enum(VALID_ROLES),
   payRate: z.number().min(0),
   payType: z.enum(["HOURLY", "FLAT_RATE", "SALARY"]).optional(),
@@ -20,7 +24,7 @@ const createEmployeeSchema = z.object({
   phoneNumber: z.string().max(50).optional(),
   specializations: z.array(z.string()).optional(),
   hireDate: z.string().optional(),
-  pin: z.string().max(10).optional(),
+  pin: z.string().regex(/^\d{4,6}$/, "PIN must be 4-6 digits").optional(),
 })
 
 export const GET = withAuth(async (request, { auth }) => {
@@ -64,7 +68,6 @@ export const GET = withAuth(async (request, { auth }) => {
       overtimeRate: emp.overtimeRate,
       status: emp.status,
       userId: emp.userId,
-      pin: emp.pin,
       photoUrl: emp.photoUrl,
       phoneNumber: emp.phoneNumber,
       specializations: emp.specializations,
