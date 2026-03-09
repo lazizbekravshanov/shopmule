@@ -91,7 +91,7 @@ model User {
   updatedAt              DateTime                 @updatedAt
   deletedAt              DateTime?
 
-  Tenant                 Tenant?                  @relation(fields: [tenantId], references: [id])
+  Tenant                 Tenant?                  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   EmployeeProfile        EmployeeProfile?
   AttendanceNotification AttendanceNotification[]
   AttendanceAuditLog     AttendanceAuditLog[]
@@ -146,7 +146,7 @@ model Customer {
   updatedAt              DateTime                 @updatedAt
   deletedAt              DateTime?
 
-  Tenant                 Tenant                   @relation(fields: [tenantId], references: [id])
+  Tenant                 Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   FleetAccount           FleetAccount?            @relation(fields: [fleetAccountId], references: [id])
   Vehicles               Vehicle[]
   WorkOrders             WorkOrder[]
@@ -198,7 +198,7 @@ model FleetAccount {
   updatedAt            DateTime            @updatedAt
   deletedAt            DateTime?
 
-  Tenant               Tenant              @relation(fields: [tenantId], references: [id])
+  Tenant               Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   Customers            Customer[]
   Vehicles             Vehicle[]
   WorkOrders           WorkOrder[]
@@ -251,8 +251,8 @@ model Vehicle {
   updatedAt      DateTime      @updatedAt
   deletedAt      DateTime?
 
-  Tenant         Tenant        @relation(fields: [tenantId], references: [id])
-  Customer       Customer      @relation(fields: [customerId], references: [id])
+  Tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  Customer       Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
   FleetAccount   FleetAccount? @relation(fields: [fleetAccountId], references: [id])
   WorkOrders     WorkOrder[]
   Appointments   Appointment[]
@@ -337,7 +337,7 @@ model WorkOrder {
   updatedAt             DateTime            @updatedAt
   deletedAt             DateTime?
 
-  Tenant                Tenant              @relation(fields: [tenantId], references: [id])
+  Tenant                Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   Customer              Customer            @relation(fields: [customerId], references: [id])
   Vehicle               Vehicle             @relation(fields: [vehicleId], references: [id])
   FleetAccount          FleetAccount?       @relation(fields: [fleetAccountId], references: [id])
@@ -499,7 +499,7 @@ model Part {
   updatedAt           DateTime            @updatedAt
   deletedAt           DateTime?
 
-  Tenant              Tenant              @relation(fields: [tenantId], references: [id])
+  Tenant              Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   Vendor              Vendor?             @relation(fields: [vendorId], references: [id])
   WorkOrderParts      WorkOrderPart[]
   WorkOrderLines      WorkOrderLine[]
@@ -578,7 +578,7 @@ model PurchaseOrder {
   updatedAt       DateTime            @updatedAt
   deletedAt       DateTime?
 
-  Tenant          Tenant              @relation(fields: [tenantId], references: [id])
+  Tenant          Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   Vendor          Vendor?             @relation(fields: [vendorId], references: [id])
   Lines           PurchaseOrderLine[]
   Transactions    PartTransaction[]
@@ -652,7 +652,7 @@ model Invoice {
   updatedAt            DateTime            @updatedAt
   deletedAt            DateTime?
 
-  Tenant               Tenant              @relation(fields: [tenantId], references: [id])
+  Tenant               Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   WorkOrder            WorkOrder           @relation(fields: [workOrderId], references: [id])
   Customer             Customer            @relation(fields: [customerId], references: [id])
   FleetAccount         FleetAccount?       @relation(fields: [fleetAccountId], references: [id])
@@ -691,7 +691,7 @@ model InvoicePayment {
   notes           String?
   createdAt       DateTime      @default(now())
 
-  Invoice         Invoice       @relation(fields: [invoiceId], references: [id])
+  Invoice         Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   RecordedBy      User?         @relation(fields: [recordedById], references: [id])
 
   @@index([invoiceId])
@@ -719,7 +719,7 @@ model Payment {
   stripeChargeId        String?
   stripePaymentIntentId String?  @unique
   stripeStatus          String?
-  Invoice               Invoice  @relation(fields: [invoiceId], references: [id])
+  Invoice               Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 // ==========================================
@@ -749,7 +749,7 @@ model Appointment {
   updatedAt         DateTime            @updatedAt
   deletedAt         DateTime?
 
-  Tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  Tenant            Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   Customer          Customer            @relation(fields: [customerId], references: [id])
   Vehicle           Vehicle?            @relation(fields: [vehicleId], references: [id])
   WorkOrder         WorkOrder?          @relation(fields: [workOrderId], references: [id])
@@ -798,7 +798,7 @@ model ServiceTemplate {
   updatedAt    DateTime              @updatedAt
   deletedAt    DateTime?
 
-  Tenant       Tenant                @relation(fields: [tenantId], references: [id])
+  Tenant       Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   Lines        ServiceTemplateLine[]
 
   @@index([tenantId])
@@ -853,8 +853,8 @@ model EmployeeProfile {
   updatedAt           DateTime              @updatedAt
   deletedAt           DateTime?
 
-  Tenant              Tenant?               @relation(fields: [tenantId], references: [id])
-  User                User                  @relation(fields: [userId], references: [id])
+  Tenant              Tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  User                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   TimeEntries         TimeEntry[]
   WorkOrderAssignments WorkOrderAssignment[]
   WorkOrderLabor      WorkOrderLabor[]
@@ -886,7 +886,7 @@ model TechnicianCertification {
   isActive     Boolean         @default(true)
   createdAt    DateTime        @default(now())
 
-  Employee     EmployeeProfile @relation(fields: [employeeId], references: [id])
+  Employee     EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@index([employeeId])
 }
@@ -963,7 +963,7 @@ model TimeEntry {
   clockIn         DateTime
   clockOut        DateTime?
   jobId           String?
-  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id])
+  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@index([employeeId])
 }
@@ -990,7 +990,7 @@ model PunchRecord {
   notes                String?
   createdAt            DateTime        @default(now())
 
-  EmployeeProfile      EmployeeProfile @relation(fields: [employeeId], references: [id])
+  EmployeeProfile      EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   Geofence             Geofence?       @relation(fields: [geofenceId], references: [id])
   Shop                 Shop?           @relation(fields: [shopId], references: [id])
   WorkOrder            WorkOrder?      @relation(fields: [workOrderId], references: [id])
@@ -1018,7 +1018,7 @@ model Timesheet {
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
-  EmployeeProfile    EmployeeProfile @relation(fields: [employeeId], references: [id])
+  EmployeeProfile    EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   ApprovedByUser     User?           @relation("TimesheetApprover", fields: [approvedBy], references: [id])
 
   @@unique([employeeId, periodStart, periodEnd])
@@ -1422,8 +1422,8 @@ model WorkOrderAssignment {
   employeeId      String
   assignedAt      DateTime        @default(now())
 
-  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id])
-  WorkOrder       WorkOrder       @relation(fields: [workOrderId], references: [id])
+  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  WorkOrder       WorkOrder       @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
 
   @@index([workOrderId])
   @@index([employeeId])
@@ -1440,7 +1440,7 @@ model WorkOrderLabor {
   stoppedAt       DateTime?
   actualHours     Float?
 
-  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id])
+  EmployeeProfile EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   WorkOrder       WorkOrder       @relation(fields: [workOrderId], references: [id])
 
   @@index([workOrderId])
@@ -1456,7 +1456,7 @@ model WorkOrderPart {
   markupPct   Float     @default(0.15)
 
   Part        Part      @relation(fields: [partId], references: [id])
-  WorkOrder   WorkOrder @relation(fields: [workOrderId], references: [id])
+  WorkOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
 
   @@index([workOrderId])
   @@index([partId])
@@ -1489,8 +1489,8 @@ model DeferredWork {
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
-  Vehicle             Vehicle            @relation(fields: [vehicleId], references: [id])
-  Tenant              Tenant             @relation(fields: [tenantId], references: [id])
+  Vehicle             Vehicle            @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  Tenant              Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([vehicleId])
   @@index([tenantId])
@@ -1533,7 +1533,7 @@ model Invite {
   acceptedAt DateTime?
   createdAt  DateTime  @default(now())
 
-  Tenant Tenant @relation(fields: [tenantId], references: [id])
+  Tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, email])
   @@index([token])
@@ -1565,8 +1565,8 @@ model Deduction {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
-  Tenant        Tenant          @relation(fields: [tenantId], references: [id])
-  Employee      EmployeeProfile @relation(fields: [employeeId], references: [id])
+  Tenant        Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  Employee      EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([employeeId])
@@ -1586,8 +1586,8 @@ model LoanAdvance {
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
-  Tenant           Tenant          @relation(fields: [tenantId], references: [id])
-  Employee         EmployeeProfile @relation(fields: [employeeId], references: [id])
+  Tenant           Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  Employee         EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([employeeId])

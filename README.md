@@ -2,19 +2,21 @@
 
 ## Overview
 
-ShopMule is a multi-tenant SaaS application for managing heavy-duty truck repair shop operations, including repair orders, technician time tracking, parts inventory, billing, and performance dashboards.
+ShopMule is a multi-tenant SaaS application for managing heavy-duty truck repair shop operations, including work orders, technician time tracking, parts inventory, invoicing, payroll, and performance dashboards.
 
 ---
 
 ## Quick Start
 
 ### Stack
-- **Frontend/Backend**: Next.js 14+ (App Router) with TypeScript
+- **Frontend/Backend**: Next.js 16 (App Router) with TypeScript
 - **Database**: PostgreSQL with Prisma ORM
 - **Auth**: NextAuth.js with credentials (email/password)
+- **AI**: Groq (Llama 3.3) with Vercel AI SDK
+- **Payments**: Stripe
 - **UI**: shadcn/ui + Tailwind CSS
 - **Validation**: Zod
-- **Forms**: React Hook Form
+- **Testing**: Vitest
 
 ### Setup
 
@@ -63,22 +65,32 @@ ShopMule is a multi-tenant SaaS application for managing heavy-duty truck repair
    - Login with: `admin@shopmule.com` / `admin123`
 
 ### Default Users (from seed)
-- **Owner**: `admin@shopmule.com` / `admin123` (Role: OWNER)
-- **Service Advisor**: `sarah@shopmule.com` / `advisor123` (Role: SERVICE_ADVISOR)
+- **Admin**: `admin@shopmule.com` / `admin123` (Role: ADMIN)
 - **Service Manager**: `lisa@shopmule.com` / `manager123` (Role: SERVICE_MANAGER)
-- **Parts Manager**: `rick@shopmule.com` / `parts123` (Role: PARTS_MANAGER)
-- **Mechanic**: `john@shopmule.com` / `mechanic123` (Role: MECHANIC)
+- **Technician**: `john@shopmule.com` / `mechanic123` (Role: TECHNICIAN)
 
 ### Available Routes
 
 - `/login` - Login page
-- `/dashboard` - Main dashboard with stats
-- `/repair-orders` - List all repair orders
-- `/repair-orders/new` - Create new repair order
-- `/repair-orders/[id]` - View repair order details
-- `/technicians` - View technicians and their status
-- `/time-clock` - Clock in/out and track time on repair orders
-- `/invoices` - View invoices and payment status
+- `/register` - Self-service signup
+- `/dashboard` - AI command center with shop pulse metrics
+- `/work-orders` - Work orders (table, Kanban, timeline, AI actions views)
+- `/work-orders/new` - Create new work order
+- `/work-orders/[id]` - Work order detail (labor, parts, photos, AI panel)
+- `/customers` - Customer management
+- `/fleet-accounts` - B2B fleet account management
+- `/inventory` - Parts inventory with low-stock alerts
+- `/technicians` - Team management and real-time attendance
+- `/time-clock` - Clock in/out, breaks, punch review, timesheets
+- `/invoices` - Invoices with AR aging, Stripe payments, payment links
+- `/payroll` - Payroll with deductions and loans
+- `/efficiency` - Technician efficiency KPIs
+- `/reports` - Revenue, efficiency, team, and payroll analytics
+- `/schedule` - Calendar and appointment booking
+- `/workflow` - Kanban pipeline for work order lifecycle
+- `/settings` - Shop configuration, billing, audit logs, geofences
+- `/integrations` - Connected services (Stripe, Twilio, SendGrid)
+- `/help` - FAQ and support
 - `/tv?token=<TOKEN>` - TV dashboard/leaderboard (full-screen mode)
 
 ### Scripts
@@ -87,6 +99,7 @@ ShopMule is a multi-tenant SaaS application for managing heavy-duty truck repair
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+- `npm run test` - Run Vitest test suite
 - `npm run db:migrate` - Run Prisma migrations
 - `npm run db:seed` - Seed database with demo data
 - `npm run db:studio` - Open Prisma Studio (database GUI)
@@ -94,19 +107,20 @@ ShopMule is a multi-tenant SaaS application for managing heavy-duty truck repair
 
 ### Features
 
-- **Authentication & RBAC** — NextAuth with credentials provider. Roles: OWNER, ADMIN, MANAGER, SERVICE_ADVISOR, SERVICE_MANAGER, PARTS_MANAGER, MECHANIC, TECH, VIEWER. Protected routes with middleware.
-- **Work Orders** — Create, view, and manage repair orders with status workflow, labor/parts lines, and time tracking.
-- **Time Tracking** — Shift punches (clock in/out), time entries linked to repair orders, real-time duration tracking.
-- **Invoices** — Invoice generation from repair orders, payment tracking (UNPAID, PARTIALLY_PAID, PAID).
-- **Inventory** — Parts management with stock levels, vendor tracking, and low-stock alerts.
+- **Authentication & RBAC** — NextAuth with credentials provider. Roles: OWNER, ADMIN, SERVICE_MANAGER, TECHNICIAN, TIMESHEET_USER. Protected routes with middleware and granular permission system with overrides.
+- **Work Orders** — Full lifecycle management with 4 view modes (AI actions, table, Kanban, timeline). Labor tracking, parts picker, photo uploads, AI status panel.
+- **Time Tracking** — Clock in/out, break tracking, punch review dashboard, weekly timesheets, overtime calculations.
+- **Invoices** — AR aging analysis, Stripe payment integration, payment link generation, email/SMS reminders, PDF export.
+- **Inventory** — Parts CRUD with inline stock adjustment, low-stock alerts, vendor tracking, purchase orders.
+- **Payroll** — Gross/net/deduction calculations, period selection, per-employee breakdown, CSV export.
+- **Efficiency** — Technician KPI dashboard with utilization and efficiency metrics, color-coded performance bars.
+- **Reports** — 5 report tabs: overview, revenue, efficiency, team, payroll. Date range filtering and CSV export.
+- **Customers** — B2C individual and B2B fleet account management, vehicle tracking, customer portal with payment links.
+- **Schedule** — Calendar-based appointment booking with technician assignment and status tracking.
 - **TV Dashboard** — Full-screen leaderboard with technician performance metrics and auto-refresh.
-- **AI Assistant** — Chat-based AI assistant with tool access for searching data, managing work orders, and getting recommendations.
-
----
-
-## Developer Portal
-
-A developer portal is available at `/dev` in the app. The public REST API, SDKs, CLI, and webhooks documented there are **coming soon** — they are not yet live. The internal `/api/*` routes used by the ShopMule web app work as expected.
+- **AI Assistant** — Chat-based copilot with tools for searching data, managing work orders, diagnostics, estimates, and recommendations. Tenant-isolated.
+- **Integrations** — Stripe (payments), Twilio (SMS), SendGrid (email). Extensible framework for future integrations.
+- **Mobile App** — Companion mobile app for technicians with GPS clock-in, photo uploads, and work order access.
 
 ---
 
@@ -118,9 +132,9 @@ Before deploying to production, complete this security checklist:
 - [ ] **`ADMIN_PASSWORD`** — Set a strong password via env var (seed script will refuse to run in production with the default)
 - [ ] **`ADMIN_EMAIL`** — Change from default `admin@shopmule.com` to your real email
 - [ ] **`DATABASE_URL`** — Use a production PostgreSQL instance with a strong password
-- [ ] **HTTPS** — Serve the app behind TLS (required for secure cookies)
+- [ ] **HTTPS** — Serve the app behind TLS (required for secure cookies, HSTS enforcement)
 - [ ] **`NEXTAUTH_URL`** — Set to your production domain (e.g. `https://app.yourshop.com`)
-- [ ] **Rotate all seed passwords** — All default passwords (`advisor123`, `manager123`, etc.) must be changed
+- [ ] **Rotate all seed passwords** — All default passwords (`manager123`, `mechanic123`, etc.) must be changed
 - [ ] **Stripe keys** — Switch from `sk_test_` to `sk_live_` keys
 - [ ] **Review `.env.example`** — Ensure no secrets are committed to version control
 
@@ -151,6 +165,12 @@ Required in `.env`:
 - `NEXTAUTH_URL` - App URL (http://localhost:3000 for dev)
 - `NEXTAUTH_SECRET` - Random secret for NextAuth (generate with: `openssl rand -base64 32`)
 
+Optional:
+- `STRIPE_SECRET_KEY` - Stripe API key for payments
+- `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` - Twilio for SMS
+- `RESEND_API_KEY` - Resend for email
+- `GROQ_API_KEY` - Groq for AI assistant
+
 ---
 
 ## Project Structure
@@ -158,23 +178,29 @@ Required in `.env`:
 ```
 web/
 ├── app/                    # Next.js App Router
-│   ├── api/               # API routes (Route Handlers)
-│   ├── dashboard/         # Dashboard pages
-│   ├── repair-orders/     # Repair order pages
-│   ├── technicians/       # Technician pages
-│   ├── time-clock/        # Time clock page
-│   ├── invoices/          # Invoice pages
+│   ├── api/               # API routes (100+ endpoints)
+│   ├── (dashboard)/       # Dashboard pages (all features)
+│   ├── login/             # Login page
+│   ├── register/          # Self-service signup
 │   └── tv/                # TV dashboard
 ├── components/            # React components
-│   └── ui/               # shadcn/ui components
+│   ├── ui/               # shadcn/ui components
+│   ├── dashboard/        # Dashboard widgets
+│   ├── work-order/       # Work order components
+│   ├── invoice/          # Invoice components
+│   └── time-clock/       # Time clock components
 ├── lib/                   # Utilities
 │   ├── auth.ts           # NextAuth configuration
+│   ├── auth/             # RBAC, permissions, withAuth wrappers
+│   ├── ai/               # AI tools and pipeline
 │   ├── db.ts             # Prisma client
-│   └── rbac.ts           # RBAC helpers
+│   ├── security.ts       # Input sanitization, rate limiting
+│   └── email/            # Email templates
 ├── prisma/                # Prisma schema and migrations
 │   ├── schema.prisma     # Database schema
 │   └── seed.ts           # Seed script
 └── types/                 # TypeScript types
+mobile/                     # React Native mobile app
 ```
 
 ---
@@ -197,9 +223,11 @@ docker compose -f docker-compose.yml up --build
 
 ## Notes
 
-- All tenant-scoped models include `shopId` and are filtered by the user's shop
-- Role-based access control (RBAC) is enforced via middleware and server-side helpers
+- All tenant-scoped models include `tenantId` and are filtered by the user's tenant
+- Role-based access control (RBAC) is enforced via middleware and server-side `withAuth`/`withPermission` wrappers
 - The TV dashboard uses token-based authentication (no login required)
+- AI tools are tenant-isolated via a factory function pattern
+- Security headers (CSP, HSTS, X-Frame-Options) are set in middleware for production
 - File attachments are stored locally (can be migrated to S3 later)
 
 ---
