@@ -11,14 +11,20 @@ import {
   Stethoscope,
   Calculator,
   FileText,
+  Sparkles,
+  Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 
 interface AIStatusPanelProps {
+  workOrderId: string;
   aiStatus: string | null;
   aiDiagnosis: Record<string, unknown> | null;
   aiEstimate: Record<string, unknown> | null;
   aiSummary: Record<string, unknown> | null;
+  onAIComplete?: () => void;
 }
 
 function CollapsibleSection({
@@ -69,15 +75,69 @@ function CollapsibleSection({
 }
 
 export function AIStatusPanel({
+  workOrderId,
   aiStatus,
   aiDiagnosis,
   aiEstimate,
   aiSummary,
+  onAIComplete,
 }: AIStatusPanelProps) {
-  const isProcessing = !!aiStatus;
+  const { toast } = useToast();
+  const [runningDiagnosis, setRunningDiagnosis] = useState(false);
+  const [runningEstimate, setRunningEstimate] = useState(false);
+
+  const isProcessing = !!aiStatus || runningDiagnosis || runningEstimate;
   const hasAnyData = !!(aiDiagnosis || aiEstimate || aiSummary);
 
-  if (!isProcessing && !hasAnyData) return null;
+  const handleRunDiagnosis = async () => {
+    setRunningDiagnosis(true);
+    try {
+      const res = await fetch('/api/ai/diagnose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workOrderId }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Failed' }));
+        throw new Error(err.error || 'Failed to run diagnosis');
+      }
+      toast({ title: 'AI Diagnosis complete', description: 'Analysis has been generated.' });
+      onAIComplete?.();
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Diagnosis failed',
+        description: error instanceof Error ? error.message : 'Please try again.',
+      });
+    } finally {
+      setRunningDiagnosis(false);
+    }
+  };
+
+  const handleRunEstimate = async () => {
+    setRunningEstimate(true);
+    try {
+      const res = await fetch('/api/ai/estimate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workOrderId }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Failed' }));
+        throw new Error(err.error || 'Failed to generate estimate');
+      }
+      toast({ title: 'AI Estimate complete', description: 'Cost estimate has been generated.' });
+      onAIComplete?.();
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Estimate failed',
+        description: error instanceof Error ? error.message : 'Please try again.',
+      });
+    } finally {
+      setRunningEstimate(false);
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg p-6">
@@ -87,8 +147,8 @@ export function AIStatusPanel({
         {isProcessing && (
           <span className="ml-auto flex items-center gap-1.5 text-xs text-[#ee7a14]">
             <Loader2 className="h-3 w-3 animate-spin" />
-            {aiStatus === 'DIAGNOSING' && 'Diagnosing...'}
-            {aiStatus === 'ESTIMATING' && 'Estimating...'}
+            {(aiStatus === 'DIAGNOSING' || runningDiagnosis) && 'Diagnosing...'}
+            {(aiStatus === 'ESTIMATING' || runningEstimate) && 'Estimating...'}
             {aiStatus === 'SUMMARIZING' && 'Summarizing...'}
           </span>
         )}
@@ -97,37 +157,85 @@ export function AIStatusPanel({
         )}
       </div>
 
-      <div className="space-y-2">
-        {/* Diagnosis */}
-        <CollapsibleSection
-          title="Diagnosis"
-          icon={Stethoscope}
-          isLoading={aiStatus === 'DIAGNOSING'}
-          isAvailable={!!aiDiagnosis}
+      {/* AI Action Buttons — always visible */}
+      <div className="flex gap-2 mb-4">
+        <Button
+          size="sm"
+          variant={aiDiagnosis ? 'outline' : 'default'}
+          className={cn(
+            'flex-1 gap-1.5 text-xs h-9',
+            !aiDiagnosis && 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0'
+          )}
+          disabled={runningDiagnosis || !!aiStatus}
+          onClick={handleRunDiagnosis}
         >
-          {aiDiagnosis && <DiagnosisContent data={aiDiagnosis} />}
-        </CollapsibleSection>
-
-        {/* Estimate */}
-        <CollapsibleSection
-          title="Estimate"
-          icon={Calculator}
-          isLoading={aiStatus === 'ESTIMATING'}
-          isAvailable={!!aiEstimate}
+          {runningDiagnosis ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Stethoscope className="h-3.5 w-3.5" />
+          )}
+          {aiDiagnosis ? 'Re-run Diagnosis' : 'AI Diagnosis'}
+        </Button>
+        <Button
+          size="sm"
+          variant={aiEstimate ? 'outline' : 'default'}
+          className={cn(
+            'flex-1 gap-1.5 text-xs h-9',
+            !aiEstimate && 'bg-gradient-to-r from-[#ee7a14] to-orange-500 hover:from-[#d96a0a] hover:to-orange-600 text-white border-0'
+          )}
+          disabled={runningEstimate || !!aiStatus}
+          onClick={handleRunEstimate}
         >
-          {aiEstimate && <EstimateContent data={aiEstimate} />}
-        </CollapsibleSection>
-
-        {/* Summary */}
-        <CollapsibleSection
-          title="Summary"
-          icon={FileText}
-          isLoading={aiStatus === 'SUMMARIZING'}
-          isAvailable={!!aiSummary}
-        >
-          {aiSummary && <SummaryContent data={aiSummary} />}
-        </CollapsibleSection>
+          {runningEstimate ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Calculator className="h-3.5 w-3.5" />
+          )}
+          {aiEstimate ? 'Re-run Estimate' : 'AI Estimate'}
+        </Button>
       </div>
+
+      {/* No data prompt */}
+      {!hasAnyData && !isProcessing && (
+        <div className="text-center py-3 px-2 bg-neutral-50 dark:bg-neutral-900 rounded-lg">
+          <Sparkles className="h-5 w-5 text-neutral-400 mx-auto mb-1.5" />
+          <p className="text-xs text-neutral-500">
+            Run AI analysis to get instant diagnosis, cost estimates, and repair recommendations.
+          </p>
+        </div>
+      )}
+
+      {/* Results */}
+      {hasAnyData && (
+        <div className="space-y-2">
+          <CollapsibleSection
+            title="Diagnosis"
+            icon={Stethoscope}
+            isLoading={aiStatus === 'DIAGNOSING' || runningDiagnosis}
+            isAvailable={!!aiDiagnosis}
+          >
+            {aiDiagnosis && <DiagnosisContent data={aiDiagnosis} />}
+          </CollapsibleSection>
+
+          <CollapsibleSection
+            title="Estimate"
+            icon={Calculator}
+            isLoading={aiStatus === 'ESTIMATING' || runningEstimate}
+            isAvailable={!!aiEstimate}
+          >
+            {aiEstimate && <EstimateContent data={aiEstimate} />}
+          </CollapsibleSection>
+
+          <CollapsibleSection
+            title="Summary"
+            icon={FileText}
+            isLoading={aiStatus === 'SUMMARIZING'}
+            isAvailable={!!aiSummary}
+          >
+            {aiSummary && <SummaryContent data={aiSummary} />}
+          </CollapsibleSection>
+        </div>
+      )}
     </div>
   );
 }
@@ -173,7 +281,7 @@ function DiagnosisContent({ data }: { data: Record<string, unknown> }) {
           <div className="text-xs font-medium text-neutral-500 mb-1">Possible Causes</div>
           <ul className="list-disc list-inside space-y-0.5">
             {possibleCauses.map((c, i) => (
-              <li key={i} className="text-sm">{c}</li>
+              <li key={i} className="text-sm">{typeof c === 'string' ? c : (c as { cause?: string })?.cause || JSON.stringify(c)}</li>
             ))}
           </ul>
         </div>
@@ -183,7 +291,7 @@ function DiagnosisContent({ data }: { data: Record<string, unknown> }) {
           <div className="text-xs font-medium text-neutral-500 mb-1">Recommended Actions</div>
           <ul className="list-disc list-inside space-y-0.5">
             {recommendedActions.map((a, i) => (
-              <li key={i} className="text-sm">{a}</li>
+              <li key={i} className="text-sm">{typeof a === 'string' ? a : (a as { action?: string })?.action || JSON.stringify(a)}</li>
             ))}
           </ul>
         </div>
@@ -209,9 +317,10 @@ function EstimateContent({ data }: { data: Record<string, unknown> }) {
   const lineItems = data.lineItems as Array<{
     description: string;
     type: string;
-    amount: number;
+    amount?: number;
+    total?: number;
   }> | undefined;
-  const totalEstimate = data.totalEstimate as number | undefined;
+  const totalEstimate = (data.totalEstimate ?? data.estimatedTotal) as number | undefined;
   const complexity = data.complexity as string | undefined;
   const confidence = data.confidence as number | undefined;
   const caveats = data.caveats as string[] | undefined;
@@ -226,7 +335,7 @@ function EstimateContent({ data }: { data: Record<string, unknown> }) {
               <div key={i} className="flex justify-between text-sm">
                 <span className="text-neutral-700 dark:text-neutral-300">{item.description}</span>
                 <span className="font-medium text-neutral-900 dark:text-neutral-100">
-                  ${typeof item.amount === 'number' ? item.amount.toFixed(2) : item.amount}
+                  ${typeof (item.total ?? item.amount) === 'number' ? (item.total ?? item.amount)!.toFixed(2) : (item.total ?? item.amount)}
                 </span>
               </div>
             ))}
@@ -284,7 +393,7 @@ function SummaryContent({ data }: { data: Record<string, unknown> }) {
           <div className="text-xs font-medium text-neutral-500 mb-1">Work Performed</div>
           <ul className="list-disc list-inside space-y-0.5">
             {workPerformed.map((w, i) => (
-              <li key={i} className="text-sm">{w}</li>
+              <li key={i} className="text-sm">{typeof w === 'string' ? w : (w as { description?: string })?.description || JSON.stringify(w)}</li>
             ))}
           </ul>
         </div>

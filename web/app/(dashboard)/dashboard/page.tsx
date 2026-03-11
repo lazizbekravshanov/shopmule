@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import {
   AICommandCenter,
+  AIInsights,
   ShopPulse,
   LiveBayBoard,
   TodaysSchedule,
@@ -22,13 +23,17 @@ export default function DashboardPage() {
         <AICommandCenter />
       </motion.div>
 
-      {/* Section 2: Shop Pulse - Key Metrics (7 metrics now) */}
+      {/* Section 2: AI Insights + Shop Pulse */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
+        className="grid gap-6 lg:grid-cols-3"
       >
-        <ShopPulse />
+        <div className="lg:col-span-2">
+          <ShopPulse />
+        </div>
+        <AIInsights />
       </motion.div>
 
       {/* Section 3: Three-Column Layout - Schedule, Team Status, Recent Activity */}

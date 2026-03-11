@@ -384,10 +384,12 @@ export default function WorkOrderDetailPage() {
         <div className="space-y-6">
           {/* AI Status Panel */}
           <AIStatusPanel
+            workOrderId={id}
             aiStatus={workOrder.aiStatus ?? null}
             aiDiagnosis={workOrder.aiDiagnosis as Record<string, unknown> | null ?? null}
             aiEstimate={workOrder.aiEstimate as Record<string, unknown> | null ?? null}
             aiSummary={workOrder.aiSummary as Record<string, unknown> | null ?? null}
+            onAIComplete={() => refetch()}
           />
 
           {/* Summary Card */}
