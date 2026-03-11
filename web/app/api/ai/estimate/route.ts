@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const rateLimit = checkRateLimit(session.user.id, "ai");
+    const rateLimit = await checkRateLimit(session.user.id, "ai");
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: "Too many requests. Please wait a moment." },

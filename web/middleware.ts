@@ -71,33 +71,39 @@ const selfAuthApiRoutes = [
   "/api/billing",        // Billing endpoints (session auth)
 ]
 
-// In-memory rate limiter store
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
+// Origin validation for CSRF protection on mutations
+function validateOrigin(request: NextRequest): boolean {
+  // Safe methods don't need origin checks
+  if (["GET", "HEAD", "OPTIONS"].includes(request.method)) return true
 
-function checkRateLimit(ip: string, limit: number, windowMs: number): boolean {
-  const now = Date.now()
-  const record = rateLimitStore.get(ip)
+  const origin = request.headers.get("origin")
+  const host = request.headers.get("host")
 
-  if (!record || now > record.resetTime) {
-    rateLimitStore.set(ip, { count: 1, resetTime: now + windowMs })
-    return true
+  // No origin = same-origin request (non-browser clients)
+  if (!origin) return true
+
+  // Allow localhost in development
+  if (process.env.NODE_ENV === "development") {
+    if (origin.includes("localhost") || origin.includes("127.0.0.1")) return true
   }
 
-  if (record.count >= limit) {
+  // Origin must match host
+  try {
+    const originUrl = new URL(origin)
+    const allowedHosts = [
+      host,
+      process.env.NEXTAUTH_URL?.replace(/^https?:\/\//, "").split("/")[0],
+      process.env.VERCEL_URL,
+    ].filter(Boolean)
+
+    return allowedHosts.some((allowed) => {
+      if (!allowed) return false
+      const allowedHost = allowed.replace(/^https?:\/\//, "").split("/")[0]
+      return originUrl.host === allowedHost
+    })
+  } catch {
     return false
   }
-
-  record.count++
-  return true
-}
-
-function getClientIP(request: NextRequest): string {
-  const forwardedFor = request.headers.get("x-forwarded-for")
-  if (forwardedFor) {
-    return forwardedFor.split(",")[0].trim()
-  }
-  const realIP = request.headers.get("x-real-ip")
-  return realIP || "unknown"
 }
 
 export async function middleware(request: NextRequest) {
@@ -118,27 +124,18 @@ export async function middleware(request: NextRequest) {
     )
   }
 
-  // Rate limiting for API routes
+  // API route handling
   if (pathname.startsWith("/api/")) {
-    const ip = getClientIP(request)
-
-    // Stricter rate limit for auth endpoints
-    if (pathname.startsWith("/api/auth")) {
-      if (!checkRateLimit(`auth:${ip}`, 20, 60 * 1000)) { // 20 requests per minute
-        return NextResponse.json(
-          { error: "Too many requests" },
-          { status: 429, headers: { "Retry-After": "60" } }
-        )
-      }
-    } else {
-      // General API rate limit
-      if (!checkRateLimit(`api:${ip}`, 100, 60 * 1000)) { // 100 requests per minute
-        return NextResponse.json(
-          { error: "Too many requests" },
-          { status: 429, headers: { "Retry-After": "60" } }
-        )
-      }
+    // Origin validation — reject cross-origin mutations (CSRF protection)
+    if (!validateOrigin(request)) {
+      return NextResponse.json(
+        { error: "Forbidden: invalid origin" },
+        { status: 403 }
+      )
     }
+
+    // Rate limiting is handled at the route level via DB-backed checkRateLimit()
+    // (middleware runs on Edge runtime and cannot access the database)
 
     // Check if API route requires auth
     const isPublicApiRoute = publicApiRoutes.some(

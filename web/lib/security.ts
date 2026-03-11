@@ -82,54 +82,71 @@ export function isValidId(str: string): boolean {
   return isValidUUID(str) || isValidCuid(str)
 }
 
-// Rate limiting configuration
-export function rateLimitKey(identifier: string, action: string): string {
-  return `ratelimit:${action}:${identifier}`
-}
+// Rate limiting configuration (DB-backed for serverless/distributed deployments)
+import { prisma } from "./db"
 
 export const RATE_LIMITS = {
-  login: { max: 5, window: 60 * 15 }, // 5 attempts per 15 minutes
-  api: { max: 100, window: 60 }, // 100 requests per minute
-  create: { max: 30, window: 60 }, // 30 creates per minute
-  ai: { max: 20, window: 60 }, // 20 AI chat requests per minute
+  login: { max: 5, windowMs: 60 * 15 * 1000 }, // 5 attempts per 15 minutes
+  api: { max: 100, windowMs: 60 * 1000 }, // 100 requests per minute
+  create: { max: 30, windowMs: 60 * 1000 }, // 30 creates per minute
+  ai: { max: 20, windowMs: 60 * 1000 }, // 20 AI requests per minute
 } as const
 
-// In-memory rate limiter (for development/simple deployments)
-// For production, use Redis or similar
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
-
-export function checkRateLimit(
+export async function checkRateLimit(
   identifier: string,
   action: keyof typeof RATE_LIMITS
-): { allowed: boolean; remaining: number; resetIn: number } {
+): Promise<{ allowed: boolean; remaining: number; resetIn: number }> {
   const config = RATE_LIMITS[action]
-  const key = rateLimitKey(identifier, action)
-  const now = Date.now()
+  const now = new Date()
+  const windowStart = new Date(now.getTime() - config.windowMs)
+  const endpoint = `action:${action}`
 
-  const record = rateLimitStore.get(key)
-
-  if (!record || now > record.resetTime) {
-    // Reset or initialize
-    rateLimitStore.set(key, {
-      count: 1,
-      resetTime: now + config.window * 1000,
+  try {
+    const record = await prisma.rateLimitRecord.findFirst({
+      where: {
+        identifier,
+        endpoint,
+        windowStart: { gte: windowStart },
+      },
+      orderBy: { windowStart: "desc" },
     })
-    return { allowed: true, remaining: config.max - 1, resetIn: config.window }
-  }
 
-  if (record.count >= config.max) {
-    return {
-      allowed: false,
-      remaining: 0,
-      resetIn: Math.ceil((record.resetTime - now) / 1000),
+    if (record) {
+      if (record.count >= config.max) {
+        const resetTime = record.windowStart.getTime() + config.windowMs
+        return {
+          allowed: false,
+          remaining: 0,
+          resetIn: Math.ceil((resetTime - now.getTime()) / 1000),
+        }
+      }
+
+      await prisma.rateLimitRecord.update({
+        where: { id: record.id },
+        data: { count: record.count + 1 },
+      })
+
+      return {
+        allowed: true,
+        remaining: config.max - record.count - 1,
+        resetIn: Math.ceil((record.windowStart.getTime() + config.windowMs - now.getTime()) / 1000),
+      }
     }
-  }
 
-  record.count++
-  return {
-    allowed: true,
-    remaining: config.max - record.count,
-    resetIn: Math.ceil((record.resetTime - now) / 1000),
+    // Create new window
+    await prisma.rateLimitRecord.create({
+      data: { identifier, endpoint, count: 1, windowStart: now },
+    })
+
+    return {
+      allowed: true,
+      remaining: config.max - 1,
+      resetIn: Math.ceil(config.windowMs / 1000),
+    }
+  } catch (error) {
+    // If DB fails, allow the request but log the error
+    console.error("[RateLimit] DB error, allowing request:", error)
+    return { allowed: true, remaining: config.max, resetIn: 60 }
   }
 }
 

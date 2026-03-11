@@ -110,7 +110,7 @@ export async function POST(req: Request) {
     }
 
     // Rate limiting
-    const rateLimit = checkRateLimit(session.user.id, 'ai')
+    const rateLimit = await checkRateLimit(session.user.id, 'ai')
     if (!rateLimit.allowed) {
       return new Response(JSON.stringify({ error: 'Too many requests. Please wait a moment and try again.' }), {
         status: 429,
