@@ -104,6 +104,16 @@ export const POST = withPermission(P.USERS_CREATE, async (request, { auth }) => 
   try {
     const tenantId = auth.tenantId
 
+    // Plan limit check — enforce max employees per tier
+    const { checkEmployeeLimit } = await import("@/lib/plans")
+    const planCheck = await checkEmployeeLimit(tenantId)
+    if (!planCheck.allowed) {
+      return NextResponse.json(
+        { error: planCheck.error, requiredPlan: planCheck.requiredPlan },
+        { status: 403 }
+      )
+    }
+
     const body = await request.json()
     const parsed = createEmployeeSchema.safeParse(body)
     if (!parsed.success) {

@@ -47,6 +47,7 @@ const statusColors: Record<string, string> = {
 export default function BillingPage() {
   const searchParams = useSearchParams();
   const isExpiredRedirect = searchParams.get('expired') === 'true';
+  const isSuspendedRedirect = searchParams.get('suspended') === 'true';
   const [billing, setBilling] = useState<BillingStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
@@ -113,6 +114,36 @@ export default function BillingPage() {
           Manage your subscription and billing details
         </p>
       </div>
+
+      {/* Subscription suspended banner */}
+      {(isSuspendedRedirect || billing?.status === 'CANCELLED') && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6 flex items-start gap-4">
+          <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-5 h-5 text-red-600" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-red-900">Your subscription has been cancelled</h2>
+            <p className="text-sm text-red-700 mt-1">
+              Choose a plan below to restore access. Your data is safe and waiting for you.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Payment past due banner */}
+      {billing?.status === 'PAST_DUE' && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-6 flex items-start gap-4">
+          <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-5 h-5 text-amber-600" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-amber-900">Payment failed</h2>
+            <p className="text-sm text-amber-700 mt-1">
+              We couldn&apos;t process your last payment. Please update your billing information to avoid service interruption.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Trial expired / expiring banner */}
       {(isExpiredRedirect || billing?.trialExpired) && (

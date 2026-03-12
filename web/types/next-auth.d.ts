@@ -21,6 +21,7 @@ declare module "next-auth" {
     tenantId?: string | null
     shopId?: string | null
     subscriptionPlan?: string
+    subscriptionStatus?: string
     trialEndsAt?: string | null
   }
 }
@@ -32,6 +33,7 @@ declare module "next-auth/jwt" {
     tenantId?: string | null
     shopId?: string | null
     subscriptionPlan?: string
+    subscriptionStatus?: string
     trialEndsAt?: string | null
   }
 }

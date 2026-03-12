@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url)
-    const includeGeofences = searchParams.get('includeGeofences') === 'true'
-    const includeEmployees = searchParams.get('includeEmployees') === 'true'
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.tenantId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const tenantId = session.user.tenantId
 
     const shops = await prisma.shop.findMany({
+      where: { tenantId },
       include: {
-        Geofences: includeGeofences ? {
+        Geofences: {
           where: { isActive: true },
           select: {
             id: true,
@@ -19,8 +25,8 @@ export async function GET(request: NextRequest) {
             radiusMeters: true,
             isRequired: true,
           },
-        } : false,
-        ShopAssignments: includeEmployees ? {
+        },
+        ShopAssignments: {
           include: {
             EmployeeProfile: {
               select: {
@@ -30,7 +36,7 @@ export async function GET(request: NextRequest) {
               },
             },
           },
-        } : false,
+        },
         _count: {
           select: {
             ShopAssignments: true,
@@ -53,6 +59,27 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.tenantId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const tenantId = session.user.tenantId
+
+    // Plan gating — Multi-location requires ENTERPRISE
+    const { checkFeatureAccess } = await import('@/lib/plans')
+    const planCheck = await checkFeatureAccess(tenantId, 'multiLocation')
+    if (!planCheck.allowed) {
+      // Allow first shop for any plan
+      const shopCount = await prisma.shop.count({ where: { tenantId } })
+      if (shopCount >= 1) {
+        return NextResponse.json(
+          { error: planCheck.error, requiredPlan: planCheck.requiredPlan },
+          { status: 403 }
+        )
+      }
+    }
+
     const body = await request.json()
     const {
       name,
@@ -79,6 +106,7 @@ export async function POST(request: NextRequest) {
 
     const shop = await prisma.shop.create({
       data: {
+        tenantId,
         name,
         address,
         city,

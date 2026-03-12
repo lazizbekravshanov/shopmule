@@ -63,6 +63,17 @@ export async function POST(request: NextRequest) {
     }
 
     const tenantId = session.user.tenantId
+
+    // Plan gating — Fleet accounts require PRO+
+    const { checkFeatureAccess } = await import('@/lib/plans')
+    const planCheck = await checkFeatureAccess(tenantId, 'fleetAccounts')
+    if (!planCheck.allowed) {
+      return NextResponse.json(
+        { error: planCheck.error, requiredPlan: planCheck.requiredPlan },
+        { status: 403 }
+      )
+    }
+
     const body = await request.json()
     const {
       companyName,

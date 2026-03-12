@@ -109,6 +109,16 @@ export async function POST(req: Request) {
       })
     }
 
+    // Plan gating — AI requires STARTER+
+    const { checkFeatureAccess } = await import('@/lib/plans')
+    const planCheck = await checkFeatureAccess(tenantId, 'aiAccess')
+    if (!planCheck.allowed) {
+      return new Response(JSON.stringify({ error: planCheck.error, requiredPlan: planCheck.requiredPlan }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+
     // Rate limiting
     const rateLimit = await checkRateLimit(session.user.id, 'ai')
     if (!rateLimit.allowed) {

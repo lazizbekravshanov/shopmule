@@ -24,6 +24,16 @@ export async function POST(req: Request) {
       );
     }
 
+    // Plan gating — AI requires STARTER+
+    const { checkFeatureAccess } = await import("@/lib/plans");
+    const planCheck = await checkFeatureAccess(session.user.tenantId, "aiAccess");
+    if (!planCheck.allowed) {
+      return NextResponse.json(
+        { error: planCheck.error, requiredPlan: planCheck.requiredPlan },
+        { status: 403 }
+      );
+    }
+
     const rateLimit = await checkRateLimit(session.user.id, "ai");
     if (!rateLimit.allowed) {
       return NextResponse.json(

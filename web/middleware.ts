@@ -43,9 +43,10 @@ const publicApiRoutes = [
   "/api/health",
   "/api/fmcsa",
   "/api/contact",
-  "/api/mobile/auth", // Mobile login endpoint
-  "/api/portal",      // Customer portal API (token-based auth)
-  "/api/pay",         // Customer payment API (token-based auth)
+  "/api/mobile/auth",       // Mobile login endpoint
+  "/api/portal",            // Customer portal API (token-based auth)
+  "/api/pay",               // Customer payment API (token-based auth)
+  "/api/billing/webhook",   // Stripe webhook (signature-verified, no session)
 ]
 
 // API routes that handle their own auth (support Bearer tokens)
@@ -205,17 +206,23 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl)
     }
 
-    // Trial paywall — FREE plan with expired trial gets redirected to billing
-    // (settings/billing is always accessible so they can upgrade)
+    // Billing enforcement — settings/billing is always accessible so they can fix payment
     const plan = token.subscriptionPlan as string | undefined
+    const subStatus = token.subscriptionStatus as string | undefined
     const trialEndsAt = token.trialEndsAt as string | undefined
     const isBillingPage = pathname.startsWith("/settings/billing") || pathname.startsWith("/settings")
 
+    // Trial paywall — FREE plan with expired trial gets redirected to billing
     if (plan === "FREE" && trialEndsAt && !isBillingPage) {
       const trialEnd = new Date(trialEndsAt)
       if (trialEnd < new Date()) {
         return NextResponse.redirect(new URL("/settings/billing?expired=true", request.url))
       }
+    }
+
+    // Payment failure — PAST_DUE or CANCELLED gets redirected to billing
+    if (subStatus === "CANCELLED" && !isBillingPage) {
+      return NextResponse.redirect(new URL("/settings/billing?suspended=true", request.url))
     }
 
     // Permission-based route access control (no DB call — role-only check)

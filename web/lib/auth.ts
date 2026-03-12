@@ -50,14 +50,16 @@ export const authOptions: NextAuthOptions = {
 
         // Fetch tenant subscription info for JWT
         let subscriptionPlan = 'FREE'
+        let subscriptionStatus = 'ACTIVE'
         let trialEndsAt: string | null = null
         if (user.tenantId) {
           const tenant = await prisma.tenant.findUnique({
             where: { id: user.tenantId },
-            select: { subscriptionPlan: true, trialEndsAt: true },
+            select: { subscriptionPlan: true, subscriptionStatus: true, trialEndsAt: true },
           })
           if (tenant) {
             subscriptionPlan = tenant.subscriptionPlan
+            subscriptionStatus = tenant.subscriptionStatus
             trialEndsAt = tenant.trialEndsAt?.toISOString() ?? null
           }
         }
@@ -71,6 +73,7 @@ export const authOptions: NextAuthOptions = {
           tenantId: user.tenantId,
           shopId: user.tenantId, // alias for backwards compat
           subscriptionPlan,
+          subscriptionStatus,
           trialEndsAt,
         }
       }
@@ -117,6 +120,7 @@ export const authOptions: NextAuthOptions = {
         token.tenantId = user.tenantId
         token.shopId = user.shopId
         token.subscriptionPlan = user.subscriptionPlan
+        token.subscriptionStatus = user.subscriptionStatus
         token.trialEndsAt = user.trialEndsAt
       }
       return token
