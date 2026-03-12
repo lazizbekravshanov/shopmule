@@ -48,6 +48,20 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Invalid email or password')
         }
 
+        // Fetch tenant subscription info for JWT
+        let subscriptionPlan = 'FREE'
+        let trialEndsAt: string | null = null
+        if (user.tenantId) {
+          const tenant = await prisma.tenant.findUnique({
+            where: { id: user.tenantId },
+            select: { subscriptionPlan: true, trialEndsAt: true },
+          })
+          if (tenant) {
+            subscriptionPlan = tenant.subscriptionPlan
+            trialEndsAt = tenant.trialEndsAt?.toISOString() ?? null
+          }
+        }
+
         console.log('[Auth] Login successful:', email)
         return {
           id: user.id,
@@ -56,6 +70,8 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           tenantId: user.tenantId,
           shopId: user.tenantId, // alias for backwards compat
+          subscriptionPlan,
+          trialEndsAt,
         }
       }
     })
@@ -100,6 +116,8 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name
         token.tenantId = user.tenantId
         token.shopId = user.shopId
+        token.subscriptionPlan = user.subscriptionPlan
+        token.trialEndsAt = user.trialEndsAt
       }
       return token
     },

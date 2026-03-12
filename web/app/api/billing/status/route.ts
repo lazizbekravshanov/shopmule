@@ -17,6 +17,7 @@ export async function GET() {
         subscriptionStatus: true,
         stripeCustomerId: true,
         stripeSubscriptionId: true,
+        trialEndsAt: true,
       },
     });
 
@@ -24,11 +25,22 @@ export async function GET() {
       return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
     }
 
+    const now = new Date();
+    const trialEndsAt = tenant.trialEndsAt;
+    const isTrialing = tenant.subscriptionPlan === "FREE" && !!trialEndsAt;
+    const trialExpired = isTrialing && trialEndsAt < now;
+    const trialDaysLeft = isTrialing && !trialExpired
+      ? Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      : 0;
+
     return NextResponse.json({
       plan: tenant.subscriptionPlan,
       status: tenant.subscriptionStatus,
       hasStripeCustomer: !!tenant.stripeCustomerId,
       hasSubscription: !!tenant.stripeSubscriptionId,
+      trialEndsAt: trialEndsAt?.toISOString() ?? null,
+      trialDaysLeft,
+      trialExpired,
     });
   } catch (error) {
     console.error("Billing status error:", error);

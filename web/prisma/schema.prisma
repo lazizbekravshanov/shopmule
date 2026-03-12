@@ -28,6 +28,7 @@ model Tenant {
   taxRate             Float               @default(0.0825)
   subscriptionPlan    SubscriptionPlan    @default(FREE)
   subscriptionStatus  SubscriptionStatus  @default(ACTIVE)
+  trialEndsAt         DateTime?           // null = no trial (paid plan or legacy)
   stripeCustomerId    String?
   stripeSubscriptionId String?
   settings            Json?               // Business hours, bay_count, default_payment_terms, etc.

@@ -205,6 +205,19 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl)
     }
 
+    // Trial paywall — FREE plan with expired trial gets redirected to billing
+    // (settings/billing is always accessible so they can upgrade)
+    const plan = token.subscriptionPlan as string | undefined
+    const trialEndsAt = token.trialEndsAt as string | undefined
+    const isBillingPage = pathname.startsWith("/settings/billing") || pathname.startsWith("/settings")
+
+    if (plan === "FREE" && trialEndsAt && !isBillingPage) {
+      const trialEnd = new Date(trialEndsAt)
+      if (trialEnd < new Date()) {
+        return NextResponse.redirect(new URL("/settings/billing?expired=true", request.url))
+      }
+    }
+
     // Permission-based route access control (no DB call — role-only check)
     const ROUTE_PERMISSIONS: Record<string, Permission> = {
       "/settings": "org:view_settings",

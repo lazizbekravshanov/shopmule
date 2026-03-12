@@ -67,11 +67,14 @@ export async function POST(request: Request) {
 
     // Atomic transaction: create tenant, user, and employee profile
     const result = await prisma.$transaction(async (tx) => {
+      const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
+
       const tenant = await tx.tenant.create({
         data: {
           name: shopName,
           slug: finalSlug,
           subscriptionPlan: "FREE",
+          trialEndsAt,
         },
       });
 
