@@ -1,18 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.tenantId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const tenantId = session.user.tenantId
     const { searchParams } = new URL(request.url)
     const shopId = searchParams.get('shopId')
 
     // Get all employees with their latest punch
     const employees = await prisma.employeeProfile.findMany({
-      where: shopId ? {
-        ShopAssignments: {
-          some: { shopId },
-        },
-      } : undefined,
+      where: {
+        tenantId,
+        ...(shopId ? { ShopAssignments: { some: { shopId } } } : {}),
+      },
       include: {
         ShopAssignments: {
           include: {
@@ -117,6 +124,7 @@ export async function GET(request: NextRequest) {
     const todayPunches = await prisma.punchRecord.groupBy({
       by: ['employeeId'],
       where: {
+        EmployeeProfile: { tenantId },
         timestamp: { gte: today },
         type: 'CLOCK_IN',
       },

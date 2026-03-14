@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { InvoiceStatus, Prisma } from '@prisma/client';
 
@@ -29,9 +31,17 @@ interface UnpaidInvoice {
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.tenantId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const tenantId = session.user.tenantId;
+
     // Get unpaid and partial invoices
     const invoices = await prisma.invoice.findMany({
       where: {
+        tenantId,
         status: {
           in: [InvoiceStatus.UNPAID, InvoiceStatus.PARTIAL],
         },

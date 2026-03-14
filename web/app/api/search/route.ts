@@ -15,10 +15,11 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const tenantId = session.user.tenantId;
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
 
@@ -34,6 +35,7 @@ export async function GET(request: NextRequest) {
       // Search customers
       prisma.customer.findMany({
         where: {
+          tenantId,
           OR: [
             { name: { contains: searchTerm, mode: 'insensitive' } },
             { email: { contains: searchTerm, mode: 'insensitive' } },
@@ -53,6 +55,7 @@ export async function GET(request: NextRequest) {
       // Search vehicles
       prisma.vehicle.findMany({
         where: {
+          tenantId,
           OR: [
             { make: { contains: searchTerm, mode: 'insensitive' } },
             { model: { contains: searchTerm, mode: 'insensitive' } },
@@ -74,6 +77,7 @@ export async function GET(request: NextRequest) {
       // Search work orders
       prisma.workOrder.findMany({
         where: {
+          tenantId,
           OR: [
             { id: { contains: searchTerm, mode: 'insensitive' } },
             { description: { contains: searchTerm, mode: 'insensitive' } },
@@ -103,6 +107,7 @@ export async function GET(request: NextRequest) {
       // Search invoices
       prisma.invoice.findMany({
         where: {
+          tenantId,
           OR: [
             { id: { contains: searchTerm, mode: 'insensitive' } },
             { Customer: { name: { contains: searchTerm, mode: 'insensitive' } } },
@@ -121,6 +126,7 @@ export async function GET(request: NextRequest) {
       // Search parts/inventory
       prisma.part.findMany({
         where: {
+          tenantId,
           OR: [
             { name: { contains: searchTerm, mode: 'insensitive' } },
             { sku: { contains: searchTerm, mode: 'insensitive' } },

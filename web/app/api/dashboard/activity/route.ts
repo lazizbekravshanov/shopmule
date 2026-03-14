@@ -17,10 +17,11 @@ interface ActivityItem {
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const tenantId = session.user.tenantId
     const now = new Date()
     const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000)
     const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -36,6 +37,7 @@ export async function GET() {
       // Recent work orders (created or updated)
       prisma.workOrder.findMany({
         where: {
+          tenantId,
           OR: [
             { createdAt: { gte: last24Hours } },
             { updatedAt: { gte: last24Hours } },
@@ -55,6 +57,7 @@ export async function GET() {
       // Recent invoices
       prisma.invoice.findMany({
         where: {
+          tenantId,
           OR: [
             { createdAt: { gte: last24Hours } },
             { updatedAt: { gte: last24Hours } },
@@ -75,6 +78,7 @@ export async function GET() {
       // Recent payments
       prisma.payment.findMany({
         where: {
+          Invoice: { tenantId },
           receivedAt: { gte: last7Days },
         },
         include: {
@@ -91,6 +95,7 @@ export async function GET() {
       // Recent customers
       prisma.customer.findMany({
         where: {
+          tenantId,
           createdAt: { gte: last7Days },
         },
         orderBy: { createdAt: 'desc' },
@@ -100,6 +105,7 @@ export async function GET() {
       // Recent clock in/out
       prisma.punchRecord.findMany({
         where: {
+          EmployeeProfile: { tenantId },
           timestamp: { gte: last24Hours },
           type: { in: ['CLOCK_IN', 'CLOCK_OUT'] },
         },

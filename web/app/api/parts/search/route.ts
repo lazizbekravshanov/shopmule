@@ -7,10 +7,11 @@ import { searchCatalog } from '@/lib/parts-catalog';
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const tenantId = session.user.tenantId;
     const { searchParams } = new URL(request.url);
     const q = searchParams.get('q')?.trim() ?? '';
 
@@ -21,6 +22,7 @@ export async function GET(request: Request) {
     // ── Shop inventory search ──────────────────────────────────────────────
     const inventoryResults = await prisma.part.findMany({
       where: {
+        tenantId,
         OR: [
           { sku: { contains: q, mode: 'insensitive' } },
           { name: { contains: q, mode: 'insensitive' } },

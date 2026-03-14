@@ -6,14 +6,16 @@ import { prisma } from "@/lib/db"
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session?.user?.tenantId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const tenantId = session.user.tenantId
     const { searchParams } = new URL(request.url)
     const countOnly = searchParams.get("countOnly") === "true"
 
     const parts = await prisma.part.findMany({
+      where: { tenantId },
       select: {
         id: true,
         name: true,

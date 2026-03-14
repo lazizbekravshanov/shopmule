@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { WorkOrderStatus, Prisma } from '@prisma/client';
 
@@ -19,9 +21,17 @@ type WorkOrderWithRelations = Prisma.WorkOrderGetPayload<{
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.tenantId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const tenantId = session.user.tenantId;
+
     // Get work orders that are active (not completed)
     const workOrders = await prisma.workOrder.findMany({
       where: {
+        tenantId,
         status: {
           in: [WorkOrderStatus.DIAGNOSED, WorkOrderStatus.APPROVED, WorkOrderStatus.IN_PROGRESS],
         },

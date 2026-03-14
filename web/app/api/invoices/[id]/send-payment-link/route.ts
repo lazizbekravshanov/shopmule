@@ -30,7 +30,7 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.tenantId) {
       return unauthorizedResponse();
     }
 
@@ -55,8 +55,8 @@ export async function POST(
     const { channels, customMessage } = parsed.data;
 
     // Fetch invoice with customer and work order details
-    const invoice = await prisma.invoice.findUnique({
-      where: { id },
+    const invoice = await prisma.invoice.findFirst({
+      where: { id, tenantId: session.user.tenantId },
       include: {
         Customer: true,
         WorkOrder: {

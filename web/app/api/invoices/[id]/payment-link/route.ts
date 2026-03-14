@@ -17,14 +17,14 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.tenantId) {
       return unauthorizedResponse();
     }
 
     const { id } = await params;
 
-    const invoice = await prisma.invoice.findUnique({
-      where: { id },
+    const invoice = await prisma.invoice.findFirst({
+      where: { id, tenantId: session.user.tenantId },
       include: {
         Customer: true,
         WorkOrder: {

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
 interface ShiftData {
@@ -36,6 +38,12 @@ interface ShiftData {
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.tenantId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const tenantId = session.user.tenantId
     const { searchParams } = new URL(request.url)
     const employeeId = searchParams.get('employeeId')
     const shopId = searchParams.get('shopId')
@@ -86,8 +94,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Build where clause
+    // Build where clause — always scope to tenant
     const whereClause: Record<string, unknown> = {
+      EmployeeProfile: { tenantId },
       timestamp: {
         gte: dateStart,
         lte: dateEnd,

@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { WorkOrderStatus } from '@prisma/client';
 
@@ -41,12 +43,20 @@ function mapWorkOrderStatus(status: WorkOrderStatus): 'in-progress' | 'waiting-p
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.tenantId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const tenantId = session.user.tenantId;
+
     // Get shop's bay configuration (default to 6 bays)
     const BAY_COUNT = 6;
 
     // Get active work orders (in progress, diagnosed, or approved)
     const activeWorkOrders = await prisma.workOrder.findMany({
       where: {
+        tenantId,
         status: {
           in: [WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.DIAGNOSED, WorkOrderStatus.APPROVED],
         },

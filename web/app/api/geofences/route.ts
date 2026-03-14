@@ -1,14 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.tenantId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const tenantId = session.user.tenantId
     const { searchParams } = new URL(request.url)
     const shopId = searchParams.get('shopId')
     const includeAssignments = searchParams.get('includeAssignments') === 'true'
 
     const geofences = await prisma.geofence.findMany({
-      where: shopId ? { shopId } : undefined,
+      where: {
+        Shop: { tenantId },
+        ...(shopId ? { shopId } : {}),
+      },
       include: {
         Shop: {
           select: {
@@ -52,6 +63,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.tenantId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const tenantId = session.user.tenantId
     const body = await request.json()
     const {
       shopId,
@@ -85,9 +102,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify shop exists
-    const shop = await prisma.shop.findUnique({
-      where: { id: shopId },
+    // Verify shop exists and belongs to tenant
+    const shop = await prisma.shop.findFirst({
+      where: { id: shopId, tenantId },
     })
 
     if (!shop) {
