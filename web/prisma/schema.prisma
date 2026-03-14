@@ -54,6 +54,7 @@ model Tenant {
   Invites             Invite[]
   Deductions          Deduction[]
   LoanAdvances        LoanAdvance[]
+  DiagnosticSessions  DiagnosticSession[]
 
   @@index([slug])
 }
@@ -356,6 +357,7 @@ model WorkOrder {
   Photos                WorkOrderPhoto[]
   StatusHistory         WorkOrderStatusHistory[]
   PartTransactions      PartTransaction[]
+  DiagnosticSessions    DiagnosticSession[]
 
   @@unique([tenantId, workOrderNumber])
   @@index([tenantId])
@@ -460,6 +462,25 @@ model WorkOrderStatusHistory {
 
   @@index([workOrderId])
   @@index([createdAt])
+}
+
+model DiagnosticSession {
+  id             String   @id @default(cuid())
+  tenantId       String
+  workOrderId    String
+  status         String   @default("IN_PROGRESS") // IN_PROGRESS | COMPLETED
+  messages       Json     @default("[]")           // Array of {role, content, step}
+  currentStep    Int      @default(1)              // 1-4 diagnostic phases
+  findings       Json?                             // Accumulated findings
+  finalDiagnosis Json?                             // DiagnosticResult on completion
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  Tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  WorkOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+
+  @@index([workOrderId])
+  @@index([tenantId])
 }
 
 // ==========================================

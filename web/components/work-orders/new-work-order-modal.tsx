@@ -25,7 +25,8 @@ import { useCreateWorkOrder } from '@/lib/queries/work-orders';
 import { useTemplates } from '@/lib/queries/templates';
 import { useDeferredWork } from '@/lib/queries/deferred';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, Truck, User, FileText, LayoutTemplate, X, Clock, AlertTriangle } from 'lucide-react';
+import { Loader2, Truck, User, FileText, LayoutTemplate, X, Clock, AlertTriangle, Mic } from 'lucide-react';
+import { VoiceInput } from '@/components/work-order/voice-input';
 import type { ServiceTemplate } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
@@ -271,6 +272,18 @@ export function NewWorkOrderModal({ open, onOpenChange }: NewWorkOrderModalProps
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-2">
+          {/* Voice input */}
+          <VoiceInput
+            onStructuredResult={(result) => {
+              if (result.complaint) setDescription(result.complaint);
+              // If AI identified a customer name, we could auto-search — for now, populate description
+              if (result.techNotes) {
+                setDescription((prev) => prev ? `${prev}\n\nTech notes: ${result.techNotes}` : result.techNotes || '');
+              }
+            }}
+            disabled={createWorkOrder.isPending}
+          />
+
           {/* Template picker */}
           <TemplatePicker
             selected={selectedTemplate}

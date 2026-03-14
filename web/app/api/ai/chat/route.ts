@@ -1,4 +1,4 @@
-import { groq } from '@ai-sdk/groq'
+import { anthropic } from '@ai-sdk/anthropic'
 import { streamText, stepCountIs } from 'ai'
 import { createAITools } from '@/lib/ai/tools'
 import { getServerSession } from 'next-auth'
@@ -12,7 +12,38 @@ export const maxDuration = 30
 const MAX_MESSAGES = 50
 const MAX_MESSAGE_LENGTH = 4000
 const MAX_TOTAL_LENGTH = 40000
+const MAX_IMAGE_CHARS = 4000
 const VALID_ROLES = ['user', 'assistant', 'system']
+
+// Diagnosis-related keywords that warrant Sonnet's deeper reasoning
+const COMPLEX_KEYWORDS = /diagnos|failure|won't start|check engine|no crank|overheat|misfire|transmission|differential|dtc|fault code|troubleshoot|root cause/i
+
+function selectModel(messages: Array<{ role: string; content: string | Array<unknown> }>) {
+  // First turn or complex reasoning → Sonnet
+  if (messages.length <= 1) return anthropic('claude-sonnet-4-20250514')
+
+  const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')
+  if (!lastUserMsg) return anthropic('claude-haiku-4-5-20251001')
+
+  const text = typeof lastUserMsg.content === 'string'
+    ? lastUserMsg.content
+    : (lastUserMsg.content as Array<{ type: string; text?: string }>)
+        .filter(p => p.type === 'text')
+        .map(p => p.text || '')
+        .join(' ')
+
+  // Long messages or diagnosis keywords → Sonnet
+  if (text.length > 500 || COMPLEX_KEYWORDS.test(text)) {
+    return anthropic('claude-sonnet-4-20250514')
+  }
+
+  // Images always need Sonnet (vision)
+  if (Array.isArray(lastUserMsg.content) && lastUserMsg.content.some((p: any) => p.type === 'image')) {
+    return anthropic('claude-sonnet-4-20250514')
+  }
+
+  return anthropic('claude-haiku-4-5-20251001')
+}
 
 const systemPrompt = `You are Mule, the AI assistant for ShopMule - and you work as hard as your name suggests. You're not just a chatbot, you're like the most experienced shop manager who's seen it all and is here to help.
 
@@ -79,14 +110,12 @@ You: "Sure thing - which vehicle? Give me a customer name or license plate and I
 
 Remember: You're here to make their job easier. Be the assistant everyone wishes they had.`
 
-function isValidMessage(msg: unknown): msg is { role: string; content: string } {
+function isValidMessage(msg: unknown): msg is { role: string; content: string | Array<unknown> } {
   if (typeof msg !== 'object' || msg === null) return false
   const m = msg as Record<string, unknown>
-  return (
-    typeof m.role === 'string' &&
-    VALID_ROLES.includes(m.role) &&
-    typeof m.content === 'string'
-  )
+  if (typeof m.role !== 'string' || !VALID_ROLES.includes(m.role)) return false
+  // Accept string content or array content (multipart: text + image)
+  return typeof m.content === 'string' || Array.isArray(m.content)
 }
 
 export async function POST(req: Request) {
@@ -151,24 +180,35 @@ export async function POST(req: Request) {
 
     // Validate and sanitize messages
     let totalLength = 0
-    const sanitizedMessages = []
+    const sanitizedMessages: Array<{ role: 'user' | 'assistant' | 'system'; content: string | Array<unknown> }> = []
 
     for (const msg of messages) {
       if (!isValidMessage(msg)) {
-        return new Response(JSON.stringify({ error: 'Invalid message format: each message must have a valid role (user/assistant/system) and string content' }), {
+        return new Response(JSON.stringify({ error: 'Invalid message format: each message must have a valid role (user/assistant/system) and string or array content' }), {
           status: 400,
           headers: { 'Content-Type': 'application/json' }
         })
       }
 
-      if (msg.content.length > MAX_MESSAGE_LENGTH) {
-        return new Response(JSON.stringify({ error: `Message too long (max ${MAX_MESSAGE_LENGTH} characters)` }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        })
+      if (typeof msg.content === 'string') {
+        if (msg.content.length > MAX_MESSAGE_LENGTH) {
+          return new Response(JSON.stringify({ error: `Message too long (max ${MAX_MESSAGE_LENGTH} characters)` }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          })
+        }
+        totalLength += msg.content.length
+      } else {
+        // Multipart content — measure only text parts, budget per-image
+        for (const part of msg.content as Array<{ type: string; text?: string }>) {
+          if (part.type === 'text' && part.text) {
+            totalLength += part.text.length
+          } else if (part.type === 'image') {
+            totalLength += MAX_IMAGE_CHARS
+          }
+        }
       }
 
-      totalLength += msg.content.length
       if (totalLength > MAX_TOTAL_LENGTH) {
         return new Response(JSON.stringify({ error: `Total message content too long (max ${MAX_TOTAL_LENGTH} characters)` }), {
           status: 400,
@@ -176,10 +216,24 @@ export async function POST(req: Request) {
         })
       }
 
-      sanitizedMessages.push({
-        role: msg.role as 'user' | 'assistant' | 'system',
-        content: sanitizeInput(msg.content),
-      })
+      if (typeof msg.content === 'string') {
+        sanitizedMessages.push({
+          role: msg.role as 'user' | 'assistant' | 'system',
+          content: sanitizeInput(msg.content),
+        })
+      } else {
+        // Pass multipart content through — sanitize only text parts
+        const sanitizedParts = (msg.content as Array<Record<string, unknown>>).map(part => {
+          if (part.type === 'text' && typeof part.text === 'string') {
+            return { ...part, text: sanitizeInput(part.text) }
+          }
+          return part
+        })
+        sanitizedMessages.push({
+          role: msg.role as 'user' | 'assistant' | 'system',
+          content: sanitizedParts,
+        })
+      }
     }
 
     // Add user context to the system prompt
@@ -187,9 +241,10 @@ export async function POST(req: Request) {
     const personalizedPrompt = `${systemPrompt}\n\nThe current user is ${userName}. Address them naturally.`
 
     const result = streamText({
-      model: groq('llama-3.3-70b-versatile'),
+      model: selectModel(sanitizedMessages as Array<{ role: string; content: string | Array<unknown> }>),
       system: personalizedPrompt,
-      messages: sanitizedMessages,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      messages: sanitizedMessages as any,
       tools: createAITools(tenantId),
       stopWhen: stepCountIs(5),
       onError: (error) => {

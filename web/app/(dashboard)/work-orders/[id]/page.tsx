@@ -10,6 +10,7 @@ import { DeferredWorkPanel } from '@/components/work-order/deferred-work-panel';
 import { PartsPicker } from '@/components/work-order/parts-picker';
 import { PhotoUpload } from '@/components/work-order/photo-upload';
 import { AIStatusPanel } from '@/components/work-order/ai-status-panel';
+import { GuidedDiagnosis } from '@/components/work-order/guided-diagnosis';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
@@ -389,7 +390,14 @@ export default function WorkOrderDetailPage() {
             aiDiagnosis={workOrder.aiDiagnosis as Record<string, unknown> | null ?? null}
             aiEstimate={workOrder.aiEstimate as Record<string, unknown> | null ?? null}
             aiSummary={workOrder.aiSummary as Record<string, unknown> | null ?? null}
+            photoCount={workOrder.photos?.length ?? 0}
             onAIComplete={() => refetch()}
+          />
+
+          {/* Guided Diagnosis */}
+          <GuidedDiagnosis
+            workOrderId={id}
+            onDiagnosisComplete={() => refetch()}
           />
 
           {/* Summary Card */}

@@ -5,7 +5,10 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { checkRateLimit } from "@/lib/security";
 import { runDiagnosticAgent } from "@/lib/ai/agents";
+import type { DiagnosticPhoto } from "@/lib/ai/agents";
 import type { Prisma } from "@prisma/client";
+import { readFile } from "fs/promises";
+import { join, extname } from "path";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -72,6 +75,10 @@ export async function POST(req: Request) {
             },
           },
         },
+        Photos: {
+          orderBy: { createdAt: "desc" as const },
+          take: 5,
+        },
       },
     });
 
@@ -80,6 +87,34 @@ export async function POST(req: Request) {
         { error: "Work order not found" },
         { status: 404 }
       );
+    }
+
+    // Load photos from disk and convert to base64
+    const photos: DiagnosticPhoto[] = [];
+    const MEDIA_TYPES: Record<string, DiagnosticPhoto["mediaType"]> = {
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".png": "image/png",
+      ".gif": "image/gif",
+      ".webp": "image/webp",
+    };
+
+    for (const photo of workOrder.Photos) {
+      try {
+        // URL format: /api/uploads/photos/{workOrderId}/{filename}
+        const urlParts = photo.url.split("/");
+        const filename = urlParts[urlParts.length - 1];
+        const filePath = join(process.cwd(), "uploads", "photos", workOrderId, filename);
+        const buffer = await readFile(filePath);
+        const ext = extname(filename).toLowerCase();
+        photos.push({
+          base64: buffer.toString("base64"),
+          mediaType: MEDIA_TYPES[ext] || "image/jpeg",
+          caption: photo.caption || photo.type || undefined,
+        });
+      } catch {
+        // Skip photos that can't be read from disk
+      }
     }
 
     const vehicle = workOrder.Vehicle;
@@ -100,6 +135,7 @@ export async function POST(req: Request) {
         description: sh.description,
         mileage: sh.mileage,
       })),
+      photos: photos.length > 0 ? photos : undefined,
     });
 
     await prisma.workOrder.update({

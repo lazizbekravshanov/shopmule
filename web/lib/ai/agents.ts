@@ -10,6 +10,12 @@ const MODEL = "claude-sonnet-4-20250514";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+export interface DiagnosticPhoto {
+  base64: string;
+  mediaType: "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+  caption?: string;
+}
+
 export interface DiagnosticParams {
   vehicle: {
     year?: number | null;
@@ -27,6 +33,7 @@ export interface DiagnosticParams {
     description: string;
     mileage?: number | null;
   }>;
+  photos?: DiagnosticPhoto[];
 }
 
 export interface PossibleCause {
@@ -196,7 +203,7 @@ function extractTextContent(
 export async function runDiagnosticAgent(
   params: DiagnosticParams
 ): Promise<DiagnosticResult> {
-  const userMessage = `Diagnose the following vehicle issue:
+  const textMessage = `Diagnose the following vehicle issue:
 
 Vehicle: ${params.vehicle.year || "Unknown"} ${params.vehicle.make} ${params.vehicle.model}
 Engine: ${params.vehicle.engine || "Not specified"}
@@ -218,11 +225,44 @@ ${
     : "No prior service history on file"
 }`;
 
+  // Build multipart content when photos are present
+  const photos = params.photos ?? [];
+  let content: Anthropic.MessageCreateParams["messages"][0]["content"];
+
+  if (photos.length > 0) {
+    const contentBlocks: Anthropic.ContentBlockParam[] = [
+      { type: "text", text: textMessage },
+    ];
+    for (const photo of photos) {
+      contentBlocks.push({
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: photo.mediaType,
+          data: photo.base64,
+        },
+      });
+      if (photo.caption) {
+        contentBlocks.push({
+          type: "text",
+          text: `Photo caption: ${photo.caption}`,
+        });
+      }
+    }
+    contentBlocks.push({
+      type: "text",
+      text: `\n${photos.length} photo(s) attached above. Analyze the visible damage, wear patterns, leaks, corrosion, diagnostic readouts, or any other visual evidence. Cross-reference your visual findings with the reported symptoms.`,
+    });
+    content = contentBlocks;
+  } else {
+    content = textMessage;
+  }
+
   const response = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 2000,
     system: WRENCH_SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
+    messages: [{ role: "user", content }],
   });
 
   const text = extractTextContent(response);

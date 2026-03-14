@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import {
   Brain,
+  Camera,
   ChevronDown,
   ChevronRight,
   Loader2,
@@ -24,6 +25,7 @@ interface AIStatusPanelProps {
   aiDiagnosis: Record<string, unknown> | null;
   aiEstimate: Record<string, unknown> | null;
   aiSummary: Record<string, unknown> | null;
+  photoCount?: number;
   onAIComplete?: () => void;
 }
 
@@ -80,6 +82,7 @@ export function AIStatusPanel({
   aiDiagnosis,
   aiEstimate,
   aiSummary,
+  photoCount = 0,
   onAIComplete,
 }: AIStatusPanelProps) {
   const { toast } = useToast();
@@ -175,6 +178,12 @@ export function AIStatusPanel({
             <Stethoscope className="h-3.5 w-3.5" />
           )}
           {aiDiagnosis ? 'Re-run Diagnosis' : 'AI Diagnosis'}
+          {photoCount > 0 && (
+            <span className="inline-flex items-center gap-0.5 ml-0.5 text-[10px] bg-white/20 rounded px-1">
+              <Camera className="h-2.5 w-2.5" />
+              {photoCount}
+            </span>
+          )}
         </Button>
         <Button
           size="sm"

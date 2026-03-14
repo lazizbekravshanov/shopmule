@@ -20,7 +20,7 @@ export async function GET() {
     const [
       currentMonthRevenue,
       lastMonthRevenue,
-      laborRevenue,
+      partsCostData,
       totalTechnicians,
       activeJobs,
       totalJobs,
@@ -42,10 +42,10 @@ export async function GET() {
         _sum: { total: true },
       }),
 
-      // Labor revenue this month (for margin calc) — merged into Promise.all
+      // Parts cost this month (for profit margin calc) — merged into Promise.all
       prisma.invoice.aggregate({
         where: { tenantId, status: 'PAID', createdAt: { gte: startOfMonth } },
-        _sum: { subtotalLabor: true },
+        _sum: { subtotalParts: true },
       }),
 
       // Total active technicians — merged into Promise.all
@@ -111,8 +111,8 @@ export async function GET() {
       ? Math.round(((currentRevenue - lastRevenue) / lastRevenue) * 100)
       : 0
 
-    const laborRev = laborRevenue._sum.subtotalLabor || 0
-    const margin = currentRevenue > 0 ? Math.round((laborRev / currentRevenue) * 100) : 0
+    const partsCost = partsCostData._sum.subtotalParts || 0
+    const margin = currentRevenue > 0 ? Math.round(((currentRevenue - partsCost) / currentRevenue) * 100) : 0
 
     const activeTechnicians = technicianStats.length
     const techUtilization = totalTechnicians > 0

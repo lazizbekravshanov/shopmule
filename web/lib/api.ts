@@ -182,6 +182,7 @@ export interface WorkOrder {
   aiEstimate?: Record<string, unknown> | null;
   aiSummary?: Record<string, unknown> | null;
   aiStatus?: string | null;
+  photos?: { id: string; url: string; caption?: string | null; type?: string | null }[];
   createdAt?: string;
   updatedAt?: string;
 }
