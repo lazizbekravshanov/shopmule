@@ -10,6 +10,7 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, {
   aiAccess: boolean
   fleetAccounts: boolean
   multiLocation: boolean
+  networkAccess: boolean
   maxWorkOrdersPerMonth: number
 }> = {
   FREE: {
@@ -17,6 +18,7 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, {
     aiAccess: false,
     fleetAccounts: false,
     multiLocation: false,
+    networkAccess: false,
     maxWorkOrdersPerMonth: 20,
   },
   STARTER: {
@@ -24,6 +26,7 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, {
     aiAccess: true,
     fleetAccounts: false,
     multiLocation: false,
+    networkAccess: false,
     maxWorkOrdersPerMonth: 500,
   },
   PRO: {
@@ -31,6 +34,7 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, {
     aiAccess: true,
     fleetAccounts: true,
     multiLocation: false,
+    networkAccess: true,
     maxWorkOrdersPerMonth: 5000,
   },
   ENTERPRISE: {
@@ -38,6 +42,7 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, {
     aiAccess: true,
     fleetAccounts: true,
     multiLocation: true,
+    networkAccess: true,
     maxWorkOrdersPerMonth: Infinity,
   },
 }
@@ -67,7 +72,7 @@ async function getTenantPlan(tenantId: string): Promise<SubscriptionPlan> {
  */
 export async function checkFeatureAccess(
   tenantId: string,
-  feature: "aiAccess" | "fleetAccounts" | "multiLocation"
+  feature: "aiAccess" | "fleetAccounts" | "multiLocation" | "networkAccess"
 ): Promise<PlanCheckResult> {
   const plan = await getTenantPlan(tenantId)
   const limits = PLAN_LIMITS[plan]

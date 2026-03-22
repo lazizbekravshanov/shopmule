@@ -32,6 +32,7 @@ model Tenant {
   stripeCustomerId    String?
   stripeSubscriptionId String?
   settings            Json?               // Business hours, bay_count, default_payment_terms, etc.
+  networkEnabled      Boolean             @default(false)
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   deletedAt           DateTime?
@@ -335,6 +336,11 @@ model WorkOrder {
   aiEstimate            Json?               // Ledger agent output
   aiSummary             Json?               // Scribe agent output
   aiStatus              String?             // DIAGNOSING | ESTIMATING | SUMMARIZING | null when idle
+  aiDiagnosisAccuracy   DiagnosisAccuracy?  // Tech rates AI accuracy on completion
+  technicianFeedback    String?             // Free-text feedback on AI diagnosis
+  diagnosisMatchedRepair Boolean?           // Did the final repair match AI diagnosis?
+  feedbackProvidedAt    DateTime?           // When feedback was given
+  feedbackProvidedBy    String?             // Which user provided feedback
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   deletedAt             DateTime?
@@ -384,6 +390,14 @@ enum WorkOrderStatus {
   ARCHIVED
   // Legacy values
   DIAGNOSED
+}
+
+enum DiagnosisAccuracy {
+  SPOT_ON
+  MOSTLY_RIGHT
+  PARTIALLY_RIGHT
+  WRONG
+  NOT_APPLICABLE
 }
 
 enum WorkOrderPriority {
@@ -680,6 +694,7 @@ model Invoice {
   FleetAccount         FleetAccount?       @relation(fields: [fleetAccountId], references: [id])
   Payments             InvoicePayment[]
   LegacyPayments       Payment[]           // Legacy relation
+  InstallmentPlan      InstallmentPlan?
 
   @@unique([tenantId, invoiceNumber])
   @@index([tenantId])
@@ -742,6 +757,69 @@ model Payment {
   stripePaymentIntentId String?  @unique
   stripeStatus          String?
   Invoice               Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+// ==========================================
+// INSTALLMENT PLANS
+// ==========================================
+
+model InstallmentPlan {
+  id               String                @id @default(cuid())
+  invoiceId        String                @unique
+  totalAmount      Float
+  numberOfPayments Int                   @default(4)
+  frequency        InstallmentFrequency  @default(BIWEEKLY)
+  status           InstallmentPlanStatus @default(ACTIVE)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  Invoice  Invoice              @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  Payments InstallmentPayment[]
+
+  @@index([invoiceId])
+  @@index([status])
+}
+
+model InstallmentPayment {
+  id                    String                   @id @default(cuid())
+  planId                String
+  sequenceNumber        Int
+  amount                Float
+  dueDate               DateTime
+  status                InstallmentPaymentStatus @default(UPCOMING)
+  paidAt                DateTime?
+  stripePaymentIntentId String?                  @unique
+  failureReason         String?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+
+  Plan InstallmentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@index([dueDate])
+  @@index([status])
+}
+
+enum InstallmentFrequency {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum InstallmentPlanStatus {
+  ACTIVE
+  COMPLETED
+  DEFAULTED
+  CANCELLED
+}
+
+enum InstallmentPaymentStatus {
+  UPCOMING
+  DUE
+  PROCESSING
+  PAID
+  FAILED
+  OVERDUE
 }
 
 // ==========================================
@@ -962,6 +1040,7 @@ model Shop {
   pinEnabled      Boolean          @default(true)
   bayCount        Int              @default(4)
   businessHours   Json?
+  networkEnabled  Boolean          @default(false)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   deletedAt       DateTime?
@@ -1613,4 +1692,80 @@ model LoanAdvance {
 
   @@index([tenantId])
   @@index([employeeId])
+}
+
+// ==========================================
+// SHOP NETWORK (Parts Marketplace + Overflow)
+// ==========================================
+
+model NetworkListing {
+  id           String               @id @default(cuid())
+  tenantId     String
+  shopId       String
+  partId       String
+  partName     String               // Denormalized for cross-tenant search
+  partNumber   String?
+  availableQty Int
+  askingPrice  Float
+  notes        String?
+  status       NetworkListingStatus @default(ACTIVE)
+  expiresAt    DateTime?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([partName])
+}
+
+model NetworkRequest {
+  id                  String               @id @default(cuid())
+  sourceTenantId      String
+  sourceShopId        String
+  type                NetworkRequestType
+  title               String
+  description         String
+  partName            String?
+  partNumber          String?
+  vehicleInfo         String?
+  urgency             NetworkUrgency       @default(NORMAL)
+  status              NetworkRequestStatus @default(OPEN)
+  respondedByTenantId String?
+  respondedByShopId   String?
+  respondedAt         DateTime?
+  responseNotes       String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([sourceTenantId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+enum NetworkListingStatus {
+  ACTIVE
+  SOLD
+  EXPIRED
+  WITHDRAWN
+}
+
+enum NetworkRequestType {
+  PART_REQUEST
+  OVERFLOW_JOB
+}
+
+enum NetworkRequestStatus {
+  OPEN
+  CLAIMED
+  FULFILLED
+  EXPIRED
+  CANCELLED
+}
+
+enum NetworkUrgency {
+  LOW
+  NORMAL
+  HIGH
+  EMERGENCY
 }

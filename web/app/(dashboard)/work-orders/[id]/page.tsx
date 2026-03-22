@@ -11,6 +11,7 @@ import { PartsPicker } from '@/components/work-order/parts-picker';
 import { PhotoUpload } from '@/components/work-order/photo-upload';
 import { AIStatusPanel } from '@/components/work-order/ai-status-panel';
 import { GuidedDiagnosis } from '@/components/work-order/guided-diagnosis';
+import { AIFeedbackCard } from '@/components/work-order/ai-feedback-card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/use-toast';
@@ -393,6 +394,15 @@ export default function WorkOrderDetailPage() {
             photoCount={workOrder.photos?.length ?? 0}
             onAIComplete={() => refetch()}
           />
+
+          {/* AI Feedback — show when completed with AI diagnosis */}
+          {workOrder.status === 'COMPLETED' && workOrder.aiDiagnosis && (
+            <AIFeedbackCard
+              workOrderId={id}
+              existingAccuracy={workOrder.aiDiagnosisAccuracy ?? null}
+              onFeedbackSubmitted={() => refetch()}
+            />
+          )}
 
           {/* Guided Diagnosis */}
           <GuidedDiagnosis

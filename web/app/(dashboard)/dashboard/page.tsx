@@ -10,6 +10,7 @@ import {
   TechnicianStatusBoard,
   RecentActivity,
 } from '@/components/dashboard';
+import { AIAccuracyWidget } from '@/components/dashboard/ai-accuracy-widget';
 
 export default function DashboardPage() {
   return (
@@ -33,7 +34,10 @@ export default function DashboardPage() {
         <div className="lg:col-span-2">
           <ShopPulse />
         </div>
-        <AIInsights />
+        <div className="space-y-6">
+          <AIInsights />
+          <AIAccuracyWidget />
+        </div>
       </motion.div>
 
       {/* Section 3: Three-Column Layout - Schedule, Team Status, Recent Activity */}
